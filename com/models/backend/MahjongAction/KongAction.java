@@ -5,8 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class KongAction extends MahjongAction {
-    public KongAction(TileInterface currentTile, List<TileInterface> playerHand) {
+    private boolean isSelfKong;  // 标记是否为自摸杠
+
+    public KongAction(TileInterface currentTile, List<TileInterface> playerHand, boolean isSelfKong) {
         super(currentTile, playerHand);
+        this.isSelfKong = isSelfKong;
     }
 
     @Override
