@@ -25,6 +25,11 @@ class NumericTile extends Tile {
     }
 
     @Override
+    public int getNumber() {
+        return 0;
+    }
+
+    @Override
     public String getValueAsString() {
         return String.valueOf(value);
     }
@@ -37,6 +42,11 @@ class WordTile extends Tile {
     public WordTile(String type, String value) {
         super(type);
         this.value = value;
+    }
+
+    @Override
+    public int getNumber() {
+        return 0;
     }
 
     @Override
