@@ -1,5 +1,6 @@
-package models.backend.MahjongAction;
+package models.backend.MahjongAction.implement;
 
+import models.backend.MahjongAction.implement.MahjongAction;
 import models.backend.Tile.TileInterface;
 import java.util.List;
 import java.util.Optional;

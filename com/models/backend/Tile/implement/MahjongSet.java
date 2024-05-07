@@ -1,4 +1,6 @@
-package models.backend.Tile;
+package models.backend.Tile.implement;
+
+import models.backend.Tile.TileInterface;
 
 import java.util.ArrayList;
 import java.util.Collections;
