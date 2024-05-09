@@ -1,4 +1,4 @@
-# mahjong
+# views
 
 ## Project setup
 ```
