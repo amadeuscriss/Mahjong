@@ -1,32 +1,44 @@
-package models.backend.Room;// Player.java 文件
+package models.backend.Room;
+
+import models.backend.Tile.TileInterface;
+import models.backend.Player.Hand;
+import java.util.List;
 
 public class Player {
-    private String name;       // 玩家的名字
-    private boolean isReady;   // 玩家是否已准备好
+    private String name;
+    private boolean isReady;
+    private Hand hand;
 
-    // 构造函数
     public Player(String name) {
         this.name = name;
-        this.isReady = false;  // 默认玩家未准备好
+        this.isReady = false;
+        this.hand = new Hand(); // 初始化空的手牌列表
     }
 
-    // 获取玩家名字
     public String getName() {
         return name;
     }
 
-    // 设置玩家名字
     public void setName(String name) {
         this.name = name;
     }
 
-    // 检查玩家是否已准备好
     public boolean isReady() {
         return isReady;
     }
 
-    // 设置玩家的准备状态
     public void setReady(boolean ready) {
-        this.isReady = ready;
+        isReady = ready;
+    }
+
+    public Hand getHand() {
+        return hand;
+    }
+
+    // 设置玩家的手牌，接受一个牌的列表
+    public void setHand(List<TileInterface> tiles) {
+        this.hand.getTiles().clear();  // 清空当前手牌
+        this.hand.getTiles().addAll(tiles);  // 添加新的牌集
+        this.hand.arrangeHand();  // 排序手牌
     }
 }
