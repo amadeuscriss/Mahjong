@@ -3,6 +3,8 @@ package models.backend.GameBoard;
 import models.backend.Player.Hand;
 import models.backend.Room.Player;
 import models.backend.Tile.TileInterface;
+import models.backend.Tile.implement.NumericTile;
+import models.backend.Tile.implement.WordTile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,10 +23,10 @@ public class GameInitializer {
 
     public void initializeGame() {
         setupTiles();
+        setupPlayers();
         shuffleTiles();
         int firstPlayerIndex = rollDiceToDecideFirstPlayer();  // 掷骰子决定先手玩家
         distributeTiles(firstPlayerIndex);
-        setupPlayers();
         if (checkAllPlayersReady()) {
             startGame();
         } else {
@@ -33,7 +35,35 @@ public class GameInitializer {
     }
 
     private void setupTiles() {
-        System.out.println("Tiles are set up.");
+        tiles.clear();  // 先清空列表，确保没有重复的牌
+
+        // 添加数字牌：条（Bamboo）、饼（Dot）、万（Character）
+        String[] types = {"Bamboo", "Dot", "Character"};
+        for (String type : types) {
+            for (int num = 1; num <= 9; num++) {
+                for (int i = 0; i < 4; i++) {  // 每种牌4张
+                    tiles.add(new NumericTile(type, num));
+                }
+            }
+        }
+
+        // 添加风牌：东、南、西、北
+        String[] winds = {"East", "South", "West", "North"};
+        for (String wind : winds) {
+            for (int i = 0; i < 4; i++) {  // 每种风牌4张
+                tiles.add(new WordTile("Wind", wind));
+            }
+        }
+
+        // 添加三元牌：中、发、白
+        String[] dragons = {"Red", "Green", "White"};
+        for (String dragon : dragons) {
+            for (int i = 0; i < 4; i++) {  // 每种三元牌4张
+                tiles.add(new WordTile("Dragon", dragon));
+            }
+        }
+
+        System.out.println("Tiles are set up with total " + tiles.size() + " tiles.");  // 打印牌的总数，确认牌已经正确添加
     }
 
     private void shuffleTiles() {
@@ -57,24 +87,28 @@ public class GameInitializer {
     }
 
     private void distributeTiles(int firstPlayerIndex) {
-        int tilesPerPlayer = 13; // typical number of tiles per player in Mahjong
+        int tilesPerPlayer = 13; // 每位玩家的牌数
         int index = 0;
 
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get((firstPlayerIndex + i) % players.size());
             if (tiles.size() >= index + tilesPerPlayer) {
+                // 创建一个新的牌的列表来存储每位玩家的手牌
                 List<TileInterface> playerTiles = new ArrayList<>(tiles.subList(index, index + tilesPerPlayer));
-                player.getHand().getTiles().addAll(playerTiles);
-                player.getHand().arrangeHand();
+                player.getHand().getTiles().clear(); // 清空现有手牌以防万一
+                player.getHand().getTiles().addAll(playerTiles); // 将牌添加到玩家的手牌中
+                player.getHand().arrangeHand(); // 对手牌进行排序
                 index += tilesPerPlayer;
             }
         }
         System.out.println("Tiles have been distributed to players and arranged.");
     }
 
+
     private void setupPlayers() {
+        // 初始化玩家的其他设置，如分数或游戏状态
         for (Player player : players) {
-            player.getHand().getTiles().clear(); // Ensure each player's hand is empty before the game starts
+            player.getHand().getTiles().clear(); // 确保每个玩家的手牌是空的，适用于游戏开始前的初始化
         }
         System.out.println("Players are set up.");
     }
