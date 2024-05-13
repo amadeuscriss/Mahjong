@@ -1,6 +1,6 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
-import models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
 
 import java.util.List;
 import java.util.Scanner;

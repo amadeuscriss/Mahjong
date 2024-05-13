@@ -1,7 +1,7 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
-import models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.MahjongSet;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 
 import java.util.List;
 

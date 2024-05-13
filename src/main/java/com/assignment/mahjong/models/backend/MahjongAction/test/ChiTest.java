@@ -1,9 +1,9 @@
 package com.assignment.mahjong.models.backend.MahjongAction.test;
 
 import com.assignment.mahjong.models.backend.MahjongAction.implement.ChiAction;
-import models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.NumericTile; // 确保正确导入
-import models.backend.Tile.implement.WordTile;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.NumericTile; // 确保正确导入
+import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
 
 import java.util.ArrayList;
 import java.util.List;

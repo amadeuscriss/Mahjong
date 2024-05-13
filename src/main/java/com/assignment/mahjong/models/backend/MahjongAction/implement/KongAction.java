@@ -1,7 +1,7 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
-import models.backend.Tile.TileInterface;
-import models.backend.Player.Point;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Player.Point;
 import java.util.List;
 
 public class KongAction extends MahjongAction {

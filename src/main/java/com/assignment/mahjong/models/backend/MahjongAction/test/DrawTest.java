@@ -1,9 +1,9 @@
 package com.assignment.mahjong.models.backend.MahjongAction.test;
 
-import models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.MahjongSet;
-import models.backend.Tile.implement.NumericTile;
-import models.backend.Tile.implement.WordTile;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
+import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
+import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
 import com.assignment.mahjong.models.backend.MahjongAction.implement.DrawAction;
 
 import java.util.Arrays;

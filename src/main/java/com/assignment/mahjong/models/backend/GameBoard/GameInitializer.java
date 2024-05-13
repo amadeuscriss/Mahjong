@@ -1,10 +1,9 @@
 package com.assignment.mahjong.models.backend.GameBoard;
 
-import models.backend.Player.Hand;
-import models.backend.Room.Player;
-import models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.NumericTile;
-import models.backend.Tile.implement.WordTile;
+import com.assignment.mahjong.models.backend.Room.Player;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
+import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
 
 import java.util.ArrayList;
 import java.util.Collections;

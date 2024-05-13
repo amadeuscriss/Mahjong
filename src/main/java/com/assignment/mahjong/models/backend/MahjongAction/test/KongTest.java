@@ -1,10 +1,10 @@
 package com.assignment.mahjong.models.backend.MahjongAction.test;
 
-import models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.NumericTile;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
 import com.assignment.mahjong.models.backend.MahjongAction.implement.KongAction;
-import models.backend.Player.Hand;
-import models.backend.Player.Point;
+import com.assignment.mahjong.models.backend.Player.Hand;
+import com.assignment.mahjong.models.backend.Player.Point;
 
 import java.util.ArrayList;
 

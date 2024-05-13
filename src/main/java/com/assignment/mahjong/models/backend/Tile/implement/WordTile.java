@@ -1,7 +1,7 @@
 package com.assignment.mahjong.models.backend.Tile.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
-import models.backend.Tile.implement.Tile;
+import com.assignment.mahjong.models.backend.Tile.implement.Tile;
 
 // 定义WordTile类，继承自Tile类，表示字牌
 public class WordTile extends Tile implements TileInterface {

@@ -1,6 +1,6 @@
 package com.assignment.mahjong.models.backend.Player; // 注意这里的包名，应与 Player 类在同一个包中，或根据实际结构调整
 
-import models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
