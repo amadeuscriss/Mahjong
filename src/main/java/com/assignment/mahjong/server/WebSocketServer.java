@@ -2,15 +2,19 @@ package com.assignment.mahjong.server;
 
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,10 +44,21 @@ public class WebSocketServer {
      * 接收客户端发送的消息
      */
     @OnMessage
-    public void onMessage(String message) {
+    public void onMessage(String message, Session session) {
         log.info("Received message from client: " + message);
         System.out.println("Received message from client: " + message);
         // 在此处处理接收到的消息
+        if(StringUtils.isNotBlank(message)){
+            try {
+                //解析发送的报文
+                JSONObject jsonObject = JSON.parseObject(message);
+                //追加发送人(防止串改)
+                jsonObject.put("fromUserId",session.getId());
+                sendMessageToAll(jsonObject.toJSONString());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -64,6 +79,18 @@ public class WebSocketServer {
         sendMessageToAll("beat");
     }
 
+
+    public void sendMessageToUser(String message, String userId) {
+        try {
+            Session session = sessionMap.get(userId);
+            if (session != null) {
+                log.info("Sending message to user: " +  message);
+                session.getBasicRemote().sendText(message);
+            }
+        } catch (Exception e) {
+            log.error("Error sending message to user: " + e);
+        }
+    }
 
 
 
