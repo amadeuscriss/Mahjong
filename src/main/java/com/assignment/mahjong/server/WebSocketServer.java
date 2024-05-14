@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @EnableScheduling
-@ServerEndpoint("/ws")
+@ServerEndpoint("/imserver/{userId}")
 @Component
 public class WebSocketServer {
 
