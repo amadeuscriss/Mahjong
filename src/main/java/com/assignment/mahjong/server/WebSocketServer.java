@@ -54,7 +54,6 @@ public class WebSocketServer {
                 JSONObject jsonObject = JSON.parseObject(message);
                 //追加发送人(防止串改)
                 jsonObject.put("fromUserId",session.getId());
-                String toUserId=jsonObject.getString("toUserId");
                 sendMessageToAll(jsonObject.toJSONString());
             }catch (Exception e){
                 e.printStackTrace();
