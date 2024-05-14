@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ws client</title>
+</head>
+<body>
+
+</body>
+
+
+<script>
+    let ws = new WebSocket("ws://localhost:8080/ws");
+
+    ws.open = function () {
+        ws.send("hello");
+    }
+
+    ws.message = function (message) {
+        console.log("Received message: " + message.data);
+    }
+</script>
+</html>
