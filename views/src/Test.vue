@@ -1,41 +1,36 @@
 <template>
   <div id="app">
-    <!-- 使用 v-if 控制组件的显示与隐藏 -->
-    <InputRoomNumber v-if="!roomEntered" @roomEntered="handleRoomEntered" />
-    <WaitingRoom v-if="roomEntered" @startGame="handleStartGame" @exitRoom="handleExitRoom" />
+    <WelcomePage v-if="currentComponent === 'WelcomePage'" @joinRoom="switchToInputRoomNumber" @createRoom="switchToWaitingRoom" />
+    <InputRoomNumber v-if="currentComponent === 'InputRoomNumber'" @roomEntered="switchToWaitingRoom" />
+    <WaitingRoom v-if="currentComponent === 'WaitingRoom'" />
   </div>
 </template>
 
 <script>
 import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
+import WelcomePage from "@/components/WelcomePage.vue";
+
 
 export default {
   name: 'App',
   components: {
+    WelcomePage,
     InputRoomNumber,
     WaitingRoom
   },
   data() {
     return {
-      roomEntered: false // 控制房间号输入组件与等待室组件的切换
+      currentComponent: 'WelcomePage'
     };
   },
   methods: {
-    handleRoomEntered(roomNumber) {
-      console.log('Room entered:', roomNumber);
-      // 房间号已输入，切换组件
-      this.roomEntered = true;
+    switchToInputRoomNumber() {
+      this.currentComponent = 'InputRoomNumber';
     },
-    handleStartGame() {
-      console.log('开始游戏');
-      // 处理开始游戏的逻辑
+    switchToWaitingRoom() {
+      this.currentComponent = 'WaitingRoom';
     },
-    handleExitRoom() {
-      console.log('退出房间');
-      // 处理退出房间的逻辑
-      this.roomEntered = false; // 返回到输入房间号界面
-    }
   }
 }
 </script>

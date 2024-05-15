@@ -14,51 +14,19 @@
       <!-- 确定按钮 -->
       <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">确定</div>
     </div>
-    <!-- 错误信息 -->
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
   </div>
 </template>
 
 <script>
+// import axios from "axios";
+
 export default {
   name: 'InputRoomNumber',
   data() {
     return {
       roomNumber: '', // 记录用户输入的房间号
       digits: ['', '', '', '', ''], // 存储每个矩形框中的数字
-      showConfirmButton: false, // 控制确定按钮显示与隐藏
-      ws: null, // WebSocket 对象
-      errorMessage: '' // 错误信息
-    };
-  },
-  created() {
-    // 建立 WebSocket 连接
-    this.ws = new WebSocket(`ws://${process.env.VUE_APP_BACKEND_URL}/ws`);
-
-    // 处理 WebSocket 连接打开事件
-    this.ws.onopen = () => {
-      console.log('WebSocket 连接已建立');
-    };
-
-    // 处理收到的 WebSocket 消息
-    this.ws.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      if (response.roomExists) {
-        this.$emit('roomEntered', this.roomNumber);
-        this.ws.close(); // 触发事件后关闭 WebSocket 连接
-      } else {
-        this.errorMessage = '该房间不存在';
-      }
-    };
-
-    // 处理 WebSocket 连接关闭事件
-    this.ws.onclose = () => {
-      console.log('WebSocket 连接已关闭');
-    };
-
-    // 处理 WebSocket 错误事件
-    this.ws.onerror = (error) => {
-      console.error('WebSocket 发生错误:', error);
+      showConfirmButton: false // 控制确定按钮显示与隐藏
     };
   },
   methods: {
@@ -69,22 +37,35 @@ export default {
       this.digits = this.roomNumber.split('');
       // 根据输入数字个数决定是否显示确定按钮
       this.showConfirmButton = this.roomNumber.length === 5;
-      // 清除错误信息
-      this.errorMessage = '';
     },
     handleConfirm() {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        // 发送房间号给后端
-        this.ws.send(JSON.stringify({ roomNumber: this.roomNumber }));
-      }
+      // 保存输入的数字
+      const roomNumber = parseInt(this.roomNumber);
+
+      console.log('房间号已保存到后端:', roomNumber);
+      // 触发自定义事件，通知父组件房间号已输入
+      this.$emit('roomEntered', this.roomNumber);
     }
-  },
-  beforeUnmount() {
-    if (this.ws) {
-      this.ws.close();
-    }
+    // async handleConfirm() {
+    //   try{
+    //     // 保存输入的数字
+    //     const roomNumber = parseInt(this.roomNumber);
+    //
+    //     // 发送POST请求将房间号发送到后端
+    //     const response = await axios.post('https://your-backend-api-url.com/rooms', { roomNumber });
+    //
+    //     // 如果后端成功接收到房间号，继续执行下面的代码
+    //     console.log('房间号已保存到后端:', response.data);
+    //
+    //     // 触发自定义事件，通知父组件房间号已输入
+    //     this.$emit('roomEntered', roomNumber);
+    //   }catch (error) {
+    //     // 处理请求失败的情况
+    //     console.error('保存房间号时出错:', error);
+    //   }
+    // }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -130,10 +111,5 @@ export default {
   text-align: center;
   line-height: 50px;
   font-size: 16px;
-}
-
-.error-message {
-  color: red;
-  margin-top: 10px;
 }
 </style>
