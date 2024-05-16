@@ -12,7 +12,7 @@ public class CheckWin {
         this.points = points;
     }
 
-    public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin) {
+    public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin, boolean isLastTileWin) {
         boolean won = false;
         if (isStandardWin(handTiles)) {
             points.setBasePoints(10); // 标准胡牌基础分为10
@@ -36,10 +36,21 @@ public class CheckWin {
                 points.addMultiplier(10.0); // 十三幺自摸的额外倍率
             }
             won = true;
+        } else if (isAllOneSuit(handTiles)) {
+            points.setBasePoints(30); // 清一色的基础分为30
+            points.addMultiplier(4.0); // 清一色的倍率
+            if (isSelfDrawn) {
+                points.addMultiplier(4.0); // 清一色自摸的额外倍率
+            }
+            won = true;
         }
 
         if (isKongFlowerWin) {
             points.addMultiplier(2.0); // 杠上开花的倍率
+        }
+
+        if (isLastTileWin) {
+            points.addMultiplier(2.0); // 海底捞月的倍率
         }
 
         if (won) {
@@ -48,6 +59,7 @@ public class CheckWin {
         }
         return won;
     }
+
 
     // 实现胡牌的具体逻辑
 // 检查是否为标准胡牌
@@ -155,5 +167,12 @@ public class CheckWin {
             }
         }
         return hasPair;
+    }
+
+    // 检查是否为清一色
+    private boolean isAllOneSuit(List<TileInterface> handTiles) {
+        if (handTiles.isEmpty()) return false;
+        String suit = handTiles.get(0).getType();
+        return handTiles.stream().allMatch(tile -> tile.getType().equals(suit));
     }
 }
