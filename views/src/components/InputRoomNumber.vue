@@ -14,8 +14,7 @@
       <!-- 确定按钮 -->
       <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">确定</div>
     </div>
-    <!-- 错误信息 -->
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -27,38 +26,7 @@ export default {
       roomNumber: '', // 记录用户输入的房间号
       digits: ['', '', '', '', ''], // 存储每个矩形框中的数字
       showConfirmButton: false, // 控制确定按钮显示与隐藏
-      ws: null, // WebSocket 对象
-      errorMessage: '' // 错误信息
-    };
-  },
-  created() {
-    // 建立 WebSocket 连接
-    this.ws = new WebSocket(`ws://${process.env.VUE_APP_BACKEND_URL}/ws`);
-
-    // 处理 WebSocket 连接打开事件
-    this.ws.onopen = () => {
-      console.log('WebSocket 连接已建立');
-    };
-
-    // 处理收到的 WebSocket 消息
-    this.ws.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      if (response.roomExists) {
-        this.$emit('roomEntered', this.roomNumber);
-        this.ws.close(); // 触发事件后关闭 WebSocket 连接
-      } else {
-        this.errorMessage = '该房间不存在';
-      }
-    };
-
-    // 处理 WebSocket 连接关闭事件
-    this.ws.onclose = () => {
-      console.log('WebSocket 连接已关闭');
-    };
-
-    // 处理 WebSocket 错误事件
-    this.ws.onerror = (error) => {
-      console.error('WebSocket 发生错误:', error);
+      errorMessage: ''
     };
   },
   methods: {
@@ -73,15 +41,10 @@ export default {
       this.errorMessage = '';
     },
     handleConfirm() {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        // 发送房间号给后端
-        this.ws.send(JSON.stringify({ roomNumber: this.roomNumber }));
-      }
-    }
-  },
-  beforeUnmount() {
-    if (this.ws) {
-      this.ws.close();
+      this.$emit('roomEntered', this.roomNumber);
+    },
+    setErrorMessage(message) {
+      this.errorMessage = message;
     }
   }
 };
@@ -136,4 +99,5 @@ export default {
   color: red;
   margin-top: 10px;
 }
+
 </style>
