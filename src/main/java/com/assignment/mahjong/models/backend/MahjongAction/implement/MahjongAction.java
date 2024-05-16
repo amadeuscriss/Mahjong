@@ -35,5 +35,10 @@ public abstract class MahjongAction {
             return Optional.empty();
         }
     }
+
+    // 添加一个公共方法来获取操作的成功状态
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
 }
 
