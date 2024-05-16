@@ -2,8 +2,8 @@
   <div class="welcome">
     <h1>欢迎来到麻将游戏</h1>
     <div class="button-container">
-      <button @click="joinRoom">加入房间</button>
-      <button @click="createRoom">新建房间</button>
+      <button @click="$emit('joinRoom')">加入房间</button>
+      <button @click="$emit('createRoom')">新建房间</button>
     </div>
   </div>
 </template>
@@ -11,14 +11,6 @@
 <script>
 export default {
   name: 'WelcomePage',
-  methods: {
-    joinRoom() {
-      this.$emit('joinRoom');
-    },
-    createRoom() {
-      this.$emit('createRoom');
-    }
-  }
 };
 </script>
 
