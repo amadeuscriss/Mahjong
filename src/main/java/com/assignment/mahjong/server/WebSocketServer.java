@@ -74,10 +74,10 @@ public class WebSocketServer {
     /**
      * 发送消息
      */
-    @Scheduled(fixedDelay = 2000)
-    public void sendMessage() {
-        sendMessageToAll("beat");
-    }
+//    @Scheduled(fixedDelay = 2000)
+//    public void sendMessage() {
+//        sendMessageToAll("beat");
+//    }
 
 
     public void sendMessageToUser(String message, String userId) {
@@ -104,7 +104,5 @@ public class WebSocketServer {
             log.error("Error sending message to all clients: " + e);
         }
     }
-
-
 
 }

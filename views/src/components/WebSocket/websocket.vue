@@ -1,5 +1,7 @@
 <template>
-  <el-button @click="sendDataToServer">给后台发送消息</el-button>
+  <div>
+    <el-button @click="sendDataToServer">给后台发送消息</el-button>
+  </div>
 </template>
 
 <script>
@@ -9,7 +11,7 @@ export default {
     return {
       wsIsRun: false,
       webSocket: null,
-      ws: 'ws://localhost:8080/ws',  // 修改为本地地址和端口
+      ws: 'ws://localhost:8080/ws',
       wsTimer: null,
     }
   },
@@ -46,21 +48,9 @@ export default {
     wsOpenHandler(event) {
       console.log('WebSocket连接成功', event);
     },
-
-    //处理服务器消息
     wsMessageHandler(event) {
       console.log('接收到服务器消息:', event.data);
-      try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === 'test'){
-          console.log('收到来自服务器的消息：', data.message);
-        }
-      }catch (error) {
-        console.error('解析消息时出错:', error);
-      }
     },
-
     wsErrorHandler(event) {
       console.error('WebSocket错误', event);
     },
