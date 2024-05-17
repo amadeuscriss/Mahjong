@@ -19,8 +19,9 @@ public class RoomManager {
     }
 
     // 加入房间
-    public boolean joinRoom(String roomCode, Player player) {
+    public boolean joinRoom(String roomCode, String playerId) {
         Room room = rooms.get(roomCode);
+        Player player = new Player(playerId);
         if (room != null && !room.isGameStarted()) {
             room.addPlayer(player);
             return true;

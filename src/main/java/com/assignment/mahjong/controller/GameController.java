@@ -21,11 +21,11 @@ public class GameController {
     }
 
     @PostMapping("/joinRoom/{roomCode}")
-    public String joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
-        if (roomManager.joinRoom(roomCode, player)) {
-            return "Player " + player.getName() + " joined room " + roomCode;
+    public String joinRoom(@PathVariable String roomCode, @RequestBody String playerId) {
+        if (roomManager.joinRoom(roomCode, playerId)) {
+            return "roomJoined";
         } else {
-            return "Failed to join room " + roomCode;
+            return "roomNotFound";
         }
     }
 
