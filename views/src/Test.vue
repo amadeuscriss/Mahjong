@@ -7,6 +7,7 @@
                :players="players"
                :playerIndex="playerIndex"
                :roomId="roomId"
+               ref="inputRoomNumberComponent"
                @errorMessage="setErrorMessage"/>
   </div>
 </template>
@@ -48,30 +49,39 @@ export default {
     },
     setErrorMessage(message) {
       if (this.currentComponent === 'InputRoomNumber') {
-        this.$children[0].setErrorMessage(message);
+        const inputRoomNumberComponent = this.$refs.inputRoomNumberComponent;
+        inputRoomNumberComponent.setErrorMessage(message);
       }
-    }
+    },
   },
     created() {
       // 直接在 created 钩子中访问全局属性 $ws
       if (this.$ws) {
         this.$ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
+          console.log('Received message:', data)
           if (data.type === 'roomCreated') {
             this.roomId = data.roomId;
-            this.players = [data.player]; // 新建房间，只有当前玩家
+            this.players = data.players; // 新建房间，只有当前玩家
             this.playerIndex = 0;
             this.currentComponent = 'WaitingRoom';
-          } else if (data.type === 'roomJoined') {
-            if (data.success) {
+          } else if (data.type === 'updateRoom'){
+            this.players = data.players;
+            this.playerIndex = data.playerIndex;
+          }
+          else if (data.type === 'joinRoomResponse') {
+            if (data.state === 'roomJoined') {
               this.players = data.players;
               this.playerIndex = data.playerIndex;
               this.roomId = data.roomId;
               this.currentComponent = 'WaitingRoom';
             } else {
               // 显示错误信息，房间不存在
-              alert('房间不存在');
+              this.setErrorMessage('房间不存在');
             }
+          } else {
+            // 显示错误信息，房间不存在
+            this.setErrorMessage('房间不存在');
           }
         };
 
