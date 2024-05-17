@@ -1,5 +1,7 @@
 package com.assignment.mahjong.models.backend.Room;
 
+import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,17 +14,13 @@ public class RoomManager {
     }
 
     // 创建房间并返回房间号
-    public String createRoom() {
-        // 生成房间号
+    public Room createRoom() {
+        MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
+        Room newRoom = new Room(this, mahjongSet);
         String roomCode = generateRoomCode();
-        while (rooms.containsKey(roomCode)) {  // 确保房间号是唯一的
-            roomCode = generateRoomCode();
-        }
-
-        Room newRoom = new Room(this, roomCode);  // 传入RoomManager和房间号到Room构造器
         rooms.put(roomCode, newRoom);
         System.out.println("Room created with code: " + roomCode);
-        return roomCode;
+        return newRoom;
     }
 
     // 生成房间号

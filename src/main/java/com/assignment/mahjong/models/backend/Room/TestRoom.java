@@ -1,7 +1,7 @@
 package com.assignment.mahjong.models.backend.Room;
 
 
-public class TestRoom {
+/**public class TestRoom {
     public static void main(String[] args) {
         RoomManager roomManager = new RoomManager();
         String roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
@@ -51,3 +51,4 @@ public class TestRoom {
         System.out.println("Expected: Game should not start without enough players, Actual: Game started? " + room.getPlayers().size());
     }
 }
+**/

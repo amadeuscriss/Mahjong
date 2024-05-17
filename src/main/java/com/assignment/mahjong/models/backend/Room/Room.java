@@ -19,13 +19,14 @@ public class Room {
     private UUID lastDiscardedByPlayerId;
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
+    private UUID currentTurnPlayerId;
 
     // 构造函数
-    public Room(RoomManager manager, String roomCode) {
+    public Room(RoomManager manager, MahjongSet mahjongSet) {
         players = new ArrayList<>();
         this.roomCode = generateRoomCode();
-        this.mahjongSet = new MahjongSet(); // 初始化牌库
         this.roomManager = manager;
+        this.mahjongSet = mahjongSet;
     }
 
     // 添加玩家到房间
@@ -162,5 +163,15 @@ public class Room {
 
     public UUID getLastDiscardedByPlayerId() {
         return lastDiscardedByPlayerId;
+    }
+
+    // 设置当前回合的玩家
+    public void setCurrentTurnPlayerId(UUID playerId) {
+        this.currentTurnPlayerId = playerId;
+    }
+
+    // 获取当前回合的玩家ID
+    public UUID getCurrentTurnPlayerId() {
+        return currentTurnPlayerId;
     }
 }
