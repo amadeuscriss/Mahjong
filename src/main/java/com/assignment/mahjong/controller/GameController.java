@@ -225,38 +225,27 @@ public class GameController {
 
 
     @GetMapping("/checkWin/{roomCode}/{playerId}")
-    public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    public String checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerById(playerId);
             if (player != null) {
                 CheckWin checkWin = new CheckWin(player.getPoints());
                 boolean isSelfDrawn = player.getLastActionWasDraw(); // 使用这个标记来确定是否为自摸
-                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile()); // 使用这个来标记是否为点炮
-                boolean isKongFlowerWin = false; // 例如，如果刚进行了杠操作
-                boolean isLastTileWin = room.getMahjongSet().getTiles().isEmpty(); // 根据牌库是否为空判断是否为海底捞月
-
-                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin, isLastTileWin);
-                player.setLastActionWasDraw(false); // 重置标记
-
+                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());// 使用这个来标记是否为点炮
+                boolean isKongFlowerWin = false; // Example logic, adjust as necessary
+                boolean isLastTileWin = false;
+                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin,isLastTileWin);
+                player.setLastActionWasDraw(false); // 重置标记，以免错误地认为后续的胡牌也是自摸
                 if (won) {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "winResponse",
-                            "state", "Win",
-                            "points", player.getPoints().getTotalPoints(),
-                            "details", player.getPoints().getScoreDetails()
-                    ));
+                    return "Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails();
                 } else {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "winResponse",
-                            "state", "NoWin",
-                            "message", "No win condition met."
-                    ));
+                    return "No win condition met.";
                 }
             }
-            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
+            return "Player not found.";
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+        return "Room not found.";
     }
 
 }

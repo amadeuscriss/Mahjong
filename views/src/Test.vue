@@ -8,8 +8,7 @@
                :playerIndex="playerIndex"
                :roomId="roomId"
                ref="inputRoomNumberComponent"
-               @errorMessage="setErrorMessage"
-               @goBack="handleGoBack"/>
+               @errorMessage="setErrorMessage"/>
   </div>
 </template>
 
@@ -54,9 +53,6 @@ export default {
         inputRoomNumberComponent.setErrorMessage(message);
       }
     },
-    handleGoBack(){
-      this.currentComponent = 'WelcomePage';
-    }
   },
     created() {
       // 直接在 created 钩子中访问全局属性 $ws
@@ -66,15 +62,11 @@ export default {
           console.log('Received message:', data)
           if (data.type === 'roomCreated') {
             this.roomId = data.roomId;
-            this.players = data.players; // 新建房间，只有当前玩家
+            this.players = [data.player]; // 新建房间，只有当前玩家
             this.playerIndex = 0;
             this.currentComponent = 'WaitingRoom';
-          } else if (data.type === 'updateRoom'){
-            this.players = data.players;
-            this.playerIndex = data.playerIndex;
-          }
-          else if (data.type === 'joinRoomResponse') {
-            if (data.state === 'roomJoined') {
+          } else if (data.type === 'roomJoined') {
+            if (data.success) {
               this.players = data.players;
               this.playerIndex = data.playerIndex;
               this.roomId = data.roomId;

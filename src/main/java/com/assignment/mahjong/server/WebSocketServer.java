@@ -4,6 +4,7 @@ package com.assignment.mahjong.server;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.assignment.mahjong.controller.GameController;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -18,10 +19,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 @EnableScheduling
 @ServerEndpoint("/ws")
 @Component
 public class WebSocketServer {
+    private final GameController gameController = new GameController();
 
     public static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
 
@@ -52,9 +55,49 @@ public class WebSocketServer {
             try {
                 //解析发送的报文
                 JSONObject jsonObject = JSON.parseObject(message);
-                //追加发送人(防止串改)
-                jsonObject.put("fromUserId",session.getId());
-                sendMessageToAll(jsonObject.toJSONString());
+
+                String type = (String) jsonObject.get("type");
+
+                switch (type) {
+                    case "joinRoom":
+                        String result = gameController.joinRoom((String) jsonObject.get("roomCode"), session.getId());
+                        jsonObject.put("type", result);
+                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+                        break;
+                    case "createRoom":
+                        String roomCode = gameController.createRoom();
+                        gameController.joinRoom(roomCode, session.getId());
+                        jsonObject.put("type", "roomCreated");
+                        jsonObject.put("roomId", roomCode);
+                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+                        break;
+                    case "chat":
+                        break;
+                    default:
+                        break;
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }catch (Exception e){
                 e.printStackTrace();
             }
