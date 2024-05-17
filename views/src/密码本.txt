@@ -1,0 +1,48 @@
+1.玩家输入房间号点击确定后：
+  发送 send(JSON.stringify({ type: 'joinRoom', roomId:"number" }));
+  希望收到：type: 'joinRoomResponse'
+        state: 'roomJoined'  or   'roomNotFound'
+
+
+2.玩家点击新建后：
+    发送 send(JSON.stringify({ type: 'createRoom' }));
+    希望收到：type: 'roomCreated'
+            内容： roomId（房间号）  players（储存玩家Id的列表）
+
+
+3.玩家在等待房间时（目前默认满四个人直接开始）：
+    希望收到（房间全服更新）： type: 'updateRoom'
+             内容：players（储存玩家ID的列表） playerIndex（当前玩家的索引）
+
+    希望收到（游戏开始）： type: 'gameStart'
+             内容：currentTurnPlayerId（当前回合的玩家ID）  playerTiles（玩家手牌）
+
+
+4.玩家在游戏时
+    希望收到（桌面全服更新）: type: 'updateGame'
+                         内容：currentTurnPlayerId（当前回合的玩家ID） tableTiles（牌桌上的牌）
+
+    希望收到（玩家的操作）: type: 'playerActions'
+                        state: 'Win'（胡）  'Kong'（杠） 'Pong'（碰）  'Chi'（吃）   'Discard'（出牌）
+                        内容（若出牌）：playerTiles（玩家手牌）
+
+
+    发送（胡牌）：send(JSON.stringify({ type: 'chooseWin' }));
+    希望收到（全服分数）: type: 'point'
+                      内容：points（玩家积分列表，按玩家列表顺序排列）
+
+    发送（杠牌）：send(JSON.stringify({ type: 'chooseKong' }));
+    希望收到: type: 'done'
+            内容: showTiles（明牌列表） playerTiles（玩家手牌）
+
+    发送（碰）：send(JSON.stringify({ type: 'choosePong' }));
+        希望收到: type: 'done'
+                内容: showTiles（明牌列表） playerTiles（玩家手牌）
+
+    发送（吃）：send(JSON.stringify({ type: 'chooseChi' }));
+        希望收到: type: 'done'
+                内容: showTiles（明牌列表）  playerTiles（玩家手牌）
+
+    发送（出牌）：send(JSON.stringify({ type: 'chooseDiscard' }));
+            希望收到: type: 'done'
+                    内容: playerTiles（玩家手牌）
