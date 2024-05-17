@@ -8,7 +8,8 @@
                :playerIndex="playerIndex"
                :roomId="roomId"
                ref="inputRoomNumberComponent"
-               @errorMessage="setErrorMessage"/>
+               @errorMessage="setErrorMessage"
+               @goBack="handleGoBack"/>
   </div>
 </template>
 
@@ -53,6 +54,9 @@ export default {
         inputRoomNumberComponent.setErrorMessage(message);
       }
     },
+    handleGoBack(){
+      this.currentComponent = 'WelcomePage';
+    }
   },
     created() {
       // 直接在 created 钩子中访问全局属性 $ws

@@ -5,7 +5,7 @@
     <!-- 输入房间号提示 -->
     <h2 class="input-room-number-prompt">请输入房间号</h2>
     <!-- 房间号输入框 -->
-    <input type="text" v-model="roomNumber" @input="handleInput" class="room-number-input" maxlength="5" />
+    <input type="text" v-model="roomNumber" @input="handleInput" class="room-number-input" maxlength="6" />
     <!-- 矩形框 -->
     <div class="digit-container">
       <div v-for="(digit, index) in digits" :key="index" class="digit">
@@ -15,8 +15,11 @@
       <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">确定</div>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <!-- 返回按钮 -->
+    <button @click="goBack" class="return-button">返回</button>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -24,19 +27,19 @@ export default {
   data() {
     return {
       roomNumber: '', // 记录用户输入的房间号
-      digits: ['', '', '', '', ''], // 存储每个矩形框中的数字
+      digits: ['', '', '', '', '', ''], // 存储每个矩形框中的数字
       showConfirmButton: false, // 控制确定按钮显示与隐藏
       errorMessage: ''
     };
   },
   methods: {
     handleInput() {
-      // 过滤非数字字符并截取前5个字符
-      this.roomNumber = this.roomNumber.replace(/\D/g, '').slice(0, 5);
+      // 过滤非数字字符并截取前6个字符
+      this.roomNumber = this.roomNumber.replace(/\D/g, '').slice(0, 6);
       // 更新矩形框中的数字
-      this.digits = this.roomNumber.split('');
+      this.digits = this.roomNumber.split('').concat(Array(6).fill('')).slice(0, 6);
       // 根据输入数字个数决定是否显示确定按钮
-      this.showConfirmButton = this.roomNumber.length === 5;
+      this.showConfirmButton = this.roomNumber.length === 6;
       // 清除错误信息
       this.errorMessage = '';
     },
@@ -45,6 +48,9 @@ export default {
     },
     setErrorMessage(message) {
       this.errorMessage = message;
+    },
+    goBack() {
+      this.$emit('goBack');
     }
   }
 };
@@ -98,6 +104,13 @@ export default {
 .error-message {
   color: red;
   margin-top: 10px;
+}
+
+.return-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 </style>
