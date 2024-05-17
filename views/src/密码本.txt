@@ -1,5 +1,5 @@
 1.玩家输入房间号点击确定后：
-  发送 send(JSON.stringify({ type: 'joinRoom', roomId }));
+  发送 send(JSON.stringify({ type: 'joinRoom', roomId:"number" }));
   希望收到：type: 'joinRoomResponse'
         state: 'roomJoined'  or   'roomNotFound'
 
