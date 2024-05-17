@@ -4,11 +4,7 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Room {
     // 获取房间中的所有玩家
@@ -21,12 +17,16 @@ public class Room {
     private MahjongSet mahjongSet;
     private TileInterface lastDiscardedTile;
     private UUID lastDiscardedByPlayerId;
+    private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
+    private RoomManager roomManager;
+    private UUID currentTurnPlayerId;
 
     // 构造函数
-    public Room() {
+    public Room(RoomManager manager, MahjongSet mahjongSet) {
         players = new ArrayList<>();
         this.roomCode = generateRoomCode();
-        this.mahjongSet = new MahjongSet(); // 初始化牌库
+        this.roomManager = manager;
+        this.mahjongSet = mahjongSet;
     }
 
     // 添加玩家到房间
@@ -49,18 +49,38 @@ public class Room {
         return null;
     }
     // 删除玩家通过玩家对象
-    public void removePlayer(Player player) {
-        if (players.remove(player)) {
-            System.out.println("Player removed: " + player.getName());
+    // 封装移除玩家的逻辑，使其可以重复使用
+    private boolean removePlayer(Player player) {
+        return players.remove(player);
+    }
+
+    // 允许玩家自行退出房间的方法
+    public void playerLeave(Player player) {
+        if (removePlayer(player)) {
+            System.out.println("Player " + player.getName() + " has left the room.");
+            // 检查房间是否为空，如果是，则可能需要删除房间
+            if (players.isEmpty() && !gameStarted) {
+                roomManager.removeRoom(roomCode);
+                System.out.println("Room " + roomCode + " removed due to no players.");
+            }
         } else {
             System.out.println("Player not found or could not be removed.");
         }
+        // 检查是否需要重新评估游戏开始条件
+        checkIfGameCanStart();
     }
 
+    // 生成房间号的具体逻辑
     private String generateRoomCode() {
         Random rand = new Random();
         int number = rand.nextInt(900000) + 100000;  // 生成100000到999999之间的数字
         return String.valueOf(number);
+    }
+
+    // 当房间不再活跃时调用这个方法
+    public void removeRoom(String roomCode) {
+        activeRoomCodes.remove(roomCode);  // 从集合中移除房间号
+        System.out.println("Room " + roomCode + " has been removed.");
     }
 
     // 删除玩家通过玩家名字
@@ -143,5 +163,15 @@ public class Room {
 
     public UUID getLastDiscardedByPlayerId() {
         return lastDiscardedByPlayerId;
+    }
+
+    // 设置当前回合的玩家
+    public void setCurrentTurnPlayerId(UUID playerId) {
+        this.currentTurnPlayerId = playerId;
+    }
+
+    // 获取当前回合的玩家ID
+    public UUID getCurrentTurnPlayerId() {
+        return currentTurnPlayerId;
     }
 }
