@@ -1,8 +1,12 @@
 package com.assignment.mahjong.models.backend.Room;
 
+
 public class TestRoom {
     public static void main(String[] args) {
-        Room room = new Room();
+        RoomManager roomManager = new RoomManager();
+        String roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
+        Room room = roomManager.getRoom(roomCode);  // 根据房间号获取房间实例
+
         System.out.println("Testing Room Class");
 
         // 测试添加玩家
@@ -22,6 +26,7 @@ public class TestRoom {
         // 测试添加超过最大玩家数
         Player eve = new Player("Eve");
         room.addPlayer(eve);
+        System.out.println("Expected: Room full, Actual: " + (room.getPlayers().size() > 4 ? "Room overflow" : "Room not overflow"));
 
         // 测试设置玩家准备状态
         alice.setReady(true);
@@ -36,7 +41,7 @@ public class TestRoom {
 
         // 测试重置房间
         room.resetRoom();
-        System.out.println("Expected: Room reset, Actual: Room reset? " + (room.getPlayers().stream().noneMatch(Player::isReady) && !room.getPlayers().isEmpty()));
+        System.out.println("Expected: Room reset, Actual: Room reset? " + (room.getPlayers().stream().noneMatch(Player::isReady) && !room.isGameStarted()));
 
         // 测试再次设置玩家准备后是否能重新开始游戏
         alice.setReady(true);
@@ -46,4 +51,3 @@ public class TestRoom {
         System.out.println("Expected: Game should not start without enough players, Actual: Game started? " + room.getPlayers().size());
     }
 }
-
