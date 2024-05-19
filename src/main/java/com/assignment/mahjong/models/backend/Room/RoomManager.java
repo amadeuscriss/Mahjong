@@ -1,13 +1,16 @@
 package com.assignment.mahjong.models.backend.Room;
 
 import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+
+@Component
 public class RoomManager {
-    private Map<String, Room> rooms;  // 存储房间号和房间的映射
+    public Map<String, Room> rooms;  // 存储房间号和房间的映射
 
     public RoomManager() {
         rooms = new HashMap<>();

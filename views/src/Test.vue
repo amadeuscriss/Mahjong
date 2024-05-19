@@ -8,7 +8,7 @@
                :playerIndex="playerIndex"
                :roomId="roomId"
                ref="inputRoomNumberComponent"
-               @errorMessage="setErrorMessage"/>
+               @errorMessage="setErrorMessage"></component>
   </div>
 </template>
 
