@@ -17,15 +17,16 @@ public class RoomManager {
     }
 
     // 创建房间并返回房间号
-    public String createRoom() {
+// 修改createRoom方法以接受Player参数
+    public String createRoom(Player creator) {
         MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
-        Room newRoom = new Room(this, mahjongSet);
-        String roomCode = generateRoomCode();
-        rooms.put(roomCode, newRoom);
+        Room newRoom = new Room(this, mahjongSet); // 创建新房间
+        String roomCode = generateRoomCode(); // 生成房间号
+        rooms.put(roomCode, newRoom); // 将房间存储在映射中
+        newRoom.addPlayer(creator); // 将房间创建者加入房间
         System.out.println("Room created with code: " + roomCode);
-        return roomCode;  // 返回房间代码而非房间对象
+        return roomCode;  // 返回房间代码
     }
-
     // 生成房间号
     private String generateRoomCode() {
         return UUID.randomUUID().toString().substring(0, 6);  // 生成一个随机的6位UUID字符串

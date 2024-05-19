@@ -20,11 +20,19 @@ import java.util.stream.Collectors;
 public class GameController {
     @Autowired
     public static RoomManager roomManager = new RoomManager();
+    public ResponseEntity<Object> createRoom(@RequestBody Map<String, Object> payload) {
+        // 假设前端发送的数据包含创建者的名称
+        String playerName = (String) payload.get("playerName");
+        if (playerName == null) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "type", "error",
+                    "message", "Player name is required to create room"
+            ));
+        }
+        Player creator = new Player(playerName);
+        String roomCode = roomManager.createRoom(creator);  // 创建房间并自动加入创建者
+        Room room = roomManager.getRoom(roomCode);  // 获取房间对象
 
-    @PostMapping("/createRoom")
-    public ResponseEntity<Object> createRoom() {
-        String roomCode = roomManager.createRoom();  // This now returns the room code
-        Room room = roomManager.getRoom(roomCode);  // Get the room object using the code
         if (room != null) {
             return ResponseEntity.ok(Map.of(
                     "type", "roomCreated",
