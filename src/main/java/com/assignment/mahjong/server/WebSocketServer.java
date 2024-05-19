@@ -60,16 +60,10 @@ public class WebSocketServer {
 
                 switch (type) {
                     case "joinRoom":
-                        String result = gameController.joinRoom((String) jsonObject.get("roomCode"), session.getId());
-                        jsonObject.put("type", result);
-                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+
                         break;
                     case "createRoom":
-                        String roomCode = gameController.createRoom();
-                        gameController.joinRoom(roomCode, session.getId());
-                        jsonObject.put("type", "roomCreated");
-                        jsonObject.put("roomId", roomCode);
-                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+
                         break;
                     case "chat":
                         break;

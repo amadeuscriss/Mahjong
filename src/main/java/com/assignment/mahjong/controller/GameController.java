@@ -22,13 +22,22 @@ public class GameController {
 
     @PostMapping("/createRoom")
     public ResponseEntity<Object> createRoom() {
-        Room room = roomManager.createRoom();
-        return ResponseEntity.ok(Map.of(
-                "type", "roomCreated",
-                "roomId", room.getRoomCode(),
-                "players", room.getPlayers().stream().map(Player::getId).collect(Collectors.toList())
-        ));
+        String roomCode = roomManager.createRoom();  // This now returns the room code
+        Room room = roomManager.getRoom(roomCode);  // Get the room object using the code
+        if (room != null) {
+            return ResponseEntity.ok(Map.of(
+                    "type", "roomCreated",
+                    "roomId", roomCode,
+                    "players", room.getPlayers().stream().map(Player::getId).collect(Collectors.toList())
+            ));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "type", "error",
+                    "message", "Failed to create room"
+            ));
+        }
     }
+
 
     @PostMapping("/joinRoom/{roomCode}")
     public ResponseEntity<Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {

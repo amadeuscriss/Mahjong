@@ -14,13 +14,13 @@ public class RoomManager {
     }
 
     // 创建房间并返回房间号
-    public Room createRoom() {
+    public String createRoom() {
         MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
         Room newRoom = new Room(this, mahjongSet);
         String roomCode = generateRoomCode();
         rooms.put(roomCode, newRoom);
         System.out.println("Room created with code: " + roomCode);
-        return newRoom;
+        return roomCode;  // 返回房间代码而非房间对象
     }
 
     // 生成房间号
