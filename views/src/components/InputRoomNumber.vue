@@ -34,8 +34,8 @@ export default {
   },
   methods: {
     handleInput() {
-      // 过滤非数字字符并截取前6个字符
-      this.roomNumber = this.roomNumber.replace(/\D/g, '').slice(0, 6);
+      // 允许输入字母和数字，并截取前6个字符
+      this.roomNumber = this.roomNumber.slice(0, 6);
       // 更新矩形框中的数字
       this.digits = this.roomNumber.split('').concat(Array(6).fill('')).slice(0, 6);
       // 根据输入数字个数决定是否显示确定按钮
