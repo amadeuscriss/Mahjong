@@ -1,10 +1,11 @@
 package com.assignment.mahjong.models.backend.Room;
 
 public class TestRoom {
+    static RoomManager roomManager = new RoomManager();
+    static String  roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
+    static  Room room = roomManager.getRoom(roomCode);  // 根据房间号获取房间实例
     public static void main(String[] args) {
-        RoomManager roomManager = new RoomManager();
-        String roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
-        Room room = roomManager.getRoom(roomCode);  // 根据房间号获取房间实例
+
 
         System.out.println("Testing Room Class");
 
