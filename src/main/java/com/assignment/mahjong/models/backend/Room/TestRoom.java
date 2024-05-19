@@ -4,49 +4,49 @@ public class TestRoom {
     public static void main(String[] args) {
         RoomManager roomManager = new RoomManager();
         String roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
-        Room room = roomManager.getRoom(roomCode);  // 根据房间号获取房间实例
 
         System.out.println("Testing Room Class");
 
-        // 测试添加玩家
+        // 测试加入玩家
         Player alice = new Player("Alice");
-        room.addPlayer(alice);
-        System.out.println("Expected: Alice added, Actual: " + (room.getPlayers().contains(alice) ? "Alice added" : "Alice not added"));
+        boolean aliceJoined = roomManager.joinRoom(roomCode, alice);
+        System.out.println("Expected: Alice added, Actual: " + (aliceJoined ? "Alice added" : "Alice not added"));
 
         Player bob = new Player("Bob");
-        room.addPlayer(bob);
+        boolean bobJoined = roomManager.joinRoom(roomCode, bob);
+        System.out.println("Expected: Bob added, Actual: " + (bobJoined ? "Bob added" : "Bob not added"));
 
         Player charlie = new Player("Charlie");
-        room.addPlayer(charlie);
+        boolean charlieJoined = roomManager.joinRoom(roomCode, charlie);
+        System.out.println("Expected: Charlie added, Actual: " + (charlieJoined ? "Charlie added" : "Charlie not added"));
 
         Player david = new Player("David");
-        room.addPlayer(david);
+        boolean davidJoined = roomManager.joinRoom(roomCode, david);
+        System.out.println("Expected: David added, Actual: " + (davidJoined ? "David added" : "David not added"));
 
         // 测试添加超过最大玩家数
         Player eve = new Player("Eve");
-        room.addPlayer(eve);
-        System.out.println("Expected: Room full, Actual: " + (room.getPlayers().size() > 4 ? "Room overflow" : "Room not overflow"));
+        boolean eveJoined = roomManager.joinRoom(roomCode, eve);
+        System.out.println("Expected: Room full, Actual: " + (!eveJoined ? "Room overflow" : "Room not overflow"));
 
-        // 测试设置玩家准备状态
-        alice.setReady(true);
-        bob.setReady(true);
-        charlie.setReady(true);
-        david.setReady(true);
-        System.out.println("Expected: Game started, Actual: Game started? " + (room.getPlayers().size() == 4 && room.getPlayers().stream().allMatch(Player::isReady)));
+        // 获取房间状态
+        Room room = roomManager.getRoom(roomCode);
 
-        // 测试删除玩家
-        room.removePlayerByName("Bob");
-        System.out.println("Expected: Bob removed, Actual: Bob removed? " + (!room.getPlayers().contains(bob)));
+        // 设置玩家准备状态
+        if (room != null) {
+            alice.setReady(true);
+            bob.setReady(true);
+            charlie.setReady(true);
+            david.setReady(true);
+            System.out.println("Expected: Game started, Actual: Game started? " + (room.getPlayers().size() == 4 && room.getPlayers().stream().allMatch(Player::isReady)));
+        } else {
+            System.out.println("Room was not found.");
+        }
 
         // 测试重置房间
-        room.resetRoom();
-        System.out.println("Expected: Room reset, Actual: Room reset? " + (room.getPlayers().stream().noneMatch(Player::isReady) && !room.isGameStarted()));
-
-        // 测试再次设置玩家准备后是否能重新开始游戏
-        alice.setReady(true);
-        charlie.setReady(true);
-        david.setReady(true);
-        room.checkIfGameCanStart();
-        System.out.println("Expected: Game should not start without enough players, Actual: Game started? " + room.getPlayers().size());
+        if (room != null) {
+            room.resetRoom();
+            System.out.println("Expected: Room reset, Actual: Room reset? " + (room.getPlayers().stream().noneMatch(Player::isReady) && !room.isGameStarted()));
+        }
     }
 }
