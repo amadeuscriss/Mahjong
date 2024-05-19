@@ -5,6 +5,8 @@ package com.assignment.mahjong.server;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.assignment.mahjong.controller.GameController;
+import com.assignment.mahjong.models.backend.Room.Player;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -25,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketServer {
     private final GameController gameController = new GameController();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private String messageToSend;
 
     public static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
 
@@ -60,16 +64,12 @@ public class WebSocketServer {
 
                 switch (type) {
                     case "joinRoom":
-                        String result = gameController.joinRoom((String) jsonObject.get("roomCode"), session.getId());
-                        jsonObject.put("type", result);
-                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+                        messageToSend = objectMapper.writeValueAsString(gameController.joinRoom((String) jsonObject.get("roomID"), new Player(session.getId())).getBody());
+                        sendMessageToAll(messageToSend);
                         break;
                     case "createRoom":
-                        String roomCode = gameController.createRoom();
-                        gameController.joinRoom(roomCode, session.getId());
-                        jsonObject.put("type", "roomCreated");
-                        jsonObject.put("roomId", roomCode);
-                        sendMessageToUser(jsonObject.toJSONString(), session.getId());
+                        messageToSend = objectMapper.writeValueAsString(gameController.createRoom().getBody());
+                        sendMessageToUser(messageToSend, session.getId());
                         break;
                     case "chat":
                         break;
