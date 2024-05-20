@@ -3,27 +3,34 @@ package com.assignment.mahjong.models.backend.Room;
 import com.assignment.mahjong.models.backend.Player.Point;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Player.Hand;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID; // 引入UUID类
+import java.util.UUID;
+
+// 引入Meld类，代表吃、碰、杠的组合
+import com.assignment.mahjong.models.backend.Tile.implement.Meld;
 
 public class Player {
-    private UUID id; // 添加一个UUID类型的id字段
-    private String name;
-    private boolean isReady;
-    private Hand hand;
+    private UUID id; // 玩家ID
+    private String name; // 玩家名称
+    private boolean isReady; // 玩家是否准备好
+    private Hand hand; // 玩家的手牌
     private Point points; // 玩家的分数对象
-    private boolean lastActionWasDraw; // 添加字段追踪最后一次行动是否为摸牌
+    private boolean lastActionWasDraw; // 上一个动作是否为摸牌
+    private List<Meld> melds; // 玩家的明牌列表
 
-
+    // 构造函数
     public Player(String name) {
-        this.id = UUID.randomUUID(); // 在构造函数中生成一个新的随机UUID
+        this.id = UUID.randomUUID(); // 生成一个随机的UUID
         this.name = name;
         this.isReady = false;
-        this.hand = new Hand(); // 初始化空的手牌列表
-        this.points = new Point(); // 初始化点数对象
-        this.lastActionWasDraw = false; // 初始化时设置为false
+        this.hand = new Hand(); // 初始化手牌列表
+        this.points = new Point(); // 初始化分数对象
+        this.lastActionWasDraw = false; // 默认上一个动作不是摸牌
+        this.melds = new ArrayList<>(); // 初始化明牌列表
     }
 
+    // Getter 和 Setter 方法
     public UUID getId() {
         return id;
     }
@@ -49,21 +56,28 @@ public class Player {
     }
 
     public void setHand(List<TileInterface> tiles) {
-        this.hand.getTiles().clear();  // 清空当前手牌
-        this.hand.getTiles().addAll(tiles);  // 添加新的牌集
+        this.hand.getTiles().clear();  // 清空手牌
+        this.hand.getTiles().addAll(tiles);  // 添加新牌
         this.hand.arrangeHand();  // 排序手牌
     }
 
-    // 提供一个方法返回玩家的分数对象
     public Point getPoints() {
-        return points; // 返回分数对象的引用
+        return points;
+    }
+
+    public boolean getLastActionWasDraw() {
+        return lastActionWasDraw;
     }
 
     public void setLastActionWasDraw(boolean lastActionWasDraw) {
         this.lastActionWasDraw = lastActionWasDraw;
     }
 
-    public boolean getLastActionWasDraw() {
-        return lastActionWasDraw;
+    public List<Meld> getMelds() {
+        return melds;
+    }
+
+    public void addMeld(Meld meld) {
+        this.melds.add(meld); // 添加一个明牌组合
     }
 }
