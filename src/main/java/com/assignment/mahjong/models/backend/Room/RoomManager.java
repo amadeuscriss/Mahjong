@@ -1,13 +1,16 @@
 package com.assignment.mahjong.models.backend.Room;
 
 import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+
+@Component
 public class RoomManager {
-    private Map<String, Room> rooms;  // 存储房间号和房间的映射
+    public Map<String, Room> rooms;  // 存储房间号和房间的映射
 
     public RoomManager() {
         rooms = new HashMap<>();
@@ -18,10 +21,17 @@ public class RoomManager {
         MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
         Room newRoom = new Room(this, mahjongSet);
         String roomCode = generateRoomCode();
+
+        // 创建一个默认玩家
+        Player defaultPlayer = new Player("Default Player");
+        newRoom.addPlayer(defaultPlayer); // 将玩家添加到新创建的房间
+
         rooms.put(roomCode, newRoom);
-        System.out.println("Room created with code: " + roomCode);
-        return roomCode;  // 返回房间代码而非房间对象
+        System.out.println("Room created with code: " + roomCode + ", Default player added");
+
+        return roomCode;  // 返回房间代码
     }
+
 
     // 生成房间号
     private String generateRoomCode() {
