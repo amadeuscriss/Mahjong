@@ -1,18 +1,107 @@
 <template>
   <div id="app">
-    <InputRoomNumber />
+    <component :is="currentComponent"
+               @joinRoom="handleJoinRoom"
+               @createRoom="handleCreateRoom"
+               @roomEntered="handleRoomEntered"
+               :players="players"
+               :playerIndex="playerIndex"
+               :roomId="roomId"
+               ref="inputRoomNumberComponent"
+               @errorMessage="setErrorMessage"
+               @goBack="handleGoback"
+    />
   </div>
 </template>
 
+
 <script>
 import InputRoomNumber from './components/InputRoomNumber.vue'
+import WaitingRoom from './components/WaitingRoom.vue'
+import WelcomePage from "@/components/WelcomePage.vue";
+import GameTable from "@/components/GameTable.vue";
 
 
 export default {
   name: 'App',
   components: {
-    InputRoomNumber
-  }
+    WelcomePage,
+    InputRoomNumber,
+    WaitingRoom,
+    GameTable
+  },
+  data() {
+    return {
+      currentComponent: GameTable,
+      players: [],
+      playerIndex: null,
+      roomId: null,
+    };
+  },
+  methods: {
+    handleJoinRoom() {
+      this.currentComponent = 'InputRoomNumber';
+    },
+    handleCreateRoom() {
+      // 发送新建房间的请求到后端
+      this.$ws.send(JSON.stringify({ type: 'createRoom',state: 'Waiting' }));
+    },
+    handleRoomEntered(roomId) {
+      if(this.$ws){
+        this.$ws.send(JSON.stringify({ type: 'joinRoom', roomId: roomId, state:'Waiting' }));
+      }
+    },
+    setErrorMessage(message) {
+      if (this.currentComponent === 'InputRoomNumber') {
+        const inputRoomNumberComponent = this.$refs.inputRoomNumberComponent;
+        inputRoomNumberComponent.setErrorMessage(message);
+      }
+    },
+    handleGoback(){
+      this.currentComponent = WelcomePage
+    }
+  },
+  created() {
+    // 直接在 created 钩子中访问全局属性 $ws
+    if (this.$ws) {
+      this.$ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received message:', data)
+        if (data.type === 'roomCreated') {
+          this.roomId = data.roomId;
+          this.players = data.players; // 新建房间，只有当前玩家
+          this.playerIndex = 0;
+          this.currentComponent = 'WaitingRoom';
+        } else if (data.type === 'updateRoom'){
+          this.players = data.players;
+          this.playerIndex = data.playerIndex;
+        }
+        else if (data.type === 'joinRoomResponse') {
+          if (data.state === 'roomJoined') {
+            this.players = data.players;
+            this.playerIndex = data.playerIndex;
+            this.roomId = data.roomId;
+            this.currentComponent = 'WaitingRoom';
+          } else {
+            // 显示错误信息，房间不存在
+            this.setErrorMessage('房间不存在');
+          }
+        } else {
+          // 显示错误信息，房间不存在
+          this.setErrorMessage('房间不存在');
+        }
+      };
+
+      this.$ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
+      this.$ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    }
+
+  },
 }
 </script>
 

@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
-import Test from './Test.vue'
+import App from './App.vue'
 // 创建 Vue 应用程序
-const app = createApp(Test);
+const app = createApp(App);
 
 // 设置 WebSocket 连接
 const ws = new WebSocket('ws://localhost:8081/ws');

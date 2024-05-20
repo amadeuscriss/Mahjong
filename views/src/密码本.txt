@@ -1,11 +1,11 @@
 1.玩家输入房间号点击确定后：
-  发送 send(JSON.stringify({ type: 'joinRoom', roomId: 'roomId' }));
+  发送 send(JSON.stringify({ type: 'joinRoom', roomId: roomId, state:'Waiting' }));
     希望收到：type: 'joinRoomResponse'
             state: 'roomJoined'  or   'roomNotFound'
 
 
 2.玩家点击新建后：
-    发送 send(JSON.stringify({ type: 'createRoom' }));
+    发送 send(JSON.stringify({ type: 'createRoom',state: 'Waiting' }));
         希望收到：type: 'roomCreated'
                 roomId: roomId（房间号）
                 players: players（储存玩家Id的列表）
@@ -22,34 +22,27 @@
 
 
 4.玩家在游戏时
+
+            tile的字符串具体内容可前往views/src/assets/tiles_front查看，与图片的文件名相同（不包含拓展名.png）
+
     希望收到（桌面全服更新）: type: 'updateGame'
                          currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）
                          tableTiles: tableTiles（牌桌上的牌）
 
     希望收到（玩家的操作）: type: 'playerActions'
-                       playerActions: playerActions (储存玩家可执行行为的列表： ['Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,  'Discard'（出牌）, 'SelfKong'（自摸杠）])
+                       playerActions: playerActions (储存玩家可执行行为的列表： ['Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,  'Discard'（出牌）, 'SelfKong'（自摸杠）]
                        playerTiles: playerTiles（玩家手牌，摸牌后的的牌）
 
+    希望收到（全服行为通知）：type： 'notification'
+                      action: action (包括 'Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃）)
+                      showTiles: showTiles（执行以上操作的玩家的明牌）
+                      performerIndex: performerIndex（执行者的索引）
 
-    发送（胡牌）：send(JSON.stringify({ type: 'chooseWin' }));
-        希望收到（全服分数）: type: 'point'
-                      points: points（玩家积分列表，按玩家列表顺序排列）
 
-    发送（杠牌）：send(JSON.stringify({ type: 'chooseKong' }));
-        希望收到: type: 'done'
-            showTiles: showTiles（明牌列表）
-            playerTiles: playerTiles（玩家手牌）
+    发送（玩家执行的操作）:JSON.stringify({ type: 'action', behavior: action, state: 'Playing' ,data: tile（该部分只有出牌才有） });
+                        action包括 'Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,
+                                    'Skip'（跳过，即玩家不执行以上的行为，选择摸牌）
+                                   'Discard'（出牌）, 'SelfKong'（自摸杠）
 
-    发送（碰）：send(JSON.stringify({ type: 'choosePong' }));
-        希望收到: type: 'done'
-                showTiles: showTiles（明牌列表）
-                playerTiles: playerTiles（玩家手牌）
-
-    发送（吃）：send(JSON.stringify({ type: 'chooseChi' }));
-        希望收到: type: 'done'
-                showTiles: showTiles（明牌列表）
-                playerTiles: playerTiles（玩家手牌）
-
-    发送（出牌）：send(JSON.stringify({ type: 'chooseDiscard' }));
-            希望收到: type: 'done'
-                    playerTiles: playerTiles（玩家手牌）
+            希望收到：type：'done'
+                    playerTiles：playerTiles（玩家手牌）
