@@ -17,13 +17,15 @@
                           playerIndex: playerIndex（当前玩家的索引）
 
     希望收到（游戏开始）： type: 'gameStart'
-                      currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）
-                      playerTiles: playerTiles（玩家手牌）
 
 
 4.玩家在游戏时
 
             tile的字符串具体内容可前往views/src/assets/tiles_front查看，与图片的文件名相同（不包含拓展名.png）
+
+    希望收到（游戏全服初始化）: type：'gameInitialization'
+                         currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）
+                         playerTiles: playerTiles（玩家手牌）
 
     希望收到（桌面全服更新）: type: 'updateGame'
                          currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）

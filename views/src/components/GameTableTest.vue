@@ -75,25 +75,26 @@
 <script>
 export default {
   name: 'GameTable',
-  props: {
-    roomId: String,
-    players: Array,
-    playerIndex: null, // 玩家索引
-  },
   data() {
     return {
-      playAction: [], // 玩家操作
-      currentTurnPlayerId: null, // 当前回合玩家id
+      players: ['12', '34', '56', '78'], // 玩家列表
+      playerIndex: 3, // 玩家索引
+      playAction: ['Win', 'Kong', 'Pong', 'Chi', 'SelfKong', 'Discard'], // 玩家操作
 
-      tableTiles: [],
-      playerTiles: [], // 玩家手牌
+      roomId: 798352, // 房间号
+      currentTurnPlayerId: '78', // 当前回合玩家id
 
-      showTiles: [[], [], [], []], // 玩家的明牌
+      tableTiles: ['Bamboo_1', 'Bamboo_2', 'Dot_1','Dot_2','Dot_3','Dot_4','Dot_5','Dot_6','Dot_7','Dot_8','Dot_9',
+                    'Bamboo_3','Bamboo_4','Bamboo_5','Bamboo_6','Bamboo_7','Bamboo_8','Bamboo_9','Character_1','Character_2','Character_3',
+                    'Character_4','Character_5','Character_6','Character_7',"Character_8",'Character_9','East','Green','North','Red','South'],
+      playerTiles: ['White', 'South', 'Bamboo_5', 'Dot_6', 'Character_3', 'Character_3', 'Character_3', 'Character_6', 'Character_6', 'Character_7', 'Character_7', 'Character_8', 'Character_9'], // 玩家手牌
+
+      showTiles: [['Red', 'Red', 'Red', 'Red'], ['White','White','White'], ['South','South','South'], ['Green','Green','Green']], // 玩家的明牌
 
       notification: {
-        show: false,
-        action: '',
-        position: '',
+        show: true,
+        action: 'Kong',
+        position: 'bottom',
       },
     };
   },
@@ -107,10 +108,6 @@ export default {
     }
   },
   methods: {
-    gameInitialization(message){
-      this.playerTiles = message.playerTiles;
-      this.currentTurnPlayerId = message.currentTurnPlayerId;
-    },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
       this.currentTurnPlayerId = message.currentTurnPlayerId;
@@ -182,9 +179,6 @@ export default {
           break;
         case 'notification':
           this.updateShownTiles(message);
-          break;
-        case 'gameInitialization':
-          this.gameInitialization(message);
           break;
       }
     }
@@ -353,7 +347,6 @@ export default {
   cursor: pointer;
 }
 
-
 /* 玩家行为展示区样式 */
 .notification {
   position: fixed;
@@ -378,7 +371,7 @@ export default {
 }
 
 .notification.top {
-  top: 150px;
+  top: 50px;
   left: 50%;
   transform: translateX(-50%);
 }
