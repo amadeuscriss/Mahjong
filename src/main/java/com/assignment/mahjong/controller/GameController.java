@@ -20,8 +20,8 @@ public class GameController {
     public static RoomManager roomManager = new RoomManager();
 
     @PostMapping("/createRoom")
-    public ResponseEntity<Object> createRoom() {
-        String roomCode = roomManager.createRoom();  // This now returns the room code
+    public ResponseEntity<Object> createRoom(String name) {
+        String roomCode = roomManager.createRoom(name);  // This now returns the room code
         Room room = roomManager.getRoom(roomCode);  // Get the room object using the code
         if (room != null) {
             return ResponseEntity.ok(Map.of(

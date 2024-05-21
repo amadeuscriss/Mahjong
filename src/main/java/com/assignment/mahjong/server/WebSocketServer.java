@@ -76,7 +76,7 @@ public class WebSocketServer {
                         sendMessageToUser(messageToSend, session.getId());
                         break;
                     case "createRoom":
-                        messageToSend = objectMapper.writeValueAsString(gameController.createRoom().getBody());
+                        messageToSend = objectMapper.writeValueAsString(gameController.createRoom(session.getId()).getBody());
 //                        gameController.joinRoom(messageToSend.substring())
                         sendMessageToUser(messageToSend, session.getId());
                         break;
