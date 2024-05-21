@@ -23,7 +23,7 @@ public class Player {
     public Player(String name) {
         this.id = UUID.randomUUID(); // 生成一个随机的UUID
         this.name = name;
-        this.isReady = false;
+        this.isReady = true;
         this.hand = new Hand(); // 初始化手牌列表
         this.points = new Point(); // 初始化分数对象
         this.lastActionWasDraw = false; // 默认上一个动作不是摸牌

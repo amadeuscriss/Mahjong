@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.assignment.mahjong.controller.GameController;
 import com.assignment.mahjong.models.backend.Room.Player;
+import com.assignment.mahjong.models.backend.Room.Room;
+import com.assignment.mahjong.models.backend.Room.RoomManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -27,10 +29,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketServer {
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     private String messageToSend;
+    Room serverRoom;
+
     private final GameController gameController = new GameController();
 
     public static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
+
+    RoomManager roomManager = GameController.getRoomManager();
 
     /**
      *  记录当前连接个数
@@ -65,19 +72,31 @@ public class WebSocketServer {
                 switch (type) {
                     case "joinRoom":
                         messageToSend = objectMapper.writeValueAsString(gameController.joinRoom((String) jsonObject.get("roomId"), new Player(session.getId())).getBody());
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
+                        serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
 
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
-                        sendMessageToUser(messageToSend, session.getId());
+                        for (Player player : serverRoom.getPlayers()) {
+                            sendMessageToUser(messageToSend, player.getName());
+                        }
+
+
+                        if (serverRoom.getPlayers().size() == 4) {
+
+                            messageToSend = objectMapper.writeValueAsString(gameController.startGame((String) jsonObject.get("roomId")).getBody());
+                            System.out.println("start");
+                            System.out.println("start");
+                            System.out.println("start");
+                            System.out.println("start");
+                            System.out.println("start");
+                            System.out.println("start");
+
+                            for (Player player : serverRoom.getPlayers()) {
+                                sendMessageToUser(messageToSend, player.getName());
+                            }
+                        }
+
                         break;
                     case "createRoom":
-                        messageToSend = objectMapper.writeValueAsString(gameController.createRoom().getBody());
-//                        gameController.joinRoom(messageToSend.substring())
+                        messageToSend = objectMapper.writeValueAsString(gameController.createRoom(session.getId()).getBody());
                         sendMessageToUser(messageToSend, session.getId());
                         break;
                     case "chat":

@@ -17,11 +17,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/game")
 public class GameController {
     @Autowired
-    public static RoomManager roomManager = new RoomManager();
+    private static RoomManager roomManager = new RoomManager();
+
+    public static RoomManager getRoomManager() {
+        return roomManager;
+    }
 
     @PostMapping("/createRoom")
-    public ResponseEntity<Object> createRoom() {
-        String roomCode = roomManager.createRoom();  // This now returns the room code
+    public ResponseEntity<Object> createRoom(String name) {
+        String roomCode = roomManager.createRoom(name);  // This now returns the room code
         Room room = roomManager.getRoom(roomCode);  // Get the room object using the code
         if (room != null) {
             return ResponseEntity.ok(Map.of(
