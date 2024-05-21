@@ -65,19 +65,12 @@ public class WebSocketServer {
                 switch (type) {
                     case "joinRoom":
                         messageToSend = objectMapper.writeValueAsString(gameController.joinRoom((String) jsonObject.get("roomId"), new Player(session.getId())).getBody());
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
-                        System.out.println(gameController.roomManager.getRoom((String) jsonObject.get("roomId")));
-
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
-//                        System.out.println(jsonObject.get("roomId"));
                         sendMessageToUser(messageToSend, session.getId());
+//                        sendMessageToAll(messageToSend);
                         break;
                     case "createRoom":
                         messageToSend = objectMapper.writeValueAsString(gameController.createRoom().getBody());
-//                        gameController.joinRoom(messageToSend.substring())
+//                        gameController.joinRoom(messageToSend.substring(0, 6), new Player(session.getId()));
                         sendMessageToUser(messageToSend, session.getId());
                         break;
                     case "chat":
