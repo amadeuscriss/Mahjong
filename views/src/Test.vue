@@ -8,7 +8,9 @@
                :playerIndex="playerIndex"
                :roomId="roomId"
                ref="inputRoomNumberComponent"
-               @errorMessage="setErrorMessage"></component>
+               @errorMessage="setErrorMessage"
+               @goBack="handleGoback"
+    />
   </div>
 </template>
 
@@ -17,6 +19,7 @@
 import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
+import GameTable from "@/components/GameTableTest.vue";
 
 
 export default {
@@ -24,11 +27,12 @@ export default {
   components: {
     WelcomePage,
     InputRoomNumber,
-    WaitingRoom
+    WaitingRoom,
+    GameTable
   },
   data() {
     return {
-      currentComponent: 'WelcomePage',
+      currentComponent: 'GameTable',
       players: [],
       playerIndex: null,
       roomId: null,
@@ -40,11 +44,11 @@ export default {
     },
     handleCreateRoom() {
       // 发送新建房间的请求到后端
-      this.$ws.send(JSON.stringify({ type: 'createRoom' }));
+      this.$ws.send(JSON.stringify({ type: 'createRoom', state: 'Waiting' }));
     },
     handleRoomEntered(roomId) {
       if(this.$ws){
-        this.$ws.send(JSON.stringify({ type: 'joinRoom', roomId }));
+        this.$ws.send(JSON.stringify({ type: 'joinRoom', roomId: roomId, state: 'Waiting' }));
       }
     },
     setErrorMessage(message) {
@@ -53,6 +57,9 @@ export default {
         inputRoomNumberComponent.setErrorMessage(message);
       }
     },
+    handleGoback(){
+      this.currentComponent = WelcomePage
+    }
   },
     created() {
       // 直接在 created 钩子中访问全局属性 $ws
@@ -79,9 +86,9 @@ export default {
               // 显示错误信息，房间不存在
               this.setErrorMessage('房间不存在');
             }
-          } else {
-            // 显示错误信息，房间不存在
-            this.setErrorMessage('房间不存在');
+          } else if (data.type === 'gameStart'){
+           //开始游戏
+            this.currentComponent = 'GameTable';
           }
         };
 

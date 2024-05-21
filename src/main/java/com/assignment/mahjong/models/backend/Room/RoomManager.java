@@ -21,10 +21,17 @@ public class RoomManager {
         MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
         Room newRoom = new Room(this, mahjongSet);
         String roomCode = generateRoomCode();
+
+        // 创建一个默认玩家
+        Player defaultPlayer = new Player("Default Player");
+        newRoom.addPlayer(defaultPlayer); // 将玩家添加到新创建的房间
+
         rooms.put(roomCode, newRoom);
-        System.out.println("Room created with code: " + roomCode);
-        return roomCode;  // 返回房间代码而非房间对象
+        System.out.println("Room created with code: " + roomCode + ", Default player added");
+
+        return roomCode;  // 返回房间代码
     }
+
 
     // 生成房间号
     private String generateRoomCode() {
