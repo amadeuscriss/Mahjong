@@ -62,9 +62,16 @@ public class GameController {
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
+            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 获取当前回合玩家的ID
+            if (currentTurnPlayerId == null) {
+                return ResponseEntity.ok(Map.of(
+                        "type", "gameStart",
+                        "status", "No current player"
+                ));
+            }
             return ResponseEntity.ok(Map.of(
                     "type", "gameStart",
-                    "currentTurnPlayerId", room.getCurrentTurnPlayerId(), // This method needs to be implemented
+                    "currentTurnPlayerId", currentTurnPlayerId,
                     "playerTiles", room.getPlayers().stream()
                             .collect(Collectors.toMap(
                                     Player::getId,
@@ -78,6 +85,7 @@ public class GameController {
                 "status", "Room not found or not all players are ready"
         ));
     }
+
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
