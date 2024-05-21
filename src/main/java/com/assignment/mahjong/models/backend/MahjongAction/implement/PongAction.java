@@ -1,15 +1,21 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Room.Player;
+import com.assignment.mahjong.models.backend.Tile.implement.Meld;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PongAction extends MahjongAction {
-    private TileInterface tileToPong; // 别的玩家打出的牌，用于碰牌
+    private TileInterface tileToPong;
+    private Player player;
 
-    public PongAction(TileInterface tileToPong, List<TileInterface> playerHand) {
+    public PongAction(TileInterface tileToPong, List<TileInterface> playerHand, Player player) {
         super(tileToPong, playerHand);
-        this.tileToPong = tileToPong; // 保存别的玩家打出的牌
+        this.tileToPong = tileToPong;
+        this.player = player;
     }
 
     @Override
@@ -18,6 +24,7 @@ public class PongAction extends MahjongAction {
             System.out.println("Pong with tile: " + tileToPong.getValueAsString());
             isSuccessful = true;
             adjustPlayerHand();
+            createMeld();
         } else {
             System.out.println("Cannot pong: Insufficient similar tiles or not matching.");
             isSuccessful = false;
@@ -33,13 +40,21 @@ public class PongAction extends MahjongAction {
     }
 
     private void adjustPlayerHand() {
-        // 移除两张相同的牌，因为一张是别人打出的，已经在动作中处理
         List<TileInterface> toRemove = playerHand.stream()
                 .filter(tile -> tile.equals(tileToPong))
                 .limit(2)
                 .collect(Collectors.toList());
 
         playerHand.removeAll(toRemove);
-        playerHand.add(tileToPong); // 添加这张被碰的牌到手牌中
+    }
+
+    private void createMeld() {
+        List<TileInterface> meldTiles = new ArrayList<>();
+        meldTiles.add(tileToPong);
+        meldTiles.add(tileToPong);
+        meldTiles.add(tileToPong);
+        Meld pongMeld = new Meld("PONG", meldTiles);
+        player.addMeld(pongMeld);
     }
 }
+

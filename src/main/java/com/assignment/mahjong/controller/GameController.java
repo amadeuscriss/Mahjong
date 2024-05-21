@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -134,7 +132,6 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
-
     @PostMapping("/pong/{roomCode}/{playerId}/{tileIndex}")
     public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
@@ -142,13 +139,18 @@ public class GameController {
             Player player = room.getPlayerById(playerId);
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
                 TileInterface tileToPong = player.getHand().getTiles().get(tileIndex);
-                PongAction pongAction = new PongAction(tileToPong, player.getHand().getTiles());
+                PongAction pongAction = new PongAction(tileToPong, player.getHand().getTiles(), player);
                 pongAction.execute();
                 if (pongAction.isActionSuccessful()) {
+                    List<String> showTiles = player.getMelds().stream()
+                            .filter(meld -> meld.getType().equals("PONG"))
+                            .flatMap(meld -> meld.getTiles().stream())
+                            .map(TileInterface::getValueAsString)
+                            .collect(Collectors.toList());
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Pong",
-                            "showTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()),
+                            "showTiles", showTiles,
                             "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
                     ));
                 } else {
@@ -165,6 +167,7 @@ public class GameController {
     }
 
 
+
     @PostMapping("/kong/{roomCode}/{playerId}/{tileIndex}")
     public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
@@ -173,14 +176,16 @@ public class GameController {
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
                 TileInterface tileToKong = player.getHand().getTiles().get(tileIndex);
                 boolean isSelfKong = checkIfSelfKong(tileToKong, player); // 检查是否为自摸杠
-                KongAction kongAction = new KongAction(tileToKong, player.getHand().getTiles(), isSelfKong, player.getPoints());
+                KongAction kongAction = new KongAction(tileToKong, player.getHand().getTiles(), isSelfKong, player.getPoints(), player);
                 kongAction.execute();
                 if (kongAction.isActionSuccessful()) {
+                    // 明牌列表显示
+                    List<String> showTiles = Collections.nCopies(4, tileToKong.getValueAsString()); // 显示4张杠的牌
                     // 更新玩家的手牌并响应杠牌成功
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Kong",
-                            "showTiles", tileToKong.getValueAsString(),  // 显示明牌
+                            "showTiles", showTiles,
                             "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
                     ));
                 } else {
@@ -201,7 +206,6 @@ public class GameController {
         // 检查是否是玩家自己摸到的牌，这通常需要特定的游戏逻辑来确定
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
-
     @PostMapping("/chi/{roomCode}/{playerId}/{tileIndex}")
     public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
@@ -211,13 +215,14 @@ public class GameController {
                 TileInterface tileToChi = player.getHand().getTiles().get(tileIndex);
                 TileInterface nextTile = player.getHand().getTiles().get(tileIndex + 1);
 
-                ChiAction chiAction = new ChiAction(tileToChi, player.getHand().getTiles(), nextTile);
+                // 创建 ChiAction，传入玩家对象和相关牌
+                ChiAction chiAction = new ChiAction(tileToChi, player.getHand().getTiles(), nextTile, player);
                 chiAction.execute();
                 if (chiAction.isSuccessful()) {
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Chi",
-                            "showTiles", Arrays.asList(tileToChi.getValueAsString(), nextTile.getValueAsString()),  // 显示吃牌涉及的牌
+                            "showTiles", player.getMelds().stream().filter(m -> m.getType().equals("CHI")).flatMap(m -> m.getTiles().stream().map(TileInterface::getValueAsString)).collect(Collectors.toList()),  // 显示吃牌涉及的牌
                             "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()) // 更新后的玩家手牌
                     ));
                 } else {
