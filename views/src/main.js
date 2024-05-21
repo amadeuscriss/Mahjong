@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import App from './Test.vue'
 // 创建 Vue 应用程序
 const app = createApp(App);
 

@@ -64,27 +64,37 @@
       </button>
     </div>
 
+    <!-- 玩家行为展示区 -->
+    <div v-if="notification.show" class="notification" :class="notification.position">
+      {{ notification.action }}
+    </div>
+
   </div>
 </template>
 
 <script>
 export default {
   name: 'GameTable',
+  props: {
+    roomId: String,
+    players: Array,
+    playerIndex: null, // 玩家索引
+  },
   data() {
     return {
-      players: ['12', '34', '56', '78'], // 玩家列表
-      playerIndex: 3, // 玩家索引
-      playAction: ['Win', 'Kong', 'Pong', 'Chi', 'SelfKong', 'Discard'], // 玩家操作
+      playAction: [], // 玩家操作
+      currentTurnPlayerId: null, // 当前回合玩家id
 
-      roomId: 798352, // 房间号
-      currentTurnPlayerId: '78', // 当前回合玩家id
+      tableTiles: [],
+      playerTiles: [], // 玩家手牌
 
-      tableTiles: ['Bamboo_1', 'Bamboo_2', 'Dot_1','Dot_2','Dot_3','Dot_4','Dot_5','Dot_6','Dot_7','Dot_8','Dot_9',
-                    'Bamboo_3','Bamboo_4','Bamboo_5','Bamboo_6','Bamboo_7','Bamboo_8','Bamboo_9','Character_1','Character_2','Character_3',
-                    'Character_4','Character_5','Character_6','Character_7',"Character_8",'Character_9','East','Green','North','Red','South'],
-      playerTiles: ['White', 'South', 'Bamboo_5', 'Dot_6', 'Character_3', 'Character_3', 'Character_3', 'Character_6', 'Character_6', 'Character_7', 'Character_7', 'Character_8', 'Character_9'], // 玩家手牌
+      showTiles: [[], [], [], []], // 玩家的明牌
 
-      showTiles: [['Red', 'Red', 'Red', 'Red'], ['White','White','White'], ['South','South','South'], ['Green','Green','Green']] // 玩家的明牌
+      notification: {
+        show: false,
+        action: '',
+        position: '',
+      },
     };
   },
   computed: {
@@ -97,6 +107,10 @@ export default {
     }
   },
   methods: {
+    gameInitialization(message){
+      this.playerTiles = message.playerTiles;
+      this.currentTurnPlayerId = message.currentTurnPlayerId;
+    },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
       this.currentTurnPlayerId = message.currentTurnPlayerId;
@@ -111,9 +125,25 @@ export default {
     updateAfterActing(message){
       this.playerTiles = message.playerTiles;
     },
+    // 显示玩家行为通知
+    showNotification(action, performerIndex) {
+      const positions = ['bottom', 'right', 'top', 'left'];
+      const position = positions[(performerIndex - this.playerIndex + 4) % 4];
+
+      this.notification = {
+        show: true,
+        action,
+        position,
+      };
+
+      setTimeout(() => {
+        this.notification.show = false;
+      }, 2000);
+    },
     //接收通知，更新明牌库
     updateShownTiles(message){
       this.showTiles[message.performerIndex] = message.showTiles;
+      this.showNotification(message.action, message.performerIndex);
     },
     // 动态获取图片路径
     getTileImage(tile) {
@@ -152,6 +182,9 @@ export default {
           break;
         case 'notification':
           this.updateShownTiles(message);
+          break;
+        case 'gameInitialization':
+          this.gameInitialization(message);
           break;
       }
     }
@@ -319,4 +352,41 @@ export default {
   font-size: 16px;
   cursor: pointer;
 }
+
+
+/* 玩家行为展示区样式 */
+.notification {
+  position: fixed;
+  font-size: 24px;
+  font-weight: bold;
+  color: red;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.notification.bottom {
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.notification.right {
+  right: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.notification.top {
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.notification.left {
+  left: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 </style>

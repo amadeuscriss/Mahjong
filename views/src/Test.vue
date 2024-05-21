@@ -19,7 +19,7 @@
 import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
-import GameTable from "@/components/GameTable.vue";
+import GameTable from "@/components/GameTableTest.vue";
 
 
 export default {
@@ -32,7 +32,7 @@ export default {
   },
   data() {
     return {
-      currentComponent: 'WelcomePage',
+      currentComponent: 'GameTable',
       players: [],
       playerIndex: null,
       roomId: null,
@@ -86,9 +86,9 @@ export default {
               // 显示错误信息，房间不存在
               this.setErrorMessage('房间不存在');
             }
-          } else {
-            // 显示错误信息，房间不存在
-            this.setErrorMessage('房间不存在');
+          } else if (data.type === 'gameStart'){
+           //开始游戏
+            this.currentComponent = 'GameTable';
           }
         };
 

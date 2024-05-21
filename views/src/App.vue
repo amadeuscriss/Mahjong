@@ -32,7 +32,7 @@ export default {
   },
   data() {
     return {
-      currentComponent: GameTable,
+      currentComponent:  WelcomePage,
       players: [],
       playerIndex: null,
       roomId: null,
@@ -86,9 +86,9 @@ export default {
             // 显示错误信息，房间不存在
             this.setErrorMessage('房间不存在');
           }
-        } else {
-          // 显示错误信息，房间不存在
-          this.setErrorMessage('房间不存在');
+        } else if (data.type === 'gameStart'){
+          //开始游戏
+          this.currentComponent = 'GameTable';
         }
       };
 
