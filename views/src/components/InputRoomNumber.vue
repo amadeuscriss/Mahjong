@@ -32,6 +32,7 @@ export default {
       errorMessage: ''
     };
   },
+
   methods: {
     handleInput() {
       // 允许输入字母和数字，并截取前6个字符
@@ -51,6 +52,14 @@ export default {
     },
     goBack() {
       this.$emit('goBack');
+    },
+    handleEvent(event){
+      const message = JSON.parse(event.data);
+      if(message.type === 'roomEntered'){
+        this.$emit('roomEntered', message.roomId);
+      }else if(message.type === 'error'){
+        this.setErrorMessage(message.message);
+      }
     }
   }
 };
