@@ -20,6 +20,7 @@ public class Room {
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
     private UUID currentTurnPlayerId;
+    private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
 
     // 构造函数
     public Room(RoomManager manager, MahjongSet mahjongSet) {
@@ -38,6 +39,11 @@ public class Room {
         } else {
             System.out.println("Cannot add more players or game already started.");
         }
+    }
+
+    // 方法来获取牌集
+    public List<TileInterface> getTiles() {
+        return tiles;
     }
 
     public Player getPlayerById(UUID playerId) {

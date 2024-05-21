@@ -1,5 +1,6 @@
 package com.assignment.mahjong.controller;
 
+import com.assignment.mahjong.models.backend.GameBoard.GameInitializer;
 import com.assignment.mahjong.models.backend.MahjongAction.implement.*;
 import com.assignment.mahjong.models.backend.Room.Room;
 import com.assignment.mahjong.models.backend.Room.RoomManager;
@@ -66,7 +67,11 @@ public class GameController {
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
-            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 获取当前回合玩家的ID
+            // 使用房间的牌和玩家来初始化游戏
+            GameInitializer gameInitializer = new GameInitializer(room.getTiles(), room.getPlayers());
+            gameInitializer.initializeGame();
+
+            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 需要一个方法来获取当前回合的玩家ID
             if (currentTurnPlayerId == null) {
                 return ResponseEntity.ok(Map.of(
                         "type", "gameStart",
@@ -89,7 +94,6 @@ public class GameController {
                 "status", "Room not found or not all players are ready"
         ));
     }
-
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
