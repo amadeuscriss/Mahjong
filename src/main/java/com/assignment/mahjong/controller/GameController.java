@@ -42,24 +42,43 @@ public class GameController {
 
 
     @PostMapping("/joinRoom/{roomCode}")
-    public ResponseEntity<Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
+    public Map<String, Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
         boolean joined = roomManager.joinRoom(roomCode, player);
         Room room = roomManager.getRoom(roomCode);
         if (joined) {
             // Broadcasting update to all clients in the room could be handled elsewhere in real app
-            return ResponseEntity.ok(Map.of(
-                    "type", "joinRoomResponse",
-                    "state", "roomJoined",
-                    "roomCode", roomCode,
-                    "players", room.getPlayers().stream().map(Player::getId).collect(Collectors.toList())
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "joinRoomResponse");
+            response.put("state", "roomJoined");
+            response.put("roomId", roomCode);
+            response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+
+            return response;
         } else {
-            return ResponseEntity.ok(Map.of(
-                    "type", "joinRoomResponse",
-                    "state", "roomNotFound"
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "joinRoomResponse");
+            response.put("state", "roomNotFound");
+            return response;
         }
     }
+
+
+    @PostMapping("/updateRoom/{roomCode}")
+    public Map<String, Object> updateRoom(@PathVariable String roomCode) {
+        Room room = roomManager.getRoom(roomCode);
+       // Broadcasting update to all clients in the room could be handled elsewhere in real app
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "updateRoom");
+            response.put("roomId", roomCode);
+            response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+
+            return response;
+    }
+
+
+
+
+
 
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
@@ -69,17 +88,17 @@ public class GameController {
             GameInitializer gameInitializer = new GameInitializer(room);
             gameInitializer.initializeGame();
 
-            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // Get the current turn player ID
-            if (currentTurnPlayerId == null) {
+            String currentTurnPlayerName = room.getCurrentTurnPlayerName(); // Get the current turn player ID
+            if (currentTurnPlayerName == null) {
                 return ResponseEntity.ok(Map.of(
-                        "type", "gameInitialization",
+                        "type", "gameStart",
                         "status", "No current player"
                 ));
             }
             // Return the game start status along with the current turn player ID and the tiles each player holds
             return ResponseEntity.ok(Map.of(
                     "type", "gameInitialization",
-                    "currentTurnPlayerId", currentTurnPlayerId,
+                    "currentTurnPlayerName", currentTurnPlayerName,
                     "playerTiles", room.getPlayers().stream()
                             .collect(Collectors.toMap(
                                     Player::getName,
@@ -90,7 +109,7 @@ public class GameController {
         }
         // Return error if the room is not found or not all players are ready
         return ResponseEntity.ok(Map.of(
-                "type", "gameInitialization",
+                "type", "gameStart",
                 "status", "Room not found or not all players are ready"
         ));
     }
@@ -264,7 +283,7 @@ public class GameController {
             if (player != null) {
                 CheckWin checkWin = new CheckWin(player.getPoints());
                 boolean isSelfDrawn = player.getLastActionWasDraw(); // 使用这个标记来确定是否为自摸
-                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());// 使用这个来标记是否为点炮
+                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerName()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());// 使用这个来标记是否为点炮
                 boolean isKongFlowerWin = false; // Example logic, adjust as necessary
                 boolean isLastTileWin = false;
                 boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin,isLastTileWin);

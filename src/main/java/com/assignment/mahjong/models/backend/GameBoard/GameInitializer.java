@@ -110,7 +110,7 @@ public class GameInitializer {
                 firstPlayerIndex = i;
             }
         }
-        room.setCurrentTurnPlayerId(players.get(firstPlayerIndex).getId());  // 设置房间的当前回合玩家ID为先手玩家的ID
+        room.setCurrentTurnPlayerName(players.get(firstPlayerIndex).getName());  // 设置房间的当前回合玩家ID为先手玩家的ID
         System.out.println(players.get(firstPlayerIndex).getName() + " will start the game as the dealer.");
         return firstPlayerIndex;
     }
