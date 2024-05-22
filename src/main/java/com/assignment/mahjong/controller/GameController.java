@@ -7,6 +7,7 @@ import com.assignment.mahjong.models.backend.Room.RoomManager;
 import com.assignment.mahjong.models.backend.Room.Player;
 import com.assignment.mahjong.models.backend.Rule.CheckWin;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +18,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
+    @Getter
     @Autowired
     private static RoomManager roomManager = new RoomManager();
-
-    public static RoomManager getRoomManager() {
-        return roomManager;
-    }
 
     @PostMapping("/createRoom")
     public ResponseEntity<Object> createRoom(String name) {
