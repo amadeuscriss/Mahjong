@@ -19,6 +19,8 @@ public class GameInitializer {
 
     public GameInitializer(Room room) {
         this.room = room;
+        initializeTiles();
+        this.players = new ArrayList<>(room.getPlayers());
     }
 
     public void initializeGame() {
@@ -31,6 +33,31 @@ public class GameInitializer {
             startGame();
         } else {
             System.out.println("Not all players are ready.");
+        }
+    }
+
+    private void initializeTiles() {
+        tiles = new ArrayList<>();  // 确保tiles被初始化
+        // 填充牌堆
+        String[] types = {"Bamboo", "Dot", "Character"};
+        for (String type : types) {
+            for (int num = 1; num <= 9; num++) {
+                for (int i = 0; i < 4; i++) {
+                    tiles.add(new NumericTile(type, num));
+                }
+            }
+        }
+        String[] winds = {"East", "South", "West", "North"};
+        for (String wind : winds) {
+            for (int i = 0; i < 4; i++) {
+                tiles.add(new WordTile("Wind", wind));
+            }
+        }
+        String[] dragons = {"Red", "Green", "White"};
+        for (String dragon : dragons) {
+            for (int i = 0; i < 4; i++) {
+                tiles.add(new WordTile("Dragon", dragon));
+            }
         }
     }
 
