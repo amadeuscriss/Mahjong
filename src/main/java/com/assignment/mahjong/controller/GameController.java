@@ -97,7 +97,7 @@ public class GameController {
             }
             // Return the game start status along with the current turn player ID and the tiles each player holds
             return ResponseEntity.ok(Map.of(
-                    "type", "gameStart",
+                    "type", "gameInitialization",
                     "currentTurnPlayerName", currentTurnPlayerName,
                     "playerTiles", room.getPlayers().stream()
                             .collect(Collectors.toMap(

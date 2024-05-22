@@ -92,7 +92,6 @@ public class WebSocketServer {
                             jsonObject.put("type", "gameStart");
                             for (Player player : serverRoom.getPlayers()) {
                                 sendMessageToUser(jsonObject.toJSONString(), player.getName());
-//                                System.out.println(serverRoom.getPlayers());
                             }
 
 
