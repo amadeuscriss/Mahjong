@@ -65,33 +65,36 @@ public class GameController {
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
-            // 使用整个房间对象来初始化游戏
+            // Initialize the game using the Room object
             GameInitializer gameInitializer = new GameInitializer(room);
             gameInitializer.initializeGame();
 
-            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 获取当前回合的玩家ID
+            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // Get the current turn player ID
             if (currentTurnPlayerId == null) {
                 return ResponseEntity.ok(Map.of(
-                        "type", "gameStart",
+                        "type", "gameInitialization",
                         "status", "No current player"
                 ));
             }
+            // Return the game start status along with the current turn player ID and the tiles each player holds
             return ResponseEntity.ok(Map.of(
-                    "type", "gameStart",
+                    "type", "gameInitialization",
                     "currentTurnPlayerId", currentTurnPlayerId,
                     "playerTiles", room.getPlayers().stream()
                             .collect(Collectors.toMap(
-                                    Player::getId,
+                                    Player::getName,
                                     player -> player.getHand().getTiles().stream()
                                             .map(TileInterface::getValueAsString)
                                             .collect(Collectors.toList())))
             ));
         }
+        // Return error if the room is not found or not all players are ready
         return ResponseEntity.ok(Map.of(
-                "type", "gameStart",
+                "type", "gameInitialization",
                 "status", "Room not found or not all players are ready"
         ));
     }
+
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")

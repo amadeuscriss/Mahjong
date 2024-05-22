@@ -81,9 +81,15 @@ public class WebSocketServer {
 
                         if (serverRoom.getPlayers().size() == 4) {
 
+                            jsonObject.put("type", "gameStart");
+                            for (Player player : serverRoom.getPlayers()) {
+                                sendMessageToUser(jsonObject.toJSONString(), player.getName());
+                                System.out.println(serverRoom.getPlayers());
+                            }
+
+
+
                             messageToSend = objectMapper.writeValueAsString(gameController.startGame((String) jsonObject.get("roomId")).getBody());
-
-
                             for (Player player : serverRoom.getPlayers()) {
                                 sendMessageToUser(messageToSend, player.getName());
                                 System.out.println(serverRoom.getPlayers());
