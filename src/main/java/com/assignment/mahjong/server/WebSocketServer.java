@@ -10,16 +10,13 @@ import com.assignment.mahjong.models.backend.Room.Room;
 import com.assignment.mahjong.models.backend.Room.RoomManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
-import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +28,7 @@ public class WebSocketServer {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private String messageToSend;
+
     Room serverRoom;
 
     private final GameController gameController = new GameController();
@@ -71,11 +69,21 @@ public class WebSocketServer {
 
                 switch (type) {
                     case "joinRoom":
-                        messageToSend = objectMapper.writeValueAsString(gameController.joinRoom((String) jsonObject.get("roomId"), new Player(session.getId())).getBody());
+                        Map<String, Object> respond = gameController.joinRoom((String) jsonObject.get("roomId"), new Player(session.getId()));
                         serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
+                        respond.put("playerIndex", session.getId());
+                        messageToSend = objectMapper.writeValueAsString(respond);
+                        sendMessageToUser(messageToSend, session.getId());
+
 
                         for (Player player : serverRoom.getPlayers()) {
-                            sendMessageToUser(messageToSend, player.getName());
+
+                            respond = gameController.updateRoom((String) jsonObject.get("roomId"));
+                            respond.put("playerIndex", player.getName());
+                            messageToSend = objectMapper.writeValueAsString(respond);
+                            if (!player.getName().equals(session.getId())) {
+                                sendMessageToUser(messageToSend, player.getName());
+                            }
                         }
 
 

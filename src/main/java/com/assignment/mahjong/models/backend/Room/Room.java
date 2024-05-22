@@ -19,7 +19,7 @@ public class Room {
     private UUID lastDiscardedByPlayerId;
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
-    private UUID currentTurnPlayerId;
+    private String currentTurnPlayerName;
     private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
     private Random random = new Random(); // 用于生成随机数的Random实例
 
@@ -168,21 +168,21 @@ public class Room {
         return lastDiscardedTile;
     }
 
-    public UUID getLastDiscardedByPlayerId() {
+    public UUID getLastDiscardedByPlayerName() {
         return lastDiscardedByPlayerId;
     }
 
     // 设置当前回合的玩家
-    public void setCurrentTurnPlayerId(UUID playerId) {
-        this.currentTurnPlayerId = playerId;
+    public void setCurrentTurnPlayerName(String playerName) {
+        this.currentTurnPlayerName = playerName;
     }
 
     // 获取当前回合的玩家ID
-    public UUID getCurrentTurnPlayerId() {
-        if (currentTurnPlayerId == null) {
+    public String getCurrentTurnPlayerName() {
+        if (currentTurnPlayerName == null) {
             rollDiceToDecideFirstPlayer();
         }
-        return currentTurnPlayerId;
+        return currentTurnPlayerName;
     }
 
     // 骰骰子决定先手玩家
@@ -201,7 +201,7 @@ public class Room {
         }
 
         if (firstPlayer != null) {
-            currentTurnPlayerId = firstPlayer.getId();
+            currentTurnPlayerName = firstPlayer.getName();
             System.out.println(firstPlayer.getName() + " will start the game as the dealer.");
         }
     }
