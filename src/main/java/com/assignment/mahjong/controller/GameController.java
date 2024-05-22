@@ -60,7 +60,6 @@ public class GameController {
             ));
         }
     }
-
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
@@ -69,53 +68,79 @@ public class GameController {
             GameInitializer gameInitializer = new GameInitializer(room);
             gameInitializer.initializeGame();
 
-            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // Get the current turn player ID
-            if (currentTurnPlayerId == null) {
+            UUID currentTurnPlayer = room.getCurrentTurnPlayerId(); // Get the current turn player
+            if (currentTurnPlayer == null) {
                 return ResponseEntity.ok(Map.of(
-                        "type", "gameStart",
-                        "status", "No current player"
+                        "type", "gameStart"
                 ));
             }
             // Return the game start status along with the current turn player ID and the tiles each player holds
             return ResponseEntity.ok(Map.of(
-                    "type", "gameStart",
-                    "currentTurnPlayerId", currentTurnPlayerId,
-                    "playerTiles", room.getPlayers().stream()
-                            .collect(Collectors.toMap(
-                                    Player::getId,
-                                    player -> player.getHand().getTiles().stream()
-                                            .map(TileInterface::getValueAsString)
-                                            .collect(Collectors.toList())))
-            ));
+                    "type", "gameStart"));
         }
         // Return error if the room is not found or not all players are ready
         return ResponseEntity.ok(Map.of(
-                "type", "gameStart",
-                "status", "Room not found or not all players are ready"
+                "type", "gameStart"
+        ));
+    }
+
+    @PostMapping("/updateGame/{roomCode}")
+    public ResponseEntity<Object> updateGame(@PathVariable String roomCode) {
+        Room room = roomManager.getRoom(roomCode);
+        if (room != null && room.isGameStarted()) {
+            return ResponseEntity.ok(Map.of(
+                    "type", "gameInitialization",
+                    "currentTurnPlayerId", room.getCurrentTurnPlayerId(),
+                    "playerTiles", room.getPlayers().stream().collect(Collectors.toMap(
+                            Player::getId,
+                            player -> player.getHand().getTiles().stream()
+                                    .map(TileInterface::getValueAsString)
+                                    .collect(Collectors.toList())
+                    )),
+                    "tableTiles", room.getTableTiles().stream()
+                            .map(TileInterface::getValueAsString)
+                            .collect(Collectors.toList())
+            ));
+        }
+        return ResponseEntity.badRequest().body(Map.of(
+                "message", "Game not started or room not found."
         ));
     }
 
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
-    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody TileInterface tile) {
+    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody Map<String, Integer> request) {
         Room room = roomManager.getRoom(roomCode);
-        if (room != null) {
-            Player player = room.getPlayerById(playerId);
-            if (player != null) {
-                DiscardAction discardAction = new DiscardAction(player.getHand().getTiles());
-                discardAction.execute();
-                if (discardAction.isActionSuccessful()) {
-                    room.setLastDiscardedTile(tile, playerId);
-                    return ResponseEntity.ok(Map.of("type", "updateGame", "discardedTile", tile.getValueAsString()));
-                } else {
-                    return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
-                }
-            }
+        if (room == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+        }
+
+        Player player = room.getPlayerById(playerId);
+        if (player == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+
+        int tileIndex = request.getOrDefault("tileIndex", -1); // Assumes tileIndex is passed in the request
+        if (tileIndex < 0 || tileIndex >= player.getHand().getTiles().size()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index."));
+        }
+
+        TileInterface tileToDiscard = player.getHand().getTiles().get(tileIndex);
+        DiscardAction discardAction = new DiscardAction(player.getHand().getTiles());
+        discardAction.execute(tileIndex);
+
+        if (!discardAction.isActionSuccessful()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
+        }
+
+        room.setLastDiscardedTile(tileToDiscard, playerId);
+        return ResponseEntity.ok(Map.of(
+                "type", "updateGame",
+                "discardedTile", tileToDiscard.getValueAsString()
+        ));
     }
+
 
 
     @PostMapping("/drawTile/{roomCode}/{playerId}")
