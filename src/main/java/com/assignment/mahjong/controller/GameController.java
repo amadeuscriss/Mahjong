@@ -6,6 +6,7 @@ import com.assignment.mahjong.models.backend.Room.RoomManager;
 import com.assignment.mahjong.models.backend.Room.Player;
 import com.assignment.mahjong.models.backend.Rule.CheckWin;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +17,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
+    @Getter
     @Autowired
     private static RoomManager roomManager = new RoomManager();
-
-    public static RoomManager getRoomManager() {
-        return roomManager;
-    }
 
     @PostMapping("/createRoom")
     public ResponseEntity<Object> createRoom(String name) {
@@ -66,9 +64,16 @@ public class GameController {
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
+            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 获取当前回合玩家的ID
+            if (currentTurnPlayerId == null) {
+                return ResponseEntity.ok(Map.of(
+                        "type", "gameStart",
+                        "status", "No current player"
+                ));
+            }
             return ResponseEntity.ok(Map.of(
                     "type", "gameStart",
-                    "currentTurnPlayerId", room.getCurrentTurnPlayerId(), // This method needs to be implemented
+                    "currentTurnPlayerId", currentTurnPlayerId,
                     "playerTiles", room.getPlayers().stream()
                             .collect(Collectors.toMap(
                                     Player::getId,
@@ -82,6 +87,7 @@ public class GameController {
                 "status", "Room not found or not all players are ready"
         ));
     }
+
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
