@@ -2,7 +2,9 @@
   发送 send(JSON.stringify({ type: 'joinRoom', roomId: roomId, state:'Waiting' }));
     希望收到：type: 'joinRoomResponse'
             state: 'roomJoined'  or   'roomNotFound'
-
+            roomId: roomId（房间号）
+            players: players
+            playerIndex: playerIndex（当前玩家的索引）
 
 2.玩家点击新建后：
     发送 send(JSON.stringify({ type: 'createRoom',state: 'Waiting' }));
