@@ -1,6 +1,7 @@
 package com.assignment.mahjong.models.backend.GameBoard;
 
 import com.assignment.mahjong.models.backend.Room.Player;
+import com.assignment.mahjong.models.backend.Room.Room;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
 import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
@@ -14,10 +15,10 @@ public class GameInitializer {
     private List<TileInterface> tiles;
     private List<Player> players;
     private final Random random = new Random();
+    private Room room; // 将 Room 对象包括进来
 
-    public GameInitializer(List<TileInterface> tiles, List<Player> players) {
-        this.tiles = tiles;
-        this.players = players;
+    public GameInitializer(Room room) {
+        this.room = room;
     }
 
     public void initializeGame() {
@@ -70,18 +71,20 @@ public class GameInitializer {
         System.out.println("Tiles have been shuffled.");
     }
 
-    private int rollDiceToDecideFirstPlayer() {
+    public int rollDiceToDecideFirstPlayer() {
+        List<Player> players = room.getPlayers();
         int maxRoll = 0;
         int firstPlayerIndex = 0;
         for (int i = 0; i < players.size(); i++) {
-            int roll = random.nextInt(6) + 1;  // Assume a 6-sided dice
+            int roll = random.nextInt(6) + 1;  // 假设使用一个六面骰子
             System.out.println(players.get(i).getName() + " rolled a " + roll);
             if (roll > maxRoll) {
                 maxRoll = roll;
                 firstPlayerIndex = i;
             }
         }
-        System.out.println(players.get(firstPlayerIndex).getName() + " will start the game.");
+        room.setCurrentTurnPlayerId(players.get(firstPlayerIndex).getId());  // 设置房间的当前回合玩家ID为先手玩家的ID
+        System.out.println(players.get(firstPlayerIndex).getName() + " will start the game as the dealer.");
         return firstPlayerIndex;
     }
 

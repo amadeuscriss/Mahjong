@@ -65,11 +65,11 @@ public class GameController {
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
-            // 使用房间的牌和玩家来初始化游戏
-            GameInitializer gameInitializer = new GameInitializer(room.getTiles(), room.getPlayers());
+            // 使用整个房间对象来初始化游戏
+            GameInitializer gameInitializer = new GameInitializer(room);
             gameInitializer.initializeGame();
 
-            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 需要一个方法来获取当前回合的玩家ID
+            UUID currentTurnPlayerId = room.getCurrentTurnPlayerId(); // 获取当前回合的玩家ID
             if (currentTurnPlayerId == null) {
                 return ResponseEntity.ok(Map.of(
                         "type", "gameStart",

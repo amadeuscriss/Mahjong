@@ -21,6 +21,7 @@ public class Room {
     private RoomManager roomManager;
     private UUID currentTurnPlayerId;
     private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
+    private Random random = new Random(); // 用于生成随机数的Random实例
 
     // 构造函数
     public Room(RoomManager manager, MahjongSet mahjongSet) {
@@ -178,6 +179,31 @@ public class Room {
 
     // 获取当前回合的玩家ID
     public UUID getCurrentTurnPlayerId() {
+        if (currentTurnPlayerId == null) {
+            rollDiceToDecideFirstPlayer();
+        }
         return currentTurnPlayerId;
     }
+
+    // 骰骰子决定先手玩家
+    private void rollDiceToDecideFirstPlayer() {
+        int maxRoll = 0;
+        Player firstPlayer = null;
+
+        for (Player player : players) {
+            int roll = random.nextInt(6) + 1; // 模拟掷一个六面骰子
+            System.out.println(player.getName() + " rolled a " + roll);
+
+            if (roll > maxRoll) {
+                maxRoll = roll;
+                firstPlayer = player;
+            }
+        }
+
+        if (firstPlayer != null) {
+            currentTurnPlayerId = firstPlayer.getId();
+            System.out.println(firstPlayer.getName() + " will start the game as the dealer.");
+        }
+    }
+
 }
