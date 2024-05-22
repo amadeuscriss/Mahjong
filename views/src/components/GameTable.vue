@@ -109,8 +109,9 @@ export default {
   methods: {
     gameInitialization(message){
 
-      this.playerTiles = message.playerTiles.playerIndex;
+      this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerId = message.currentTurnPlayerId;
+      console.log(message.playerTiles)
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
@@ -171,8 +172,10 @@ export default {
 
     handleMessage(event) {
       const message = JSON.parse(event.data);
+      console.log("Gamestart");
       switch (message.type) {
         case 'updateGame':
+          console.log("updateGame")
           this.updateGame(message);
           break;
         case 'playerActions':
@@ -185,6 +188,7 @@ export default {
           this.updateShownTiles(message);
           break;
         case 'gameInitialization':
+          console.log("gameInitialization")
           this.gameInitialization(message);
           break;
       }
