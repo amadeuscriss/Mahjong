@@ -17,7 +17,7 @@
     <div class="shown-tiles">
       <!-- 下方玩家 -->
       <div class="shown-tiles-bottom">
-        <div v-for="(tile, index) in showTiles[playerIndex]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in mappedShowTiles[playerIndex]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -25,15 +25,15 @@
 
       <!-- 右侧玩家 -->
       <div class="shown-tiles-right">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 1) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in mappedShowTiles[getNextPlayerIndex(playerIndex, 1)]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
-          <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
+          <img src="@/assets/tiles_back/showedTilesSides.png" class="shown-tiles-back" alt="tile back"/>
         </div>
       </div>
 
       <!-- 上方玩家 -->
       <div class="shown-tiles-top">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 2) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in mappedShowTiles[getNextPlayerIndex(playerIndex, 2)]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -41,9 +41,9 @@
 
       <!-- 左侧玩家 -->
       <div class="shown-tiles-left">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 3) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in mappedShowTiles[getNextPlayerIndex(playerIndex, 3)]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
-          <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
+          <img src="@/assets/tiles_back/showedTilesSides.png" class="shown-tiles-back" alt="tile back"/>
         </div>
       </div>
 
@@ -78,18 +78,20 @@ export default {
   data() {
     return {
       players: ['12', '34', '56', '78'], // 玩家列表
-      playerIndex: 3, // 玩家索引
+      playerIndex: '56', // 玩家索引
       playAction: ['Win', 'Kong', 'Pong', 'Chi', 'SelfKong', 'Discard'], // 玩家操作
 
       roomId: 798352, // 房间号
       currentTurnPlayerId: '78', // 当前回合玩家id
 
-      tableTiles: ['Bamboo_1', 'Bamboo_2', 'Dot_1','Dot_2','Dot_3','Dot_4','Dot_5','Dot_6','Dot_7','Dot_8','Dot_9',
-                    'Bamboo_3','Bamboo_4','Bamboo_5','Bamboo_6','Bamboo_7','Bamboo_8','Bamboo_9','Character_1','Character_2','Character_3',
-                    'Character_4','Character_5','Character_6','Character_7',"Character_8",'Character_9','East','Green','North','Red','South'],
-      playerTiles: ['White', 'South', 'Bamboo_5', 'Dot_6', 'Character_3', 'Character_3', 'Character_3', 'Character_6', 'Character_6', 'Character_7', 'Character_7', 'Character_8', 'Character_9'], // 玩家手牌
+      tableTiles: ['Bamboo 1', 'Bamboo 2', 'Dot 1','Dot 2','Dot 3','Dot 4','Dot 5','Dot 6','Dot 7','Dot 8','Dot 9',
+                    'Bamboo 3','Bamboo 4','Bamboo 5','Bamboo 6','Bamboo 7','Bamboo 8','Bamboo 9','Character 1','Character 2','Character 3',
+                    'Character 4','Character 5','Character 6','Character 7',"Character 8",'Character 9','East','Green','North','Red','South'],
+      playerTiles: ['White', 'South', 'Bamboo 5', 'Dot 6', 'Character 3', 'Character 3', 'Character 3', 'Character 6', 'Character 6', 'Character 7', 'Character 7', 'Character 8', 'Character 9'], // 玩家手牌
 
-      showTiles: [['Red', 'Red', 'Red', 'Red'], ['White','White','White'], ['South','South','South'], ['Green','Green','Green']], // 玩家的明牌
+      // showTiles: [['Red', 'Red', 'Red', 'Red'], ['White','White','White'], ['South','South','South'], ['Green','Green','Green']], // 玩家的明牌
+      showTiles: {}, // 从后端接收到的showTiles数据
+      mappedShowTiles: {}, // 映射后的showTiles数据
 
       notification: {
         show: true,
@@ -108,6 +110,27 @@ export default {
     }
   },
   methods: {
+    // 更新showTiles并进行映射
+    updateShowTiles(newShowTiles) {
+      console.log("updateShownTiles")
+      this.showTiles = newShowTiles;
+      this.mappedShowTiles = this.mapShowTiles(newShowTiles);
+      console.log(this.mappedShowTiles)
+    },
+    // 映射showTiles数据
+    mapShowTiles(showTiles) {
+      let mappedShowTiles = {};
+      this.players.forEach(playerID => {
+        mappedShowTiles[playerID] = showTiles[playerID] || [];
+      });
+      return mappedShowTiles;
+    },
+    // 根据当前玩家ID获取下一个玩家ID
+    getNextPlayerIndex(currentPlayerID, offset) {
+      const currentIdx = this.players.indexOf(currentPlayerID);
+      const nextIdx = (currentIdx + offset) % this.players.length;
+      return this.players[nextIdx];
+    },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
       this.currentTurnPlayerId = message.currentTurnPlayerId;
@@ -125,7 +148,16 @@ export default {
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
-      const position = positions[(performerIndex - this.playerIndex + 4) % 4];
+      const playerIndexPosition = this.players.indexOf(this.playerIndex);
+      const performerIndexPosition = this.players.indexOf(performerIndex);
+
+      if (playerIndexPosition === -1 || performerIndexPosition === -1) {
+        console.error('Invalid playerIndex or performerIndex');
+        return;
+      }
+
+      const positionIndex = (performerIndexPosition - playerIndexPosition + 4) % 4;
+      const position = positions[positionIndex];
 
       this.notification = {
         show: true,
@@ -139,7 +171,7 @@ export default {
     },
     //接收通知，更新明牌库
     updateShownTiles(message){
-      this.showTiles[message.performerIndex] = message.showTiles;
+      this.updateShowTiles(message.showTiles)
       this.showNotification(message.action, message.performerIndex);
     },
     // 动态获取图片路径
@@ -185,6 +217,13 @@ export default {
   },
   mounted() {
     // 使用全局 WebSocket 连接
+    const exampleShowTiles = {
+      '12': ['Red', 'Red', 'Red', 'Red'],
+      '34': ['Red', 'Red', 'Red', 'Red'],
+      '56': ['Red', 'Red', 'Red', 'Red'],
+      '78': ['Red', 'Red', 'Red', 'Red']
+    };
+    this.updateShowTiles(exampleShowTiles);
     this.$ws.onmessage = this.handleMessage;
   }
 }
@@ -219,25 +258,27 @@ export default {
 
 .tile-container {
   position: relative;
-  margin: 0 30px;
+  margin: 0 33px;
+  transition: transform 0.3s ease; /* 添加过渡效果 */
+}
+
+.tile-container:hover {
+  transform: translateY(-30px); /* 悬停时上移20px，根据需要调整 */
 }
 
 .tile-front {
   width: 45px; /* 根据需要调整大小 */
   height: 75px; /* 根据需要调整大小 */
-
   position: absolute;
   top: 8px;
-  left: 0;
+  left: 2px;
   z-index: 2;
   cursor: pointer;
 }
 
-
-.player-tiles-back{
+.player-tiles-back {
   width: 70px; /* 根据需要调整大小 */
   height: 100px; /* 根据需要调整大小 */
-
   position: absolute;
   top: -15px;
   left: -10px;
@@ -282,7 +323,7 @@ export default {
 
 .shown-tiles-bottom {
   position: absolute;
-  bottom: 90px;
+  bottom: 110px;
   display: flex;
 }
 
@@ -317,10 +358,40 @@ export default {
 }
 
 .shown-tile {
-  width: 25px;
-  height: 40px;
+  width: 22px;
+  height: 37px;
   z-index: 2;
+  transition: transform 0.3s ease; /* 添加过渡效果 */
 }
+
+/* 右边展示手牌逆时针旋转90度 */
+.shown-tiles-right .shown-tile {
+  transform: rotate(-90deg);
+  transform-origin: center; /* 绕中心旋转 */
+  margin: -8px; /* 调整每张牌之间的间距 */
+}
+
+.shown-tiles-right .shown-tiles-back {
+  transform: rotate(-90deg);
+  transform-origin: center; /* 绕中心旋转 */
+  margin: -8px; /* 调整每张牌之间的间距 */
+  top: 0px; /* 调整牌背的垂直位置 */
+}
+
+/* 左边展示手牌顺时针旋转90度 */
+.shown-tiles-left .shown-tile {
+  transform: rotate(90deg);
+  transform-origin: center; /* 绕中心旋转 */
+  margin: -8px; /* 调整每张牌之间的间距 */
+}
+
+.shown-tiles-left .shown-tiles-back {
+  transform: rotate(90deg);
+  transform-origin: center; /* 绕中心旋转 */
+  margin: -8px; /* 调整每张牌之间的间距 */
+  top: 0px; /* 调整牌背的垂直位置 */
+}
+
 
 .shown-tiles-back{
   width: 25px; /* 根据需要调整大小 */
@@ -328,9 +399,10 @@ export default {
 
   position: absolute;
   top: 4px;
-  left: 0;
+  left: -1px;
   z-index: 1;
 }
+
 
 .action-buttons {
   position: fixed;

@@ -37,6 +37,9 @@
                        playerActions: playerActions (储存玩家可执行行为的列表： ['Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,  'Discard'（出牌）, 'SelfKong'（自摸杠）]
                        playerTiles: playerTiles（玩家手牌，摸牌后的的牌）
 
+
+    socket 传递参数{玩家操作：“null”/“吃碰杠”， 打出的牌：“null”/“具体牌”， 执行操作的玩家name}
+
     希望收到（全服行为通知）：type： 'notification'
                       action: action (包括 'Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃）)
                       showTiles: showTiles（执行以上操作的玩家的明牌）

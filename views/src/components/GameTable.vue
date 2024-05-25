@@ -111,7 +111,6 @@ export default {
 
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerId = message.currentTurnPlayerId;
-      console.log(message.playerTiles)
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
