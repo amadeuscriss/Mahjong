@@ -140,6 +140,7 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
+
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
     public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody Map<String, Integer> request) {
@@ -221,6 +222,7 @@ public class GameController {
                             .flatMap(meld -> meld.getTiles().stream())
                             .map(TileInterface::getValueAsString)
                             .collect(Collectors.toList());
+                    broadcastAction(room, "Pong", showTiles, room.getPlayers().indexOf(player));
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Pong",
@@ -228,10 +230,8 @@ public class GameController {
                             "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
                     ));
                 } else {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "Failed",
-                            "message", "Failed to execute pong with tile: " + tileToPong.getValueAsString()
+                    return ResponseEntity.badRequest().body(Map.of(
+                            "message", "Failed to execute pong."
                     ));
                 }
             }
@@ -314,27 +314,50 @@ public class GameController {
 
 
     @GetMapping("/checkWin/{roomCode}/{playerId}")
-    public String checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerById(playerId);
             if (player != null) {
                 CheckWin checkWin = new CheckWin(player.getPoints());
-                boolean isSelfDrawn = player.getLastActionWasDraw(); // 使用这个标记来确定是否为自摸
-                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());// 使用这个来标记是否为点炮
-                boolean isKongFlowerWin = false; // Example logic, adjust as necessary
-                boolean isLastTileWin = false;
-                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin,isLastTileWin);
-                player.setLastActionWasDraw(false); // 重置标记，以免错误地认为后续的胡牌也是自摸
+                boolean isSelfDrawn = player.getLastActionWasDraw(); // Flag for self-drawn win
+                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());
+                boolean isKongFlowerWin = false; // Example placeholder for Kong Flower win
+                boolean isLastTileWin = false; // Placeholder for Last Tile Win
+                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin, isLastTileWin);
+                player.setLastActionWasDraw(false); // Reset the draw action flag
                 if (won) {
-                    return "Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails();
+                    List<String> showTiles = player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList());
+                    broadcastWin(room, "Win", showTiles, room.getPlayers().indexOf(player));
+                    return ResponseEntity.ok("Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails());
                 } else {
-                    return "No win condition met.";
+                    return ResponseEntity.ok("No win condition met.");
                 }
             }
-            return "Player not found.";
+            return ResponseEntity.badRequest().body("Player not found.");
         }
-        return "Room not found.";
+        return ResponseEntity.badRequest().body("Room not found.");
     }
 
+    private void broadcastAction(Room room, String action, List<String> showTiles, int performerIndex) {
+        Map<String, Object> notification = Map.of(
+                "type", "notification",
+                "action", action,
+                "showTiles", showTiles,
+                "performerIndex", performerIndex
+        );
+        // Here you would actually send this map to all connected clients in the room
+        System.out.println("Broadcasting: " + notification);
+    }
+
+    private void broadcastWin(Room room, String action, List<String> showTiles, int performerIndex) {
+        Map<String, Object> notification = Map.of(
+                "type", "notification",
+                "action", action,
+                "showTiles", showTiles,
+                "performerIndex", performerIndex
+        );
+        // Actual broadcasting logic would go here
+        System.out.println("Broadcasting win: " + notification);
+    }
 }
