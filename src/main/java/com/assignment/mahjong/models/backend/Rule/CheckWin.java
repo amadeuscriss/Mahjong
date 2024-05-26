@@ -12,6 +12,13 @@ public class CheckWin {
         this.points = points;
     }
 
+    // Method to determine if adding a specific tile results in a win
+    public static boolean canWin(List<TileInterface> handTiles, TileInterface candidateTile) {
+        List<TileInterface> testHand = new ArrayList<>(handTiles);
+        testHand.add(candidateTile);
+        return isStandardWin(testHand) || isSevenPairs(testHand) || isThirteenOrphans(testHand) || isAllOneSuit(testHand);
+    }
+
     public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin, boolean isLastTileWin) {
         boolean won = false;
         if (isStandardWin(handTiles)) {
@@ -132,7 +139,7 @@ public class CheckWin {
         return countMap.values().stream().allMatch(count -> count == 2);
     }
 
-    private boolean isThirteenOrphans(List<TileInterface> handTiles) {
+    private static boolean isThirteenOrphans(List<TileInterface> handTiles) {
         final String[] requiredTiles = {
                 "1 Wan", "9 Wan", "1 Tiao", "9 Tiao", "1 Tong", "9 Tong",
                 "East", "South", "West", "North", "Red", "Green", "White"
@@ -150,3 +157,4 @@ public class CheckWin {
         return handTiles.stream().allMatch(tile -> tile.getType().equals(suit));
     }
 }
+
