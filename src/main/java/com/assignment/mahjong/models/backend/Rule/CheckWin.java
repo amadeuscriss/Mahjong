@@ -64,7 +64,7 @@ public class CheckWin {
         return won;
     }
 
-    private boolean isStandardWin(List<TileInterface> handTiles) {
+    private static boolean isStandardWin(List<TileInterface> handTiles) {
         if (handTiles.size() % 3 != 2) return false;
 
         Collections.sort(handTiles, Comparator.comparing(TileInterface::getValueAsString));
@@ -81,7 +81,7 @@ public class CheckWin {
         return false;
     }
 
-    private boolean canFormMelds(List<TileInterface> tiles) {
+    private static boolean canFormMelds(List<TileInterface> tiles) {
         if (tiles.isEmpty()) return true;
 
         if (tiles.size() >= 3) {
@@ -102,11 +102,11 @@ public class CheckWin {
         return false;
     }
 
-    private int countMatches(List<TileInterface> tiles, String value) {
+    private static int countMatches(List<TileInterface> tiles, String value) {
         return (int) tiles.stream().filter(t -> t.getValueAsString().equals(value)).count();
     }
 
-    private List<TileInterface> removeTiles(List<TileInterface> tiles, String value, int count) {
+    private static List<TileInterface> removeTiles(List<TileInterface> tiles, String value, int count) {
         List<TileInterface> modifiedList = new ArrayList<>(tiles);
         Iterator<TileInterface> iterator = modifiedList.iterator();
         while (iterator.hasNext() && count > 0) {
@@ -119,7 +119,7 @@ public class CheckWin {
         return modifiedList;
     }
 
-    private String generateNextValue(String value, int increment) {
+    private static String generateNextValue(String value, int increment) {
         String[] parts = value.split(" ");
         try {
             int num = Integer.parseInt(parts[1]) + increment;
@@ -130,7 +130,7 @@ public class CheckWin {
         }
     }
 
-    private boolean isSevenPairs(List<TileInterface> handTiles) {
+    private static boolean isSevenPairs(List<TileInterface> handTiles) {
         if (handTiles.size() != 14) return false;
         Map<String, Integer> countMap = new HashMap<>();
         for (TileInterface tile : handTiles) {
@@ -151,7 +151,7 @@ public class CheckWin {
         return uniqueTiles.isEmpty() && handTiles.stream().anyMatch(t -> Collections.frequency(handTiles, t) == 2);
     }
 
-    private boolean isAllOneSuit(List<TileInterface> handTiles) {
+    private static boolean isAllOneSuit(List<TileInterface> handTiles) {
         if (handTiles.isEmpty()) return false;
         String suit = handTiles.get(0).getType();
         return handTiles.stream().allMatch(tile -> tile.getType().equals(suit));
