@@ -29,6 +29,7 @@ ws.onopen = () => {
 
     // 处理 WebSocket 连接关闭
     ws.onclose = (event) => {
+
         console.log('WebSocket 连接已关闭:', event);
     };
 

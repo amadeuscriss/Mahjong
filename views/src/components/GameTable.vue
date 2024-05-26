@@ -108,7 +108,8 @@ export default {
   },
   methods: {
     gameInitialization(message){
-      this.playerTiles = message.playerTiles;
+
+      this.playerTiles = message.playerTiles.playerIndex;
       this.currentTurnPlayerId = message.currentTurnPlayerId;
     },
     //更新当前回合玩家，更新桌面

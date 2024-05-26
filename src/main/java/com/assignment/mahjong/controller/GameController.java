@@ -42,24 +42,44 @@ public class GameController {
 
 
     @PostMapping("/joinRoom/{roomCode}")
-    public ResponseEntity<Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
+    public Map<String, Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
         boolean joined = roomManager.joinRoom(roomCode, player);
         Room room = roomManager.getRoom(roomCode);
         if (joined) {
             // Broadcasting update to all clients in the room could be handled elsewhere in real app
-            return ResponseEntity.ok(Map.of(
-                    "type", "joinRoomResponse",
-                    "state", "roomJoined",
-                    "roomCode", roomCode,
-                    "players", room.getPlayers().stream().map(Player::getId).collect(Collectors.toList())
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "joinRoomResponse");
+            response.put("state", "roomJoined");
+            response.put("roomId", roomCode);
+            response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+
+            return response;
         } else {
-            return ResponseEntity.ok(Map.of(
-                    "type", "joinRoomResponse",
-                    "state", "roomNotFound"
-            ));
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "joinRoomResponse");
+            response.put("state", "roomNotFound");
+            return response;
         }
     }
+
+
+    @PostMapping("/updateRoom/{roomCode}")
+    public Map<String, Object> updateRoom(@PathVariable String roomCode) {
+        Room room = roomManager.getRoom(roomCode);
+       // Broadcasting update to all clients in the room could be handled elsewhere in real app
+            Map<String, Object> response = new HashMap<>();
+            response.put("type", "updateRoom");
+            response.put("roomId", roomCode);
+            response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+
+            return response;
+    }
+
+
+
+
+
+
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
@@ -68,112 +88,53 @@ public class GameController {
             GameInitializer gameInitializer = new GameInitializer(room);
             gameInitializer.initializeGame();
 
-            UUID currentTurnPlayer = room.getCurrentTurnPlayerId(); // Get the current turn player
-            if (currentTurnPlayer == null) {
+            String currentTurnPlayerName = room.getCurrentTurnPlayerName(); // Get the current turn player ID
+            if (currentTurnPlayerName == null) {
                 return ResponseEntity.ok(Map.of(
-                        "type", "gameStart"
+                        "type", "gameStart",
+                        "status", "No current player"
                 ));
             }
             // Return the game start status along with the current turn player ID and the tiles each player holds
             return ResponseEntity.ok(Map.of(
-                    "type", "gameStart"));
+                    "type", "gameInitialization",
+                    "currentTurnPlayerName", currentTurnPlayerName,
+                    "playerTiles", room.getPlayers().stream()
+                            .collect(Collectors.toMap(
+                                    Player::getName,
+                                    player -> player.getHand().getTiles().stream()
+                                            .map(TileInterface::getValueAsString)
+                                            .collect(Collectors.toList())))
+            ));
         }
         // Return error if the room is not found or not all players are ready
         return ResponseEntity.ok(Map.of(
-                "type", "gameStart"
+                "type", "gameStart",
+                "status", "Room not found or not all players are ready"
         ));
-    }
-
-    @PostMapping("/updateGame/{roomCode}")
-    public ResponseEntity<Object> updateGame(@PathVariable String roomCode) {
-        Room room = roomManager.getRoom(roomCode);
-        if (room != null && room.isGameStarted()) {
-            return ResponseEntity.ok(Map.of(
-                    "type", "gameInitialization",
-                    "currentTurnPlayerId", room.getCurrentTurnPlayerId(),
-                    "playerTiles", room.getPlayers().stream().collect(Collectors.toMap(
-                            Player::getId,
-                            player -> player.getHand().getTiles().stream()
-                                    .map(TileInterface::getValueAsString)
-                                    .collect(Collectors.toList())
-                    )),
-                    "tableTiles", room.getTableTiles().stream()
-                            .map(TileInterface::getValueAsString)
-                            .collect(Collectors.toList())
-            ));
-        }
-        return ResponseEntity.badRequest().body(Map.of(
-                "message", "Game not started or room not found."
-        ));
-    }
-
-    @PostMapping("/availableActions/{roomCode}/{playerId}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody TileInterface discardedTile) {
-        Room room = roomManager.getRoom(roomCode);
-        if (room != null && discardedTile != null) {
-            Player player = room.getPlayerById(playerId);
-            if (player != null) {
-                List<String> actions = new ArrayList<>();
-                if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Win");
-                }
-                if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Pong");
-                }
-                if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Kong");
-                }
-                // Assume ChiAction.canChi is a method that checks if Chi is possible
-                if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Chi");
-                }
-
-                return ResponseEntity.ok(Map.of(
-                        "type", "playerActions",
-                        "playerActions", actions,
-                        "playerTiles", player.getHand().getTiles().stream()
-                                .map(TileInterface::getValueAsString)
-                                .collect(Collectors.toList())
-                ));
-            }
-        }
-        return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
-    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody Map<String, Integer> request) {
+    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody TileInterface tile) {
         Room room = roomManager.getRoom(roomCode);
-        if (room == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
-        }
-
-        Player player = room.getPlayerById(playerId);
-        if (player == null) {
+        if (room != null) {
+            Player player = room.getPlayerById(playerId);
+            if (player != null) {
+                DiscardAction discardAction = new DiscardAction(player.getHand().getTiles());
+                discardAction.execute();
+                if (discardAction.isActionSuccessful()) {
+                    room.setLastDiscardedTile(tile, playerId);
+                    return ResponseEntity.ok(Map.of("type", "updateGame", "discardedTile", tile.getValueAsString()));
+                } else {
+                    return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
+                }
+            }
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
-
-        int tileIndex = request.getOrDefault("tileIndex", -1); // Assumes tileIndex is passed in the request
-        if (tileIndex < 0 || tileIndex >= player.getHand().getTiles().size()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index."));
-        }
-
-        TileInterface tileToDiscard = player.getHand().getTiles().get(tileIndex);
-        DiscardAction discardAction = new DiscardAction(player.getHand().getTiles());
-        discardAction.execute(tileIndex);
-
-        if (!discardAction.isActionSuccessful()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
-        }
-
-        room.setLastDiscardedTile(tileToDiscard, playerId);
-        return ResponseEntity.ok(Map.of(
-                "type", "updateGame",
-                "discardedTile", tileToDiscard.getValueAsString()
-        ));
+        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
-
 
 
     @PostMapping("/drawTile/{roomCode}/{playerId}")
@@ -222,7 +183,6 @@ public class GameController {
                             .flatMap(meld -> meld.getTiles().stream())
                             .map(TileInterface::getValueAsString)
                             .collect(Collectors.toList());
-                    broadcastAction(room, "Pong", showTiles, room.getPlayers().indexOf(player));
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Pong",
@@ -230,8 +190,10 @@ public class GameController {
                             "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
                     ));
                 } else {
-                    return ResponseEntity.badRequest().body(Map.of(
-                            "message", "Failed to execute pong."
+                    return ResponseEntity.ok(Map.of(
+                            "type", "playerActions",
+                            "state", "Failed",
+                            "message", "Failed to execute pong with tile: " + tileToPong.getValueAsString()
                     ));
                 }
             }
@@ -314,50 +276,27 @@ public class GameController {
 
 
     @GetMapping("/checkWin/{roomCode}/{playerId}")
-    public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    public String checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerById(playerId);
             if (player != null) {
                 CheckWin checkWin = new CheckWin(player.getPoints());
-                boolean isSelfDrawn = player.getLastActionWasDraw(); // Flag for self-drawn win
-                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerId()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());
-                boolean isKongFlowerWin = false; // Example placeholder for Kong Flower win
-                boolean isLastTileWin = false; // Placeholder for Last Tile Win
-                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin, isLastTileWin);
-                player.setLastActionWasDraw(false); // Reset the draw action flag
+                boolean isSelfDrawn = player.getLastActionWasDraw(); // 使用这个标记来确定是否为自摸
+                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerName()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());// 使用这个来标记是否为点炮
+                boolean isKongFlowerWin = false; // Example logic, adjust as necessary
+                boolean isLastTileWin = false;
+                boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin,isLastTileWin);
+                player.setLastActionWasDraw(false); // 重置标记，以免错误地认为后续的胡牌也是自摸
                 if (won) {
-                    List<String> showTiles = player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList());
-                    broadcastWin(room, "Win", showTiles, room.getPlayers().indexOf(player));
-                    return ResponseEntity.ok("Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails());
+                    return "Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails();
                 } else {
-                    return ResponseEntity.ok("No win condition met.");
+                    return "No win condition met.";
                 }
             }
-            return ResponseEntity.badRequest().body("Player not found.");
+            return "Player not found.";
         }
-        return ResponseEntity.badRequest().body("Room not found.");
+        return "Room not found.";
     }
 
-    private void broadcastAction(Room room, String action, List<String> showTiles, int performerIndex) {
-        Map<String, Object> notification = Map.of(
-                "type", "notification",
-                "action", action,
-                "showTiles", showTiles,
-                "performerIndex", performerIndex
-        );
-        // Here you would actually send this map to all connected clients in the room
-        System.out.println("Broadcasting: " + notification);
-    }
-
-    private void broadcastWin(Room room, String action, List<String> showTiles, int performerIndex) {
-        Map<String, Object> notification = Map.of(
-                "type", "notification",
-                "action", action,
-                "showTiles", showTiles,
-                "performerIndex", performerIndex
-        );
-        // Actual broadcasting logic would go here
-        System.out.println("Broadcasting win: " + notification);
-    }
 }
