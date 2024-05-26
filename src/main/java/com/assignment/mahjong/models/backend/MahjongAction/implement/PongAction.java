@@ -20,7 +20,7 @@ public class PongAction extends MahjongAction {
 
     @Override
     public void execute() {
-        if (canPong()) {
+        if (PongAction.canPong(playerHand, tileToPong)) {
             System.out.println("Pong with tile: " + tileToPong.getValueAsString());
             isSuccessful = true;
             adjustPlayerHand();
@@ -31,12 +31,11 @@ public class PongAction extends MahjongAction {
         }
     }
 
-    private boolean canPong() {
-        long count = playerHand.stream()
-                .filter(tile -> tile.equals(tileToPong))
+    public static boolean canPong(List<TileInterface> handTiles, TileInterface tile) {
+        long count = handTiles.stream()
+                .filter(t -> t.equals(tile))
                 .count();
-
-        return count >= 2; // 需要至少有两张与当前牌相同的牌
+        return count >= 2;  // 需要至少两张与打出牌相同的牌
     }
 
     private void adjustPlayerHand() {
