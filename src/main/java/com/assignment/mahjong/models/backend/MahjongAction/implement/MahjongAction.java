@@ -26,7 +26,7 @@ public abstract class MahjongAction {
     }
 
     // 解析牌的数值，如果牌的字符串表示可以转换为整数，则返回对应的Optional对象，否则返回空的Optional
-    protected Optional<Integer> parseTileValue(TileInterface tile) {
+    protected static Optional<Integer> parseTileValue(TileInterface tile) {
         try {
             // 尝试将牌的字符串值转换为整数
             return Optional.of(Integer.parseInt(tile.getValueAsString()));
