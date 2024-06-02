@@ -101,6 +101,9 @@ public class WebSocketServer {
                                 sendMessageToUser(messageToSend, player.getName());
                                 System.out.println(serverRoom.getPlayers());
                             }
+
+
+
                         }
 
                         break;
