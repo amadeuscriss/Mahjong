@@ -22,7 +22,7 @@ public class KongAction extends MahjongAction {
 
     @Override
     public void execute() {
-        if (canKong()) {
+        if (canKong(playerHand, currentTile)) {
             if (isSelfKong) {
                 points.addMultiplier(2.0); // 假设自摸杠倍率为2
                 System.out.println("Self-Kong with tile: " + currentTile.getValueAsString());
@@ -31,9 +31,10 @@ public class KongAction extends MahjongAction {
                 System.out.println("Melded Kong with tile: " + currentTile.getValueAsString());
             }
             isSuccessful = true;
-            // 创建明牌组合并添加到玩家的明牌列表中
+            // Correct the way the Meld is created with proper parameters
             Meld kongMeld = new Meld("KONG", Collections.nCopies(4, currentTile));
             player.addMeld(kongMeld);
+
         } else {
             System.out.println("Cannot kong: Insufficient similar tiles.");
             isSuccessful = false;
@@ -41,12 +42,11 @@ public class KongAction extends MahjongAction {
     }
 
     // 检查是否可以执行杠牌，基于牌的数量
-    private boolean canKong() {
-        String tileType = currentTile.getType();
+    public static boolean canKong(List<TileInterface> playerHand, TileInterface tile) {
         long count = playerHand.stream()
-                .filter(tile -> tile.getType().equals(tileType))
+                .filter(t -> t.equals(tile))
                 .count();
-
-        return count == 4;  // 需要至少有四张与当前牌相同的牌
+        return count >= 3;  // 需要至少有三张与当前牌相同的牌
     }
 }
+

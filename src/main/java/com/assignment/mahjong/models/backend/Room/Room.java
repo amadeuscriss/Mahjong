@@ -16,12 +16,14 @@ public class Room {
     private String roomCode;  // 房间号
     private MahjongSet mahjongSet;
     private TileInterface lastDiscardedTile;
-    private UUID lastDiscardedByPlayerId;
+    private String lastDiscardedByPlayerName;
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
     private String currentTurnPlayerName;
     private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
     private Random random = new Random(); // 用于生成随机数的Random实例
+    private List<TileInterface> tableTiles = new ArrayList<>(); // Tiles on the table
+
 
     // 构造函数
     public Room(RoomManager manager, MahjongSet mahjongSet) {
@@ -47,9 +49,9 @@ public class Room {
         return tiles;
     }
 
-    public Player getPlayerById(UUID playerId) {
+    public Player getPlayerByName(String Name) {
         for (Player player : players) {
-            if (player.getId().equals(playerId)) {
+            if (player.getName().equals(Name)) {
                 return player;
             }
         }
@@ -159,17 +161,17 @@ public class Room {
         return mahjongSet;
     }
 
-    public void setLastDiscardedTile(TileInterface tile, UUID playerId) {
+    public void setLastDiscardedTile(TileInterface tile, String playerName) {
         this.lastDiscardedTile = tile;
-        this.lastDiscardedByPlayerId = playerId;
+        this.lastDiscardedByPlayerName = playerName;
     }
 
     public TileInterface getLastDiscardedTile() {
         return lastDiscardedTile;
     }
 
-    public UUID getLastDiscardedByPlayerName() {
-        return lastDiscardedByPlayerId;
+    public String getLastDiscardedByPlayerName() {
+        return lastDiscardedByPlayerName;
     }
 
     // 设置当前回合的玩家
@@ -185,13 +187,18 @@ public class Room {
         return currentTurnPlayerName;
     }
 
+    public List<TileInterface> getTableTiles() {
+        return tableTiles;
+    }
+
+
     // 骰骰子决定先手玩家
     private void rollDiceToDecideFirstPlayer() {
         int maxRoll = 0;
         Player firstPlayer = null;
 
         for (Player player : players) {
-            int roll = random.nextInt(6) + 1; // 模拟掷一个六面骰子
+            int roll = random.nextInt(6) + 1; // Simulate a six-sided dice roll
             System.out.println(player.getName() + " rolled a " + roll);
 
             if (roll > maxRoll) {
@@ -205,5 +212,4 @@ public class Room {
             System.out.println(firstPlayer.getName() + " will start the game as the dealer.");
         }
     }
-
 }
