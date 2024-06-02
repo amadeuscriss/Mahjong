@@ -26,11 +26,11 @@
             tile的字符串具体内容可前往views/src/assets/tiles_front查看，与图片的文件名相同（不包含拓展名.png）
 
     希望收到（游戏全服初始化）: type：'gameInitialization'
-                         currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）
+                         currentTurnPlayerName: currentTurnPlayerName（当前回合的玩家ID）
                          playerTiles: playerTiles（玩家手牌）
 
     希望收到（桌面全服更新）: type: 'updateGame'
-                         currentTurnPlayerId: currentTurnPlayerId（当前回合的玩家ID）
+                         currentTurnPlayerName: currentTurnPlayerName（当前回合的玩家ID）
                          tableTiles: tableTiles（牌桌上的牌）
 
     希望收到（玩家的操作）: type: 'playerActions'

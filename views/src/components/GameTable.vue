@@ -83,7 +83,7 @@ export default {
   data() {
     return {
       playAction: [], // 玩家操作
-      currentTurnPlayerName: null, // 当前回合玩家id
+      currentTurnPlayerName: null,
 
       tableTiles: [],
       playerTiles: [], // 玩家手牌
@@ -111,6 +111,7 @@ export default {
 
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerName = message.currentTurnPlayerName;
+      console.log(this.playerIndex);
       if(this.currentTurnPlayerName === this.playerIndex){
         this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
       }
@@ -160,7 +161,7 @@ export default {
     },
     // 处理牌面的点击事件
     handleTileClick(tile) {
-      if (this.players[this.playerIndex]=== this.currentTurnPlayerName){
+      if (this.playerIndex === this.currentTurnPlayerName){
         const tileIndex = this.playerTiles.indexOf(tile);
         const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tileIndex , roomId: this.roomId , playIndex: this.playerIndex});
         this.$ws.send(message);
