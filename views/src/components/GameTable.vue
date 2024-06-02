@@ -111,6 +111,7 @@ export default {
 
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerId = message.currentTurnPlayerId;
+      this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' }));
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
@@ -120,11 +121,11 @@ export default {
     //获取玩家行为
     handlePlayerActions(message) {
       this.playAction = message.playAction;
-      this.playerTiles = message.playerTiles;
+      this.playerTiles = message.playerTiles[this.playerIndex];
     },
     //在执行操作后更新手牌
     updateAfterActing(message){
-      this.playerTiles = message.playerTiles;
+      this.playerTiles = message.playerTiles[this.playerIndex];
     },
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
