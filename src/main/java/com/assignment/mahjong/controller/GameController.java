@@ -115,13 +115,12 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerId}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId,@RequestBody TileInterface discardedTile) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerById(playerId);
             if (player != null) {
                 List<String> actions = new ArrayList<>();
-                TileInterface discardedTile = room.getLastDiscardedTile();
 
                 if (discardedTile == null) {
                     // First player to act, no discarded tile, can only discard
