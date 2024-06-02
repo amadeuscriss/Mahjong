@@ -111,7 +111,7 @@ export default {
 
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerId = message.currentTurnPlayerId;
-      this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' }));
+      this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' , roomId: this.roomId}));
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
