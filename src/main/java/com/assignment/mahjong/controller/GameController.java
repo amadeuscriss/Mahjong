@@ -114,11 +114,11 @@ public class GameController {
         ));
     }
 
-    @PostMapping("/availableActions/{roomCode}/{playerId}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId,@RequestBody TileInterface discardedTile) {
+    @PostMapping("/availableActions/{roomCode}/{playerName}")
+    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody TileInterface discardedTile) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null) {
                 List<String> actions = new ArrayList<>();
 
@@ -155,14 +155,14 @@ public class GameController {
 
 
     // 处理玩家出牌动作
-    @PostMapping("/discardTile/{roomCode}/{playerId}")
-    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody Map<String, Integer> request) {
+    @PostMapping("/discardTile/{roomCode}/{playerName}")
+    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Integer> request) {
         Room room = roomManager.getRoom(roomCode);
         if (room == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
         }
 
-        Player player = room.getPlayerById(playerId);
+        Player player = room.getPlayerByName(playerName);
         if (player == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
@@ -180,7 +180,7 @@ public class GameController {
             return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
         }
 
-        room.setLastDiscardedTile(tileToDiscard, playerId);
+        room.setLastDiscardedTile(tileToDiscard, playerName);
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
                 "discardedTile", tileToDiscard.getValueAsString()
@@ -188,11 +188,11 @@ public class GameController {
     }
 
 
-    @PostMapping("/drawTile/{roomCode}/{playerId}")
-    public ResponseEntity<Object> drawTile(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    @PostMapping("/drawTile/{roomCode}/{playerName}")
+    public ResponseEntity<Object> drawTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null) {
                 DrawAction drawAction = new DrawAction(room.getMahjongSet());
                 drawAction.execute();
@@ -219,11 +219,11 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
-    @PostMapping("/pong/{roomCode}/{playerId}/{tileIndex}")
-    public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
+    @PostMapping("/pong/{roomCode}/{playerName}/{tileIndex}")
+    public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
                 TileInterface tileToPong = player.getHand().getTiles().get(tileIndex);
                 PongAction pongAction = new PongAction(tileToPong, player.getHand().getTiles(), player);
@@ -255,11 +255,11 @@ public class GameController {
 
 
 
-    @PostMapping("/kong/{roomCode}/{playerId}/{tileIndex}")
-    public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
+    @PostMapping("/kong/{roomCode}/{playerName}/{tileIndex}")
+    public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
                 TileInterface tileToKong = player.getHand().getTiles().get(tileIndex);
                 boolean isSelfKong = checkIfSelfKong(tileToKong, player); // 检查是否为自摸杠
@@ -295,11 +295,11 @@ public class GameController {
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
 
-    @PostMapping("/chi/{roomCode}/{playerId}/{tileIndex}")
-    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
+    @PostMapping("/chi/{roomCode}/{playerName}/{tileIndex}")
+    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size() - 1) {
                 TileInterface tileToChi = player.getHand().getTiles().get(tileIndex);
                 TileInterface nextTile = player.getHand().getTiles().get(tileIndex + 1);
@@ -328,15 +328,15 @@ public class GameController {
     }
 
 
-    @GetMapping("/checkWin/{roomCode}/{playerId}")
-    public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    @GetMapping("/checkWin/{roomCode}/{playerName}")
+    public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null) {
                 CheckWin checkWin = new CheckWin(player.getPoints());
                 boolean isSelfDrawn = player.getLastActionWasDraw(); // Flag for self-drawn win
-                boolean isWinByDiscard = playerId.equals(room.getLastDiscardedByPlayerName()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());
+                boolean isWinByDiscard = playerName.equals(room.getLastDiscardedByPlayerName()) && player.getHand().getTiles().contains(room.getLastDiscardedTile());
                 boolean isKongFlowerWin = false; // Example placeholder for Kong Flower win
                 boolean isLastTileWin = false; // Placeholder for Last Tile Win
                 boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin, isLastTileWin);
@@ -365,11 +365,11 @@ public class GameController {
         System.out.println("Broadcasting: " + notification);
     }
 
-    @PostMapping("/getPlayerTiles/{roomCode}/{playerId}")
-    public ResponseEntity<Object> getPlayerTiles(@PathVariable String roomCode, @PathVariable UUID playerId) {
+    @PostMapping("/getPlayerTiles/{roomCode}/{playerName}")
+    public ResponseEntity<Object> getPlayerTiles(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
-            Player player = room.getPlayerById(playerId);
+            Player player = room.getPlayerByName(playerName);
             if (player != null) {
                 return ResponseEntity.ok(Map.of(
                         "type", "done",

@@ -111,7 +111,10 @@ export default {
 
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerId = message.currentTurnPlayerId;
-      this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' }));
+      if(this.currentTurnPlayerId === this.playerIndex){
+        this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' , roomId: this.roomId}));
+      }
+
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
@@ -158,7 +161,7 @@ export default {
     // 处理牌面的点击事件
     handleTileClick(tile) {
       if (this.players[this.playerIndex]=== this.currentTurnPlayerId){
-        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tile  });
+        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tile , roomId: this.roomId , playIndex: this.playerIndex});
         this.$ws.send(message);
       }
 
@@ -166,7 +169,7 @@ export default {
     // 处理操作按钮的点击事件
     handleAction(action) {
       console.log('Action clicked:', action); // 调试信息
-      const message = JSON.stringify({ type: 'action', behavior: action, state: 'Playing'  });
+      const message = JSON.stringify({ type: 'action', behavior: action, state: 'Playing' , roomId: this.roomId , playIndex: this.playerIndex});
       this.$ws.send(message);
     },
 

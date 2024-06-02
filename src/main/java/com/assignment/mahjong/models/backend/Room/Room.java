@@ -16,7 +16,7 @@ public class Room {
     private String roomCode;  // 房间号
     private MahjongSet mahjongSet;
     private TileInterface lastDiscardedTile;
-    private UUID lastDiscardedByPlayerId;
+    private String lastDiscardedByPlayerName;
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
     private String currentTurnPlayerName;
@@ -49,9 +49,9 @@ public class Room {
         return tiles;
     }
 
-    public Player getPlayerById(UUID playerId) {
+    public Player getPlayerByName(String Name) {
         for (Player player : players) {
-            if (player.getId().equals(playerId)) {
+            if (player.getName().equals(Name)) {
                 return player;
             }
         }
@@ -161,17 +161,17 @@ public class Room {
         return mahjongSet;
     }
 
-    public void setLastDiscardedTile(TileInterface tile, UUID playerId) {
+    public void setLastDiscardedTile(TileInterface tile, String playerName) {
         this.lastDiscardedTile = tile;
-        this.lastDiscardedByPlayerId = playerId;
+        this.lastDiscardedByPlayerName = playerName;
     }
 
     public TileInterface getLastDiscardedTile() {
         return lastDiscardedTile;
     }
 
-    public UUID getLastDiscardedByPlayerName() {
-        return lastDiscardedByPlayerId;
+    public String getLastDiscardedByPlayerName() {
+        return lastDiscardedByPlayerName;
     }
 
     // 设置当前回合的玩家

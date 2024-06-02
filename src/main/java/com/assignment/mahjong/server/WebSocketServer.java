@@ -111,7 +111,17 @@ public class WebSocketServer {
                         messageToSend = objectMapper.writeValueAsString(gameController.createRoom(session.getId()).getBody());
                         sendMessageToUser(messageToSend, session.getId());
                         break;
-                    case "chat":
+                    case "startGame":
+                        String currentPlayer = (String) jsonObject.get("state");
+                        serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
+                        messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), currentPlayer, null).getBody());
+
+                        for (Session session1 : sessionMap.values()) {
+
+                            if (session1.getId().equals(currentPlayer)) {
+                                sendMessageToUser(messageToSend, session1.getId());
+                            }
+                        }
                         break;
                     default:
                         break;
