@@ -120,11 +120,11 @@ export default {
     //获取玩家行为
     handlePlayerActions(message) {
       this.playAction = message.playAction;
-      this.playerTiles = message.playerTiles;
+      this.playerTiles = message.playerTiles[this.playerIndex];
     },
     //在执行操作后更新手牌
     updateAfterActing(message){
-      this.playerTiles = message.playerTiles;
+      this.playerTiles = message.playerTiles[this.playerIndex];
     },
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
