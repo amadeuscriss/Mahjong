@@ -149,7 +149,6 @@ public class GameController {
 
 
     // 处理玩家出牌动作
-// 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerId}")
     public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody Map<String, Integer> request) {
         Room room = roomManager.getRoom(roomCode);
@@ -289,6 +288,7 @@ public class GameController {
         // 检查是否是玩家自己摸到的牌，这通常需要特定的游戏逻辑来确定
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
+
     @PostMapping("/chi/{roomCode}/{playerId}/{tileIndex}")
     public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable UUID playerId, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
@@ -357,6 +357,26 @@ public class GameController {
         );
         // Here you would actually send this map to all connected clients in the room
         System.out.println("Broadcasting: " + notification);
+    }
+
+    @PostMapping("/getPlayerTiles/{roomCode}/{playerId}")
+    public ResponseEntity<Object> getPlayerTiles(@PathVariable String roomCode, @PathVariable UUID playerId) {
+        Room room = roomManager.getRoom(roomCode);
+        if (room != null) {
+            Player player = room.getPlayerById(playerId);
+            if (player != null) {
+                return ResponseEntity.ok(Map.of(
+                        "type", "done",
+                        "playerTiles", player.getHand().getTiles().stream()
+                                .map(TileInterface::getValueAsString)
+                                .collect(Collectors.toList())
+                ));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
+            }
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+        }
     }
 
 }
