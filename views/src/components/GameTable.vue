@@ -161,10 +161,10 @@ export default {
     // 处理牌面的点击事件
     handleTileClick(tile) {
       if (this.players[this.playerIndex]=== this.currentTurnPlayerId){
-        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tile , roomId: this.roomId , playIndex: this.playerIndex});
+        const tileIndex = this.playerTiles.indexOf(tile);
+        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tileIndex , roomId: this.roomId , playIndex: this.playerIndex});
         this.$ws.send(message);
       }
-
     },
     // 处理操作按钮的点击事件
     handleAction(action) {
