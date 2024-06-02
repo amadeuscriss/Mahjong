@@ -115,24 +115,30 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerId}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId, @RequestBody TileInterface discardedTile) {
+    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable UUID playerId) {
         Room room = roomManager.getRoom(roomCode);
-        if (room != null && discardedTile != null) {
+        if (room != null) {
             Player player = room.getPlayerById(playerId);
             if (player != null) {
                 List<String> actions = new ArrayList<>();
-                if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Win");
-                }
-                if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Pong");
-                }
-                if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Kong");
-                }
-                // Assume ChiAction.canChi is a method that checks if Chi is possible
-                if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Chi");
+                TileInterface discardedTile = room.getLastDiscardedTile();
+
+                if (discardedTile == null) {
+                    // First player to act, no discarded tile, can only discard
+                    actions.add("Discard");
+                } else {
+                    if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
+                        actions.add("Win");
+                    }
+                    if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
+                        actions.add("Pong");
+                    }
+                    if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
+                        actions.add("Kong");
+                    }
+                    if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
+                        actions.add("Chi");
+                    }
                 }
 
                 return ResponseEntity.ok(Map.of(
@@ -146,6 +152,7 @@ public class GameController {
         }
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
+
 
 
     // 处理玩家出牌动作
