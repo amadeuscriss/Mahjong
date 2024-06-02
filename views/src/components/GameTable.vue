@@ -83,7 +83,7 @@ export default {
   data() {
     return {
       playAction: [], // 玩家操作
-      currentTurnPlayerId: null, // 当前回合玩家id
+      currentTurnPlayerName: null, // 当前回合玩家id
 
       tableTiles: [],
       playerTiles: [], // 玩家手牌
@@ -110,15 +110,15 @@ export default {
     gameInitialization(message){
 
       this.playerTiles = message.playerTiles[this.playerIndex];
-      this.currentTurnPlayerId = message.currentTurnPlayerId;
-      if(this.currentTurnPlayerId === this.playerIndex){
-        this.$ws.send(JSON.stringify({ type: 'startGame',state: 'this.currentTurnPlayerId' , roomId: this.roomId}));
+      this.currentTurnPlayerName = message.currentTurnPlayerName;
+      if(this.currentTurnPlayerName === this.playerIndex){
+        this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
       }
 
     },
     //更新当前回合玩家，更新桌面
     updateGame(message) {
-      this.currentTurnPlayerId = message.currentTurnPlayerId;
+      this.currentTurnPlayerName = message.currentTurnPlayerId;
       this.tableTiles = message.tableTiles;
     },
     //获取玩家行为
@@ -160,11 +160,11 @@ export default {
     },
     // 处理牌面的点击事件
     handleTileClick(tile) {
-      if (this.players[this.playerIndex]=== this.currentTurnPlayerId){
-        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tile , roomId: this.roomId , playIndex: this.playerIndex});
+      if (this.players[this.playerIndex]=== this.currentTurnPlayerName){
+        const tileIndex = this.playerTiles.indexOf(tile);
+        const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tileIndex , roomId: this.roomId , playIndex: this.playerIndex});
         this.$ws.send(message);
       }
-
     },
     // 处理操作按钮的点击事件
     handleAction(action) {
