@@ -212,4 +212,26 @@ public class Room {
             System.out.println(firstPlayer.getName() + " will start the game as the dealer.");
         }
     }
+
+    // 移动到下一个玩家的回合
+    public void moveToNextPlayer() {
+        if (players.size() < 2) {
+            return;  // Not enough players to move to the next player
+        }
+
+        int currentIndex = -1;
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getName().equals(currentTurnPlayerName)) {
+                currentIndex = i;
+                break;
+            }
+        }
+
+        if (currentIndex == -1) {
+            return;  // Current turn player not found
+        }
+
+        int nextIndex = (currentIndex + 1) % players.size();
+        currentTurnPlayerName = players.get(nextIndex).getName();
+    }
 }
