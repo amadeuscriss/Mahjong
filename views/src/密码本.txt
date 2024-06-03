@@ -51,7 +51,14 @@
                                       showTiles: showTiles（执行以上操作的玩家的明牌）
                                       performerIndex: performerIndex（执行者的索引）
 
-    在玩家收到回合变动的信息后，能出牌的玩家会出牌：
+    在玩家收到回合变动的信息后，能出牌的玩家会出牌，一般情况会受到摸牌信息，同时判断是否可以自摸杠与自摸胡：
+                希望收到摸牌信息：type： "playerActions",
+                               state： "Draw",
+                               playerTiles： playerTiles（摸牌后的玩家手牌）
+                               playerActions： playerActions（玩家行为，默认有一个出牌）
+
+
+                向后端发送出牌信息
                 发送：JSON.stringify({ type: 'action',
                                        behavior: 'Discard',
                                        state: 'Playing' ,
@@ -66,6 +73,15 @@
     在有玩家出牌后，希望收到（桌面全服更新）:
                          type: 'updateGame'
                          tableTiles: tableTiles（牌桌上的牌）
+
+    如果有人胡牌或流局，希望收到信息（全服）：
+                type： "game over"
+                playerTiles: playerTiles(所有玩家手牌，与游戏初始化时的相同)
+                codeList: codeList(玩家积分列表，类似于playerTiles)
+
+
+
+
 
 
 
