@@ -79,7 +79,7 @@ export default {
     return {
       players: ['12', '34', '56', '78'], // 玩家列表
       playerIndex: '56', // 玩家索引
-      playAction: ['Win', 'Kong', 'Pong', 'Chi', 'SelfKong', 'Discard'], // 玩家操作
+      playActions: ['Win', 'Kong', 'Pong', 'Chi', 'SelfKong', 'Discard'], // 玩家操作
 
       roomId: 798352, // 房间号
       currentTurnPlayerId: '78', // 当前回合玩家id
@@ -102,7 +102,7 @@ export default {
   },
   computed: {
     filteredActions() {
-      const actions = this.playAction.filter(action => action !== 'Discard');
+      const actions = this.playActions.filter(action => action !== 'Discard');
       if (actions.length > 0) {
         actions.push('Skip'); // 添加“跳过”按钮
       }
@@ -138,7 +138,7 @@ export default {
     },
     //获取玩家行为
     handlePlayerActions(message) {
-      this.playAction = message.playAction;
+      this.playActions = message.playActions;
       this.playerTiles = message.playerTiles;
     },
     //在执行操作后更新手牌
@@ -218,12 +218,9 @@ export default {
   mounted() {
     // 使用全局 WebSocket 连接
     const exampleShowTiles = {
-      '12': ['Red', 'Red', 'Red', 'Red'],
-      '34': ['Red', 'Red', 'Red', 'Red'],
-      '56': ['Red', 'Red', 'Red', 'Red'],
-      '78': ['Red', 'Red', 'Red', 'Red']
-    };
-    this.updateShowTiles(exampleShowTiles);
+    "playerTiles":["Bamboo 2","Bamboo 4","Bamboo 4","Bamboo 6","Bamboo 7","Bamboo 7","Bamboo 8","Bamboo 8","Bamboo 9","Character 1","Character 5","White","East"],"playerActions":["Discard"],"type":"playerActions"}
+    ;
+    this.handlePlayerActions(exampleShowTiles);
     this.$ws.onmessage = this.handleMessage;
   }
 }

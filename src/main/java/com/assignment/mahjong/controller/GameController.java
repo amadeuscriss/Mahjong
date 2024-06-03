@@ -10,6 +10,7 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
+
+    private SimpMessagingTemplate messagingTemplate;
     @Getter
     @Autowired
     private static RoomManager roomManager = new RoomManager();
@@ -142,17 +145,73 @@ public class GameController {
 
                 return ResponseEntity.ok(Map.of(
                         "type", "playerActions",
-                        "playerActions", actions,
-                        "playerTiles", player.getHand().getTiles().stream()
-                                .map(TileInterface::getValueAsString)
-                                .collect(Collectors.toList())
+                        "playerActions", actions
                 ));
             }
         }
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
+    @PostMapping("/handleAction/{roomCode}/{playerName}")
+    public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
+        String action = (String) request.get("behavior");
+        Room room = roomManager.getRoom(roomCode);
+        if (room != null) {
+            Player player = room.getPlayerByName(playerName);
+            if (player != null) {
+                List<String> showTiles = player.getHand().getTiles().stream()
+                        .map(TileInterface::getValueAsString)
+                        .collect(Collectors.toList());
+                List<String> tableTiles = room.getTableTiles().stream()
+                        .map(TileInterface::getValueAsString)
+                        .collect(Collectors.toList());
 
+                // 执行相应的操作
+                switch (action) {
+                    case "Win":
+                        // 执行胡牌操作
+                        checkWin(roomCode, playerName);
+                        break;
+                    case "Kong":
+                        // 执行杠牌操作
+                        kongTile(roomCode, playerName, (Integer) request.get("tileIndex"));
+                        break;
+                    case "Pong":
+                        // 执行碰牌操作
+                        pongTile(roomCode, playerName, (Integer) request.get("tileIndex"));
+                        break;
+                    case "Chi":
+                        // 执行吃牌操作
+                        chiTile(roomCode, playerName, (Integer) request.get("tileIndex"));
+                        break;
+                    case "Skip":
+                        // 跳过操作（不执行任何抢占行为）
+                        // 更新到下一玩家的回合
+                        room.moveToNextPlayer();
+                        break;
+                    default:
+                        return ResponseEntity.badRequest().body(Map.of("message", "Invalid action."));
+                }
+
+                // 获取当前回合玩家
+                String currentTurnPlayerName = room.getCurrentTurnPlayerName();
+
+                // 广播操作信息
+                broadcastAction(room, action, tableTiles, showTiles, room.getPlayers().indexOf(player));
+
+                // 发送回合变动信息
+                Map<String, Object> turnChangeNotification = Map.of(
+                        "type", "Turn change",
+                        "currentTurnPlayerName", currentTurnPlayerName
+                );
+                messagingTemplate.convertAndSend("/topic/game/" + room.getRoomCode(), turnChangeNotification);
+
+                return ResponseEntity.ok(turnChangeNotification);
+            }
+            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
+        }
+        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+    }
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerName}")
@@ -199,12 +258,31 @@ public class GameController {
                 if (drawAction.isActionSuccessful()) {
                     // 更新玩家的最后行动为摸牌
                     player.setLastActionWasDraw(true);
-                    // 广播当前玩家摸到的牌以及更新后的手牌
+
+                    // 获取玩家摸牌后的手牌
+                    List<TileInterface> playerTiles = player.getHand().getTiles();
+
+                    // 检测是否可以胡牌或杠牌，并将结果存储在一个列表中
+                    List<String> playerActions = new ArrayList<>();
+                    TileInterface drawnTile = drawAction.getDrawnTile();
+
+                    if (CheckWin.canWin(playerTiles, drawnTile)) {
+                        playerActions.add("Win");
+                    }
+                    if (KongAction.canKong(playerTiles, drawnTile)) {
+                        playerActions.add("Kong");
+                    }
+
+                    playerActions.add("Discard");
+                    playerActions.add("SelfKong");
+
+                    // 广播当前玩家摸到的牌以及更新后的手牌和可执行的操作
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Draw",
-                            "drawnTile", drawAction.getDrawnTile().getValueAsString(),
-                            "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
+                            "drawnTile", drawnTile.getValueAsString(),
+                            "playerTiles", playerTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.toList()),
+                            "playerActions", playerActions
                     ));
                 } else {
                     return ResponseEntity.ok(Map.of(
@@ -218,6 +296,7 @@ public class GameController {
         }
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
+
 
     @PostMapping("/pong/{roomCode}/{playerName}/{tileIndex}")
     public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
@@ -342,8 +421,6 @@ public class GameController {
                 boolean won = checkWin.checkIfWin(player.getHand().getTiles(), isSelfDrawn, isWinByDiscard, isKongFlowerWin, isLastTileWin);
                 player.setLastActionWasDraw(false); // Reset the draw action flag
                 if (won) {
-                    List<String> showTiles = player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList());
-                    broadcastAction(room, "Win", showTiles, room.getPlayers().indexOf(player));
                     return ResponseEntity.ok("Player wins with total points: " + player.getPoints().getTotalPoints() + ". " + player.getPoints().getScoreDetails());
                 } else {
                     return ResponseEntity.ok("No win condition met.");
@@ -354,11 +431,12 @@ public class GameController {
         return ResponseEntity.badRequest().body("Room not found.");
     }
 
-    private void broadcastAction(Room room, String action, List<String> showTiles, int performerIndex) {
+    private void broadcastAction(Room room, String action, List<String> tableTiles,List<String> showTiles, int performerIndex) {
         Map<String, Object> notification = Map.of(
                 "type", "notification",
                 "action", action,
                 "showTiles", showTiles,
+                "tableTiles", tableTiles,
                 "performerIndex", performerIndex
         );
         // Here you would actually send this map to all connected clients in the room
