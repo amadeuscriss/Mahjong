@@ -82,7 +82,7 @@ export default {
   },
   data() {
     return {
-      playAction: [], // 玩家操作
+      playerActions: [ ], // 玩家操作
       currentTurnPlayerName: null,
 
       tableTiles: [],
@@ -95,23 +95,42 @@ export default {
         action: '',
         position: '',
       },
+
+      skipTimeout: null, // 跟踪自动跳过的超时
     };
   },
   computed: {
     filteredActions() {
-      const actions = this.playAction.filter(action => action !== 'Discard');
-      if (actions.length > 0) {
-        actions.push('Skip'); // 添加“跳过”按钮
+      // 检查 playerActions 的类型
+      if (Array.isArray(this.playerActions)) {
+        // 如果是数组，使用原本的方法过滤
+        console.log("filteredActions (array):", this.playerActions);
+        const actions = this.playerActions.filter(action => action !== 'Discard');
+        if (actions.length > 0) {
+          actions.push('Skip'); // 添加“跳过”按钮
+        }
+        return actions;
+      } else if (typeof this.playerActions === 'string') {
+        // 如果是字符串，创建一个包含该字符串的数组
+        console.log("filteredActions (string):", this.playerActions);
+        const actions = [this.playerActions].filter(action => action !== 'Discard');
+        if (actions.length > 0) {
+          actions.push('Skip'); // 添加“跳过”按钮
+        }
+        return actions;
+      } else {
+        // 如果既不是数组也不是字符串，返回空数组
+        console.error("playerActions is neither an array nor a string:", this.playerActions);
+        return [];
       }
-      return actions;
     }
   },
+
   methods: {
     gameInitialization(message){
-
+      console.log("gameInitialization" + this.playerActions);
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerName = message.currentTurnPlayerName;
-      console.log(this.playerIndex);
       if(this.currentTurnPlayerName === this.playerIndex){
         this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
       }
@@ -124,8 +143,20 @@ export default {
     },
     //获取玩家行为
     handlePlayerActions(message) {
-      this.playAction = message.playAction;
-      this.playerTiles = message.playerTiles[this.playerIndex];
+      this.playerActions = message.playerActions;
+      this.playerTiles = message.playerTiles;
+      console.log("handlePlayerActions: ", this.playerActions);
+      // this.playerTiles = message.playerTiles[this.playerIndex];
+
+      // 如果 playerActions 有超过2个操作，5秒内没有点击则自动点击 Skip
+      if (Array.isArray(this.playerActions) && this.playerActions.length > 1) {
+        if (this.skipTimeout) {
+          clearTimeout(this.skipTimeout);
+        }
+        this.skipTimeout = setTimeout(() => {
+          this.handleAction('Skip');
+        }, 5000);
+      }
     },
     //在执行操作后更新手牌
     updateAfterActing(message){
@@ -161,10 +192,12 @@ export default {
     },
     // 处理牌面的点击事件
     handleTileClick(tile) {
-      if (this.playerIndex === this.currentTurnPlayerName){
+      if (this.playerActions.length === 1 &&
+          this.playerActions[0] === 'Discard'){
         const tileIndex = this.playerTiles.indexOf(tile);
         const message = JSON.stringify({ type: 'action', behavior: 'Discard', state: 'Playing' , data: tileIndex , roomId: this.roomId , playIndex: this.playerIndex});
         this.$ws.send(message);
+        this.playerActions = [];
       }
     },
     // 处理操作按钮的点击事件
@@ -172,6 +205,12 @@ export default {
       console.log('Action clicked:', action); // 调试信息
       const message = JSON.stringify({ type: 'action', behavior: action, state: 'Playing' , roomId: this.roomId , playIndex: this.playerIndex});
       this.$ws.send(message);
+
+      // 点击按钮后清除自动跳过的超时
+      if (this.skipTimeout) {
+        clearTimeout(this.skipTimeout);
+        this.skipTimeout = null;
+      }
     },
 
     handleMessage(event) {
@@ -192,7 +231,6 @@ export default {
           this.updateShownTiles(message);
           break;
         case 'gameInitialization':
-          console.log("gameInitialization")
           this.gameInitialization(message);
           break;
       }
@@ -201,7 +239,13 @@ export default {
   mounted() {
     // 使用全局 WebSocket 连接
     this.$ws.onmessage = this.handleMessage;
-  }
+  },
+  // beforeDestroy() {
+  //   // 清除任何未清除的超时
+  //   if (this.skipTimeout) {
+  //     clearTimeout(this.skipTimeout);
+  //   }
+  // }
 }
 </script>
 
