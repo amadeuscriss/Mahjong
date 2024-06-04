@@ -159,7 +159,7 @@ export default {
       }
 
     },
-    //更新当前回合玩家，更新桌面
+    //更新手牌
     updateGame(message) {
       this.playerTiles = message.playerTiles;
     },
@@ -216,7 +216,6 @@ export default {
     },
     //接收通知，更新明牌库
     updateShownTiles(message){
-      this.tableTiles = message.tableTiles;
       this.showTiles[message.performerIndex] = message.showTiles;
       this.showNotification(message.action, message.performerIndex);
     },
@@ -253,7 +252,11 @@ export default {
     // 处理操作按钮的点击事件
     handleAction(action) {
       console.log('Action clicked:', action); // 调试信息
-      const message = JSON.stringify({ type: 'action', behavior: action, state: 'Playing' , roomId: this.roomId , playIndex: this.playerIndex});
+      const message = JSON.stringify({ type: 'action',
+                                            behavior: action, state: 'Playing' ,
+                                            roomId: this.roomId ,
+                                            playIndex: this.playerIndex ,
+                                            nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
       this.$ws.send(message);
 
       // 点击按钮后清除自动跳过的超时
@@ -279,6 +282,7 @@ export default {
           break;
         case 'notification':
           this.updateShownTiles(message);
+          this.tableTiles = message.tableTiles;
           break;
         case 'gameInitialization':
           this.gameInitialization(message);
