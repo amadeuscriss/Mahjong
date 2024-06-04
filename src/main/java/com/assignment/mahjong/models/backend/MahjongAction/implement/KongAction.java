@@ -6,7 +6,9 @@ import com.assignment.mahjong.models.backend.Room.Player;
 import com.assignment.mahjong.models.backend.Tile.implement.Meld;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KongAction extends MahjongAction {
     private boolean isSelfKong;  // 标记是否为自摸杠
@@ -19,6 +21,25 @@ public class KongAction extends MahjongAction {
         this.points = points;
         this.player = player;
     }
+
+    public static boolean canSelfKong(List<TileInterface> playerTiles, TileInterface drawnTile) {
+        // 创建一个 Map 来统计每种牌的数量
+        Map<String, Integer> tileCountMap = new HashMap<>();
+
+        // 统计玩家手牌中的每种牌的数量
+        for (TileInterface tile : playerTiles) {
+            String tileValue = tile.getValueAsString();
+            tileCountMap.put(tileValue, tileCountMap.getOrDefault(tileValue, 0) + 1);
+        }
+
+        // 统计摸到的牌
+        String drawnTileValue = drawnTile.getValueAsString();
+        tileCountMap.put(drawnTileValue, tileCountMap.getOrDefault(drawnTileValue, 0) + 1);
+
+        // 判断是否有四张相同的牌
+        return tileCountMap.get(drawnTileValue) == 4;
+    }
+
 
     @Override
     public void execute() {
