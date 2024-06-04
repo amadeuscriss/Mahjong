@@ -423,7 +423,7 @@ public class GameController {
         return ResponseEntity.badRequest().body("Room not found.");
     }
 
-    private void broadcastAction(Room room, String action, int performerIndex) {
+    private Map<String, Object> broadcastAction(Room room, String action, int performerIndex) {
         List<String> tableTiles = room.getAllDiscardedTiles().stream()
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
@@ -440,6 +440,7 @@ public class GameController {
         );
         messagingTemplate.convertAndSend("/topic/game/" + room.getRoomCode(), notification);
         System.out.println("Broadcasting: " + notification);
+        return notification;
     }
 
 
