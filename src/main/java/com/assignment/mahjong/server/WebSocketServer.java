@@ -132,7 +132,7 @@ public class WebSocketServer {
                         if (((String) jsonObject.get("behavior")).equals("Discard")) {
                             messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
                             sendMessageToUser(messageToSend, session.getId());
-                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (int) jsonObject.get("playIndex")));
+                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), Integer.parseInt((String) jsonObject.get("playIndex"))));
 
                             for (Player player : serverRoom.getPlayers()) {
                                 sendMessageToUser(messageToSend, player.getName());
