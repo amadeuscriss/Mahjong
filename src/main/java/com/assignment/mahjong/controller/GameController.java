@@ -68,13 +68,13 @@ public class GameController {
     @PostMapping("/updateRoom/{roomCode}")
     public Map<String, Object> updateRoom(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
-       // Broadcasting update to all clients in the room could be handled elsewhere in real app
-            Map<String, Object> response = new HashMap<>();
-            response.put("type", "updateRoom");
-            response.put("roomId", roomCode);
-            response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        // Broadcasting update to all clients in the room could be handled elsewhere in real app
+        Map<String, Object> response = new HashMap<>();
+        response.put("type", "updateRoom");
+        response.put("roomId", roomCode);
+        response.put("players", room.getPlayers().stream().map(Player::getName).collect(Collectors.toList()));
 
-            return response;
+        return response;
     }
 
 
@@ -422,7 +422,7 @@ public class GameController {
         return ResponseEntity.badRequest().body("Room not found.");
     }
 
-    private Map<String, Object> broadcastAction(Room room, String action, int performerIndex) {
+    public ResponseEntity<Object> broadcastAction(Room room, String action, int performerIndex) {
         List<String> tableTiles = room.getAllDiscardedTiles().stream()
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
@@ -438,7 +438,7 @@ public class GameController {
                 "performerIndex", performerIndex
         );
         System.out.println("Broadcasting: " + notification);
-        return notification;
+        return ResponseEntity.ok(notification);
     }
 
 
