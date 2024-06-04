@@ -215,7 +215,7 @@ public class GameController {
 
     // 处理玩家出牌动作
     @PostMapping("/discardTile/{roomCode}/{playerName}")
-    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Integer> request) {
+    public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
         Room room = roomManager.getRoom(roomCode);
         if (room == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
@@ -226,7 +226,7 @@ public class GameController {
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
 
-        int tileIndex = request.getOrDefault("tileIndex", -1); // Assumes tileIndex is passed in the request
+        int tileIndex = (int) request.getOrDefault("tileIndex", -1); // Assumes tileIndex is passed in the request
         if (tileIndex < 0 || tileIndex >= player.getHand().getTiles().size()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index."));
         }
