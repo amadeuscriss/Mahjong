@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class Room {
     // 获取房间中的所有玩家
     @Getter
-    private List<Player> players;  // 房间中的玩家列表
+    private static List<Player> players;  // 房间中的玩家列表
     private final int maxPlayers = 4;  // 房间最大玩家数
     private boolean gameStarted = false;  // 游戏是否已经开始
     @Getter
@@ -23,7 +23,7 @@ public class Room {
     private String currentTurnPlayerName;
     private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
     private Random random = new Random(); // 用于生成随机数的Random实例
-    private static List<TileInterface> tableTiles = new ArrayList<>(); // Tiles on the table
+    public static List<TileInterface> tableTiles = new ArrayList<>(); // Tiles on the table
 
     // 构造函数
     public Room(RoomManager manager, MahjongSet mahjongSet) {
@@ -49,7 +49,7 @@ public class Room {
         return tiles;
     }
 
-    public Player getPlayerByName(String Name) {
+    public static Player getPlayerByName(String Name) {
         for (Player player : players) {
             if (player.getName().equals(Name)) {
                 return player;
@@ -237,7 +237,6 @@ public class Room {
 
     // 获取执行操作玩家的明牌
     public List<String> getShowTilesForPlayer(Player player) {
-        // 假设每个玩家都有一个方法来获取他们的明牌
         return player.getMelds().stream()
                 .flatMap(meld -> meld.getTiles().stream())
                 .map(TileInterface::getValueAsString)

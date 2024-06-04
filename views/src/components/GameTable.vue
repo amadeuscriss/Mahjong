@@ -230,8 +230,8 @@ export default {
       }
     },
     // 根据当前玩家ID获取下一个玩家ID
-    getNextPlayerName(playerIndex, offset) {
-      const currentIdx = this.players.indexOf(playerIndex);
+    getNextPlayerName(currentTurnPlayerName, offset) {
+      const currentIdx = this.players.indexOf(currentTurnPlayerName);
       const nextIdx = (currentIdx + offset) % 4;
       return this.players[nextIdx];
     },
@@ -246,7 +246,7 @@ export default {
                                                 data: tileIndex ,
                                                 roomId: this.roomId ,
                                                 playIndex: this.players.indexOf(this.playerIndex),
-                                                nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
+                                                nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
         this.$ws.send(message);
         this.playerActions = [];
       }
@@ -258,7 +258,7 @@ export default {
                                             behavior: action, state: 'Playing' ,
                                             roomId: this.roomId ,
                                             playIndex: this.players.indexOf(this.playerIndex),
-                                            nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
+                                            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
       this.$ws.send(message);
 
       // 点击按钮后清除自动跳过的超时
@@ -270,7 +270,8 @@ export default {
 
     handleMessage(event) {
       const message = JSON.parse(event.data);
-      console.log("Gamestart");
+      console.log("GameStart");
+      console.log(this.players)
       switch (message.type) {
         case 'updateGame':
           console.log("updateGame")

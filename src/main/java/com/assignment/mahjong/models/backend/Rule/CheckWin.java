@@ -14,10 +14,10 @@ public class CheckWin {
 
     // Method to determine if adding a specific tile results in a win
     public static boolean canWin(List<TileInterface> handTiles, TileInterface candidateTile) {
-        List<TileInterface> testHand = new ArrayList<>(handTiles);
-        testHand.add(candidateTile);
-        System.out.println(1);
-        return isStandardWin(testHand) || isSevenPairs(testHand) || isThirteenOrphans(testHand) || isAllOneSuit(testHand);
+//        List<TileInterface> testHand = new ArrayList<>(handTiles);
+//        testHand.add(candidateTile);
+//        return isStandardWin(testHand) || isSevenPairs(testHand) || isThirteenOrphans(testHand) || isAllOneSuit(testHand);
+        return false;
     }
 
     public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin, boolean isLastTileWin) {
@@ -66,6 +66,7 @@ public class CheckWin {
     }
 
     private static boolean isStandardWin(List<TileInterface> handTiles) {
+        System.out.println(1);
         if (handTiles.size() % 3 != 2) return false;
 
         Collections.sort(handTiles, Comparator.comparing(TileInterface::getValueAsString));
@@ -132,6 +133,7 @@ public class CheckWin {
     }
 
     private static boolean isSevenPairs(List<TileInterface> handTiles) {
+        System.out.println(2);
         if (handTiles.size() != 14) return false;
         Map<String, Integer> countMap = new HashMap<>();
         for (TileInterface tile : handTiles) {
@@ -141,6 +143,7 @@ public class CheckWin {
     }
 
     private static boolean isThirteenOrphans(List<TileInterface> handTiles) {
+        System.out.println(3);
         final String[] requiredTiles = {
                 "1 Wan", "9 Wan", "1 Tiao", "9 Tiao", "1 Tong", "9 Tong",
                 "East", "South", "West", "North", "Red", "Green", "White"
@@ -153,6 +156,7 @@ public class CheckWin {
     }
 
     private static boolean isAllOneSuit(List<TileInterface> handTiles) {
+        System.out.println(4);
         if (handTiles.isEmpty()) return false;
         String suit = handTiles.get(0).getType();
         return handTiles.stream().allMatch(tile -> tile.getType().equals(suit));
