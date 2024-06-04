@@ -79,9 +79,6 @@ public class GameController {
 
 
 
-
-
-
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
@@ -119,35 +116,34 @@ public class GameController {
     @PostMapping("/availableActions/{roomCode}/{playerName}")
     public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody TileInterface discardedTile) {
         Room room = roomManager.getRoom(roomCode);
+        List<String> actions = new ArrayList<>();
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                List<String> actions = new ArrayList<>();
-
                 if (discardedTile == null) {
                     // First player to act, no discarded tile, can only discard
                     actions.add("Discard");
-                } else {
-                    if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
-                        actions.add("Win");
-                    }
-                    if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
-                        actions.add("Pong");
-                    }
-                    if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
-                        actions.add("Kong");
-                    }
-                    if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
-                        actions.add("Chi");
-                    }
                 }
-
+                if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
+                    actions.add("Win");
+                }
+                if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
+                    actions.add("Pong");
+                }
+                if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
+                    actions.add("Kong");
+                }
+                if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
+                    actions.add("Chi");
+                }
+            }
+            System.out.println(actions);
                 return ResponseEntity.ok(Map.of(
                         "type", "playerActions",
                         "playerActions", actions
                 ));
             }
-        }
+
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
@@ -155,6 +151,7 @@ public class GameController {
     public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
         String action = (String) request.get("behavior");
         Room room = roomManager.getRoom(roomCode);
+        System.out.println(1);
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
@@ -217,7 +214,7 @@ public class GameController {
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
 
-        int tileIndex = (int) request.getOrDefault("tileIndex", -1); // Assumes tileIndex is passed in the request
+        int tileIndex = (int) request.getOrDefault("data", -1); // Assumes tileIndex is passed in the request
         if (tileIndex < 0 || tileIndex >= player.getHand().getTiles().size()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index."));
         }
@@ -233,7 +230,7 @@ public class GameController {
         room.setLastDiscardedTile(tileToDiscard, playerName);
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
-                "discardedTile", tileToDiscard.getValueAsString()
+                "discardedTile", discardAction.getleasttiles()
         ));
     }
 
@@ -252,6 +249,8 @@ public class GameController {
 
                     // 获取玩家摸牌后的手牌
                     List<TileInterface> playerTiles = player.getHand().getTiles();
+                    TileInterface thedrawtiles = drawAction.getDrawnTile();
+                    playerTiles.add(thedrawtiles);
 
                     // 检测是否可以胡牌或杠牌，并将结果存储在一个列表中
                     List<String> playerActions = new ArrayList<>();

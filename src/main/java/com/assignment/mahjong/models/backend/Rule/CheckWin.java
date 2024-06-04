@@ -16,6 +16,7 @@ public class CheckWin {
     public static boolean canWin(List<TileInterface> handTiles, TileInterface candidateTile) {
         List<TileInterface> testHand = new ArrayList<>(handTiles);
         testHand.add(candidateTile);
+        System.out.println(1);
         return isStandardWin(testHand) || isSevenPairs(testHand) || isThirteenOrphans(testHand) || isAllOneSuit(testHand);
     }
 

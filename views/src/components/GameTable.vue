@@ -3,6 +3,8 @@
     <!-- 显示房间号 -->
     <div class="room-id">
       房间号: {{ roomId }}
+      玩家name{{playerIndex}}
+      当前回合玩家name{{currentTurnPlayerName}}}
     </div>
 
 <!--    &lt;!&ndash; 玩家手牌展示区 &ndash;&gt;-->
@@ -243,7 +245,7 @@ export default {
                                                 state: 'Playing' ,
                                                 data: tileIndex ,
                                                 roomId: this.roomId ,
-                                                playIndex: this.playerIndex,
+                                                playIndex: this.players.indexOf(this.playerIndex),
                                                 nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
         this.$ws.send(message);
         this.playerActions = [];
@@ -255,7 +257,7 @@ export default {
       const message = JSON.stringify({ type: 'action',
                                             behavior: action, state: 'Playing' ,
                                             roomId: this.roomId ,
-                                            playIndex: this.playerIndex ,
+                                            playIndex: this.players.indexOf(this.playerIndex),
                                             nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
       this.$ws.send(message);
 
