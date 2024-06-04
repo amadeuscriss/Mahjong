@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/game")
 public class GameController {
 
-    private SimpMessagingTemplate messagingTemplate;
     @Getter
     @Autowired
     private static RoomManager roomManager = new RoomManager();
@@ -195,7 +194,7 @@ public class GameController {
                         "type", "Turn change",
                         "currentTurnPlayerName", currentTurnPlayerName
                 );
-                messagingTemplate.convertAndSend("/topic/game/" + room.getRoomCode(), turnChangeNotification);
+
 
                 return ResponseEntity.ok(turnChangeNotification);
             }
@@ -438,7 +437,6 @@ public class GameController {
                 "tableTiles", tableTiles,
                 "performerIndex", performerIndex
         );
-        messagingTemplate.convertAndSend("/topic/game/" + room.getRoomCode(), notification);
         System.out.println("Broadcasting: " + notification);
         return notification;
     }
