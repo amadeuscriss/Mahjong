@@ -5,6 +5,7 @@ import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Room {
     // 获取房间中的所有玩家
@@ -233,5 +234,19 @@ public class Room {
 
         int nextIndex = (currentIndex + 1) % players.size();
         currentTurnPlayerName = players.get(nextIndex).getName();
+    }
+
+    // 获取牌桌上的所有牌
+    public List<TileInterface> getAllDiscardedTiles() {
+        return tableTiles;
+    }
+
+    // 获取执行操作玩家的明牌
+    public List<String> getShowTilesForPlayer(Player player) {
+        // 假设每个玩家都有一个方法来获取他们的明牌
+        return player.getMelds().stream()
+                .flatMap(meld -> meld.getTiles().stream())
+                .map(TileInterface::getValueAsString)
+                .collect(Collectors.toList());
     }
 }
