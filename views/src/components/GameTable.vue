@@ -3,6 +3,7 @@
     <!-- 显示房间号 -->
     <div class="room-id">
       房间号: {{ roomId }}
+      用户名：{{ playerIndex }}
     </div>
 
 <!--    &lt;!&ndash; 玩家手牌展示区 &ndash;&gt;-->
@@ -172,6 +173,7 @@ export default {
         this.drawnTile = message.drawnTile;
       }
 
+      console.log("handlePlayerActions" + this.playerActions)
       // this.playerTiles = message.playerTiles[this.playerIndex];
 
       // 如果 playerActions 有超过2个操作，5秒内没有点击则自动点击 Skip
