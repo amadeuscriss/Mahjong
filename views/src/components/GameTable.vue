@@ -161,7 +161,7 @@ export default {
     },
     //更新手牌
     updateGame(message) {
-      this.playerTiles = message.playerTiles;
+      this.playerTiles = message.discardedTile;
     },
     //获取玩家行为
     handlePlayerActions(message) {
