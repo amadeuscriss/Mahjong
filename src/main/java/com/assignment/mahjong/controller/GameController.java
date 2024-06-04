@@ -262,11 +262,6 @@ public class GameController {
                         playerActions.add("Win");
                     }
                     if (KongAction.canKong(playerTiles, drawnTile)) {
-                        playerActions.add("Kong");
-                    }
-
-                    // 判断是否可以自杠
-                    if (KongAction.canSelfKong(playerTiles, drawnTile)) {
                         playerActions.add("SelfKong");
                     }
 
