@@ -10,7 +10,6 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -448,13 +447,19 @@ public class GameController {
 
         Player performer = room.getPlayers().get(performerIndex);
         List<String> showTiles = room.getShowTilesForPlayer(performer);
+        List<String> playernowtiles = performer.getHand().getTiles().stream()
+                .map(TileInterface::getValueAsString)
+                .collect(Collectors.toList());
+
 
         Map<String, Object> notification = Map.of(
                 "type", "notification",
                 "action", action,
                 "showTiles", showTiles,
                 "tableTiles", tableTiles,
-                "performerIndex", performerIndex
+                "performerIndex", performerIndex,
+                "playernowtiles", playernowtiles
+
         );
         System.out.println("Broadcasting: " + notification);
         return ResponseEntity.ok(notification);

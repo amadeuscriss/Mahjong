@@ -89,7 +89,7 @@ public class GameInitializer {
                 tiles.add(new WordTile("Dragon", dragon));
             }
         }
-
+        shuffleTiles();
         System.out.println("Tiles are set up with total " + tiles.size() + " tiles.");  // 打印牌的总数，确认牌已经正确添加
     }
 
@@ -130,6 +130,10 @@ public class GameInitializer {
                 index += tilesPerPlayer;
             }
         }
+
+        // 从牌库中删除已经发过的牌
+        tiles.subList(0, index).clear();
+
         System.out.println("Tiles have been distributed to players and arranged.");
     }
 
