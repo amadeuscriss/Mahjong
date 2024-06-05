@@ -136,8 +136,10 @@ public class WebSocketServer {
                             for (Player player : serverRoom.getPlayers()) {
                                 messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                 sendMessageToUser(messageToSend, player.getName());
-                                messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
-                                sendMessageToUser(messageToSend, player.getName());
+                                if (!player.getName().equals(session.getId())) {
+                                    messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
+                                    sendMessageToUser(messageToSend, player.getName());
+                                }
                             }
 
                             // 加一个turn round 的方法
