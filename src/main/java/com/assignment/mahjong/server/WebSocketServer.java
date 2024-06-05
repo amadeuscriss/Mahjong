@@ -151,7 +151,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")));
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
 
@@ -162,7 +162,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")));
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
                                 }
