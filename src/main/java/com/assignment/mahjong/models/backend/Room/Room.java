@@ -1,36 +1,33 @@
 package com.assignment.mahjong.models.backend.Room;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
-import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Room {
-    // 获取房间中的所有玩家
     @Getter
     private static List<Player> players;  // 房间中的玩家列表
     private final int maxPlayers = 4;  // 房间最大玩家数
     private boolean gameStarted = false;  // 游戏是否已经开始
     @Getter
     private String roomCode;  // 房间号
-    private MahjongSet mahjongSet;
     private TileInterface lastDiscardedTile;
     private String lastDiscardedByPlayerName;
     private Set<String> activeRoomCodes = new HashSet<>();  // 用于存储活跃的房间号
     private RoomManager roomManager;
     private String currentTurnPlayerName;
-    private List<TileInterface> tiles = new ArrayList<>(); // 存储牌的列表
+    private List<TileInterface> tiles; // 存储牌的列表
     private Random random = new Random(); // 用于生成随机数的Random实例
     public static List<TileInterface> tableTiles = new ArrayList<>(); // Tiles on the table
 
     // 构造函数
-    public Room(RoomManager manager, MahjongSet mahjongSet) {
+    public Room(RoomManager manager, List<TileInterface> tiles) {
         players = new ArrayList<>();
         this.roomCode = generateRoomCode();
         this.roomManager = manager;
-        this.mahjongSet = mahjongSet;
+        this.tiles = tiles;
     }
 
     // 添加玩家到房间
@@ -44,20 +41,21 @@ public class Room {
         }
     }
 
-    // 方法来获取牌集
+    // 获取牌集
     public List<TileInterface> getTiles() {
         return tiles;
     }
 
-    public static Player getPlayerByName(String Name) {
+    // 根据名字获取玩家
+    public static Player getPlayerByName(String name) {
         for (Player player : players) {
-            if (player.getName().equals(Name)) {
+            if (player.getName().equals(name)) {
                 return player;
             }
         }
         return null;
     }
-    // 删除玩家通过玩家对象
+
     // 封装移除玩家的逻辑，使其可以重复使用
     private boolean removePlayer(Player player) {
         return players.remove(player);
@@ -67,7 +65,6 @@ public class Room {
     public void playerLeave(Player player) {
         if (removePlayer(player)) {
             System.out.println("Player " + player.getName() + " has left the room.");
-            // 检查房间是否为空，如果是，则可能需要删除房间
             if (players.isEmpty() && !gameStarted) {
                 roomManager.removeRoom(roomCode);
                 System.out.println("Room " + roomCode + " removed due to no players.");
@@ -75,7 +72,6 @@ public class Room {
         } else {
             System.out.println("Player not found or could not be removed.");
         }
-        // 检查是否需要重新评估游戏开始条件
         checkIfGameCanStart();
     }
 
@@ -153,14 +149,10 @@ public class Room {
     }
 
     public boolean isGameStarted() {
-        return false;
+        return gameStarted;
     }
 
-    // 其他方法
-    public MahjongSet getMahjongSet() {
-        return mahjongSet;
-    }
-
+    // 设置最近一次弃牌
     public void setLastDiscardedTile(TileInterface tile, String playerName) {
         this.lastDiscardedTile = tile;
         this.lastDiscardedByPlayerName = playerName;
