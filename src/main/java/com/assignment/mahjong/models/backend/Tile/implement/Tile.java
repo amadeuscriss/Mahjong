@@ -2,23 +2,23 @@ package com.assignment.mahjong.models.backend.Tile.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 
-// 定义一个抽象类Tile，它实现了TileInterface接口
+// Define an abstract class Tile that implements the TileInterface
 public abstract class Tile implements TileInterface {
-    // type属性用于存储牌的类型
+    // The type attribute is used to store the type of the tile
     protected String type;
 
-    // 构造函数，初始化牌的类型
+    // Constructor to initialize the type of the tile
     public Tile(String type) {
         this.type = type;
     }
 
-    // 实现接口中的getType方法，返回牌的类型
+    // Implement the getType method from the interface, returns the type of the tile
     @Override
     public String getType() {
         return type;
     }
 
-    // 抽象方法，需要在子类中实现，用于获取牌的值的字符串表示
+    // An abstract method that needs to be implemented in subclasses, used to get the string representation of the tile's value
     public abstract String getValueAsString();
 }
 

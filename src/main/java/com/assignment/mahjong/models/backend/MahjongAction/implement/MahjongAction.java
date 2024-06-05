@@ -4,39 +4,39 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import java.util.List;
 import java.util.Optional;
 
-// 定义一个抽象类MahjongAction，用于描述麻将中的各种动作
+// Define an abstract class MahjongAction to describe various actions in Mahjong.
 public abstract class MahjongAction {
-    protected TileInterface currentTile;  // 当前操作的牌
-    protected List<TileInterface> playerHand;  // 玩家手牌列表
-    protected boolean isSuccessful;       // 动作是否成功的标志
+    protected TileInterface currentTile;  // The tile currently being operated on
+    protected List<TileInterface> playerHand;  // List of tiles in the player's hand
+    protected boolean isSuccessful;       // Flag indicating whether the action is successful
 
-    // 构造函数，初始化当前牌和玩家手牌
+    // Constructor to initialize the current tile and player's hand
     public MahjongAction(TileInterface currentTile, List<TileInterface> playerHand) {
         this.currentTile = currentTile;
         this.playerHand = playerHand;
-        this.isSuccessful = false;  // 默认设置动作未成功
+        this.isSuccessful = false;  // Default to setting action as unsuccessful
     }
 
-    // 抽象方法，子类需要根据具体动作来实现这个方法
+    // Abstract method, subclasses need to implement this method based on specific actions
     public abstract void execute();
 
-    // 获取动作是否成功执行的结果
+    // Get the result of whether the action was successfully executed
     public boolean isActionSuccessful() {
         return isSuccessful;
     }
 
-    // 解析牌的数值，如果牌的字符串表示可以转换为整数，则返回对应的Optional对象，否则返回空的Optional
+    // Parse the value of the tile; if the string representation of the tile can be converted to an integer, return the corresponding Optional object, otherwise return an empty Optional
     protected static Optional<Integer> parseTileValue(TileInterface tile) {
         try {
-            // 尝试将牌的字符串值转换为整数
+            // Attempt to convert the string value of the tile to an integer
             return Optional.of(Integer.parseInt(tile.getValueAsString()));
         } catch (NumberFormatException e) {
-            // 如果转换失败，说明牌的值不是数字，返回空的Optional对象
+            // If conversion fails, it means the value of the tile is not a number, return an empty Optional
             return Optional.empty();
         }
     }
 
-    // 添加一个公共方法来获取操作的成功状态
+    // Add a public method to get the success status of the operation
     public boolean isSuccessful() {
         return isSuccessful;
     }

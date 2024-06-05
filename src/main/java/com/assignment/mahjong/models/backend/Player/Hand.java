@@ -6,26 +6,27 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+// Represent a player's hand in a tile-based game
 public class Hand {
-    private List<TileInterface> tiles;
+    private List<TileInterface> tiles; // List to store tiles in the hand
 
     public Hand() {
-        this.tiles = new ArrayList<>();
+        this.tiles = new ArrayList<>(); // Initialize the list of tiles
     }
 
     public void addTile(TileInterface tile) {
-        tiles.add(tile);
+        tiles.add(tile); // Add the tile to the hand
         System.out.println("Added tile: " + tile.getValueAsString() + " to hand.");
     }
 
     public boolean removeTile(TileInterface tile) {
-        boolean removed = tiles.remove(tile);
+        boolean removed = tiles.remove(tile); // Attempt to remove the tile
         if (removed) {
             System.out.println("Removed tile: " + tile.getValueAsString() + " from hand.");
         } else {
             System.out.println("Failed to remove tile: " + tile.getValueAsString() + " from hand.");
         }
-        return removed;
+        return removed; // Return whether the removal was successful
     }
 
     public List<TileInterface> getTiles() {
@@ -36,7 +37,7 @@ public class Hand {
         Collections.sort(tiles, new Comparator<TileInterface>() {
             @Override
             public int compare(TileInterface o1, TileInterface o2) {
-                int typeDiff = o1.getType().compareTo(o2.getType());
+                int typeDiff = o1.getType().compareTo(o2.getType()); // Compare tile types
                 if (typeDiff != 0) return typeDiff;
                 return Integer.compare(o1.getNumber(), o2.getNumber());
             }

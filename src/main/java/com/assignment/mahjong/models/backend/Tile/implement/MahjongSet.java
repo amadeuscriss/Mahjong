@@ -7,16 +7,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class MahjongSet {
-    // tiles储存牌
+    // Tiles stores card
     private List<TileInterface> tiles = new ArrayList<>();
 
     public MahjongSet() {
         initializeTiles();
     }
 
-    // 生成牌的方法
+    // Method of generating cards
     private void initializeTiles() {
-        // 生成条、筒、万
+        // Generate bamboo, dot, and character
         for (int i = 1; i <= 9; i++) {
             for (int j = 0; j < 4; j++) {
                 tiles.add(new NumericTile("Bamboo", i));
@@ -25,7 +25,7 @@ public class MahjongSet {
             }
         }
 
-        // 生成风牌和箭牌
+        // Generate winds and dragons
         String[] winds = {"East", "South", "West", "North"};
         String[] dragons = {"Red", "Green", "White"};
         for (int i = 0; i < 4; i++) {
@@ -38,12 +38,12 @@ public class MahjongSet {
         }
     }
 
-    // 洗牌算法
+    // Shuffling algorithm
     public void shuffle() {
         Collections.shuffle(tiles);
     }
 
-    // 访问当前的牌集合
+    // Access the current set of cards
     public List<TileInterface> getTiles() {
         return tiles;
     }

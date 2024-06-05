@@ -20,22 +20,30 @@ import java.util.stream.IntStream;
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
-
+    // RoomManager instance to manage game rooms
     @Getter
     @Autowired
     private static RoomManager roomManager = new RoomManager();
 
+    /**
+     * Endpoint to create a new game room.
+     *
+     * @param name The name of the room to be created.
+     * @return ResponseEntity<Object> indicating the success or failure of the room creation.
+     */
     @PostMapping("/createRoom")
     public ResponseEntity<Object> createRoom(String name) {
         String roomCode = roomManager.createRoom(name);  // This now returns the room code
         Room room = roomManager.getRoom(roomCode);  // Get the room object using the code
-        if (room != null) {
+        if (room != null) { // Check if the room was successfully created
+            // If room creation was successful, return room information
             return ResponseEntity.ok(Map.of(
                     "type", "roomCreated",
                     "roomId", roomCode,
                     "players", room.getPlayers().stream().map(Player::getId).collect(Collectors.toList())
             ));
         } else {
+            // If room creation failed, return an error response
             return ResponseEntity.badRequest().body(Map.of(
                     "type", "error",
                     "message", "Failed to create room"
@@ -46,7 +54,9 @@ public class GameController {
 
     @PostMapping("/joinRoom/{roomCode}")
     public Map<String, Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
+        // Attempt to join the specified room with the provided player
         boolean joined = roomManager.joinRoom(roomCode, player);
+        // Get the Room object corresponding to the room code
         Room room = roomManager.getRoom(roomCode);
         if (joined) {
             // Broadcasting update to all clients in the room could be handled elsewhere in real app
@@ -58,6 +68,7 @@ public class GameController {
 
             return response;
         } else {
+            // If room not found or unable to join, prepare response indicating room not found
             Map<String, Object> response = new HashMap<>();
             response.put("type", "joinRoomResponse");
             response.put("state", "roomNotFound");
@@ -82,6 +93,7 @@ public class GameController {
 
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
+        // Retrieve the Room object associated with the provided room code
         Room room = roomManager.getRoom(roomCode);
         if (room != null && room.checkIfGameCanStart()) {
             // Initialize the game using the Room object
@@ -90,6 +102,7 @@ public class GameController {
 
             String currentTurnPlayerName = room.getCurrentTurnPlayerName(); // Get the current turn player ID
             if (currentTurnPlayerName == null) {
+                // If there is no current turn player, return an error response
                 return ResponseEntity.ok(Map.of(
                         "type", "gameStart",
                         "status", "No current player"
@@ -116,12 +129,16 @@ public class GameController {
 
     @PostMapping("/availableActions/{roomCode}/{playerName}")
     public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody int discardedTileIndex) {
+        // Get the specified room
         Room room = roomManager.getRoom(roomCode);
+        // Get the latest discarded tile
         TileInterface Discardtile1 = room.getAllDiscardedTiles().get(room.getAllDiscardedTiles().size()-1);
         List<String> actions = new ArrayList<>();
         if (room != null) {
+            // Get the specified player
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
+                // If there is no discarded tile yet, indicating the first player to act, can only discard
                 if (Discardtile1 == null) {
                     // First player to act, no discarded tile, can only discard
                     actions.add("Discard");
@@ -139,12 +156,14 @@ public class GameController {
                     actions.add("Chi");
                 }
             }
+                // Return ResponseEntity containing available actions
                 return ResponseEntity.ok(Map.of(
                         "type", "playerActions",
                         "playerActions", actions
                 ));
             }
 
+        // If the room or player is not found, return an error response
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
@@ -155,22 +174,22 @@ public class GameController {
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                // 执行相应的操作
+                // Perform the corresponding operation
                 switch (action) {
                     case "Win":
-                        // 执行胡牌操作
+                        // Perform the Hu operation
                         checkWin(roomCode, playerName);
                         break;
                     case "Kong":
-                        // 执行杠牌操作
+                        // Perform the Kong operation
                         kongTile(roomCode, playerName, (Integer) request.get("tileIndex"));
                         break;
                     case "Pong":
-                        // 执行碰牌操作
+                        // Perform the Pong operation
                         pongTile(roomCode, playerName);
                         break;
                     case "Chi":
-                        // 执行吃牌操作
+                        // Perform te Chi operation
                         chiTile(roomCode, playerName);
                         break;
                     case "Skip":
@@ -180,13 +199,13 @@ public class GameController {
                         return ResponseEntity.badRequest().body(Map.of("message", "Invalid action."));
                 }
 
-                // 获取当前回合玩家
+                // Get the current round player
                 String currentTurnPlayerName = room.getCurrentTurnPlayerName();
 
-                // 广播操作信息
+                // Broadcast operation information
                 broadcastAction(room, action, room.getPlayers().indexOf(player));
 
-                // 发送回合变动信息
+                // Send round change information
                 Map<String, Object> turnChangeNotification = Map.of(
                         "type", "Turn change",
                         "currentTurnPlayerName", currentTurnPlayerName
@@ -201,33 +220,42 @@ public class GameController {
     }
 
 
-    // 处理玩家出牌动作
+    // Handle the player's card action
     @PostMapping("/discardTile/{roomCode}/{playerName}")
     public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
+        // Get the specified room
         Room room = roomManager.getRoom(roomCode);
         if (room == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
         }
 
+        // Get the specified player in the room
         Player player = room.getPlayerByName(playerName);
         if (player == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
 
+        // Extract the tile index from the request body, default to -1 if not provided
         int tileIndex = (int) request.getOrDefault("data", -1); // Assumes tileIndex is passed in the request
+        // Validate the tile index
         if (tileIndex < 0 || tileIndex >= player.getHand().getTiles().size()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index."));
         }
 
+        // Get the tile to discard
         TileInterface tileToDiscard = player.getHand().getTiles().get(tileIndex);
+        // Create a discard action instance
         DiscardAction discardAction = new DiscardAction(player.getHand().getTiles());
+        // Execute the discard action
         discardAction.execute(tileIndex);
 
         if (!discardAction.isActionSuccessful()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Failed to discard a tile."));
         }
 
+        // Set the last discarded tile in the room
         room.setLastDiscardedTile(tileToDiscard, playerName);
+        // Return a successful response with updated game data
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
                 "discardedTile", discardAction.getleasttiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
@@ -244,15 +272,15 @@ public class GameController {
                 DrawAction drawAction = new DrawAction(room.getTiles());
                 drawAction.execute();
                 if (drawAction.isActionSuccessful()) {
-                    // 更新玩家的最后行动为摸牌
+                    // Update the player's last action to touch the card
                     player.setLastActionWasDraw(true);
 
-                    // 获取玩家摸牌后的手牌
+                    // Get the hand after the player touches the card
                     List<TileInterface> playerTiles = player.getHand().getTiles();
                     TileInterface thedrawtiles = drawAction.getDrawnTile();
                     playerTiles.add(thedrawtiles);
 
-                    // 检测是否可以胡牌或杠牌，并将结果存储在一个列表中
+                    // Detects whether a card can be a card or a card, and stores the result in a list
                     List<String> playerActions = new ArrayList<>();
                     TileInterface drawnTile = drawAction.getDrawnTile();
 
@@ -265,7 +293,7 @@ public class GameController {
 
                     playerActions.add("Discard");
 
-                    // 广播当前玩家摸到的牌以及更新后的手牌和可执行的操作
+                    // Broadcast the cards that the current player has touched along with the updated hand and the actions that can be performed
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Draw",
@@ -293,17 +321,17 @@ public class GameController {
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                // 获取桌面上最后一张牌
+                // Get the last card on the table
                 TileInterface lastDiscardedTile = room.getLastDiscardedTile();
                 if (lastDiscardedTile != null) {
-                    // 查找与最后一张牌相同的牌在玩家手牌中的索引
+                    // Finds the index of the card in the player's hand that is the same as the last card
                     List<Integer> tileIndices = IntStream.range(0, player.getHand().getTiles().size())
                             .filter(i -> player.getHand().getTiles().get(i).getValueAsString().equals(lastDiscardedTile.getValueAsString()))
                             .boxed()
                             .collect(Collectors.toList());
-                    // 确保找到了两个相同的牌
+                    // Make sure you find two of the same cards
                     if (tileIndices.size() == 2) {
-                        // 执行碰牌操作
+                        // Perform the Pong operation
                         PongAction pongAction = new PongAction(lastDiscardedTile, player.getHand().getTiles(), player);
                         pongAction.execute();
                         if (pongAction.isActionSuccessful()) {
@@ -348,13 +376,13 @@ public class GameController {
             Player player = room.getPlayerByName(playerName);
             if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
                 TileInterface tileToKong = player.getHand().getTiles().get(tileIndex);
-                boolean isSelfKong = checkIfSelfKong(tileToKong, player); // 检查是否为自摸杠
+                boolean isSelfKong = checkIfSelfKong(tileToKong, player); // Check whether it is a self-touching bar
                 KongAction kongAction = new KongAction(tileToKong, player.getHand().getTiles(), isSelfKong, player.getPoints(), player);
                 kongAction.execute();
                 if (kongAction.isActionSuccessful()) {
-                    // 明牌列表显示
-                    List<String> showTiles = Collections.nCopies(4, tileToKong.getValueAsString()); // 显示4张杠的牌
-                    // 更新玩家的手牌并响应杠牌成功
+                    // Clear card list display
+                    List<String> showTiles = Collections.nCopies(4, tileToKong.getValueAsString()); // A card showing 4 bars
+                    // Update the player's hand and respond to the bar successfully
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
                             "state", "Kong",
@@ -375,9 +403,9 @@ public class GameController {
     }
 
 
-    // 辅助方法，检查是否为自摸杠
+    // Auxiliary method, check whether it is a self-touch Kong
     private boolean checkIfSelfKong(TileInterface tile, Player player) {
-        // 检查是否是玩家自己摸到的牌，这通常需要特定的游戏逻辑来确定
+        // Check whether the player himself touched the card, which usually requires specific game logic to determine
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
 
@@ -390,7 +418,7 @@ public class GameController {
                 List<TileInterface> playerHand = player.getHand().getTiles();
                 List<List<Integer>> chiCombinations = new ArrayList<>();
 
-                // 遍历手牌，查找所有可以吃牌的组合索引
+                // Go through the hand and find the index of all combinations that can be Chi
                 for (int i = 0; i < playerHand.size(); i++) {
                     TileInterface tileToChi = playerHand.get(i);
 
@@ -408,7 +436,7 @@ public class GameController {
                             chiIndices.add(playerHand.indexOf(predecessorTile));
                             chiIndices.add(playerHand.indexOf(successorTile));
 
-                            // 排除重复的组合
+                            // Eliminate duplicate combinations
                             if (chiIndices.stream().distinct().count() == 3) {
                                 chiCombinations.add(chiIndices);
                             }
@@ -418,7 +446,7 @@ public class GameController {
 
                 System.out.println(chiCombinations);
                 if (!chiCombinations.isEmpty()) {
-                    // 使用找到的第一个组合进行吃牌操作
+                    // Use the first combination found to Chi the card
                     List<Integer> chiIndices = chiCombinations.get(0);
                     List<TileInterface> chiTiles = chiIndices.stream().map(playerHand::get).collect(Collectors.toList());
 
@@ -475,17 +503,22 @@ public class GameController {
     }
 
     public ResponseEntity<Object> broadcastAction(Room room, String action, int performerIndex) {
+        // Get all the tiles discarded on the table and convert them to strings
         List<String> tableTiles = room.getAllDiscardedTiles().stream()
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
 
+        // Get the performer of the action
         Player performer = room.getPlayers().get(performerIndex);
+        // Get the tiles shown to the performer
         List<String> showTiles = room.getShowTilesForPlayer(performer);
+        // Get the current tiles of the performer's hand and convert them to strings
         List<String> playernowtiles = performer.getHand().getTiles().stream()
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
 
 
+        // Construct the notification message
         Map<String, Object> notification = Map.of(
                 "type", "notification",
                 "action", action,
@@ -502,8 +535,10 @@ public class GameController {
 
     @PostMapping("/getPlayerTiles/{roomCode}/{playerName}")
     public ResponseEntity<Object> getPlayerTiles(@PathVariable String roomCode, @PathVariable String playerName) {
+        // Retrieve the room using the provided room code
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
+            // Retrieve the player from the room using the provided player name
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
                 return ResponseEntity.ok(Map.of(

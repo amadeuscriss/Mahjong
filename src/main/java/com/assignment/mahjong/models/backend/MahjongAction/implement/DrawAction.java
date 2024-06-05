@@ -4,47 +4,46 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 
 import java.util.List;
 
-// DrawAction类用于实现摸牌动作
+// DrawAction uses to implement card touch actions
 public class DrawAction {
-    private List<TileInterface> tiles;  // 引用牌库，用于从中摸牌
-    private TileInterface drawnTile;  // 存储摸到的牌
-    private boolean isSuccessful;  // 操作是否成功的标志
+    private List<TileInterface> tiles;  // Reference card library, used to draw cards from
+    private TileInterface drawnTile;  // Store the cards you touch
+    private boolean isSuccessful;  // Indicates whether the operation was successful
 
-    // 构造函数，接受牌库的引用
+    // Constructor that accepts a reference to the library
     public DrawAction(List<TileInterface> tiles) {
         this.tiles = tiles;
     }
 
-    // 执行摸牌动作的方法
+    // Method of performing a touch action
     public void execute() {
-        drawnTile = drawTileFromSet();  // 从牌库中摸一张牌
+        drawnTile = drawTileFromSet();  // Grab a card from the library
         if (drawnTile != null) {
-            // 如果成功摸到牌，打印摸到的牌并标记操作成功
+            // If the card is successfully touched, print the card and mark the operation successful
             System.out.println("Drew a tile: " + drawnTile.getValueAsString());
             isSuccessful = true;
         } else {
-            // 如果未摸到牌（牌库空），打印失败信息并标记操作失败
             System.out.println("Failed to draw a tile: Deck is empty.");
             isSuccessful = false;
         }
     }
 
-    // 从tiles中摸一张牌的私有方法
+    // A private way to touch a card from the tiles
     private TileInterface drawTileFromSet() {
         if (!tiles.isEmpty()) {
-            // 如果牌库不为空，从牌堆末尾摸一张牌并移除
+            // If the deck is not empty, touch a card from the end of the deck and remove it
             return tiles.remove(tiles.size() - 1);
         }
-        // 如果牌堆为空，返回null表示无法摸牌
+        // If the deck is empty, null is returned to indicate that the card cannot be touched
         return null;
     }
 
-    // 获取摸到的牌的公共方法
+    // A public method of obtaining a touched card
     public TileInterface getDrawnTile() {
         return drawnTile;
     }
 
-    // 返回操作是否成功的公共方法
+    // A public method that returns whether the operation was successful
     public boolean isActionSuccessful() {
         return isSuccessful;
     }
