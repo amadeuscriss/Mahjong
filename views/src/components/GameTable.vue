@@ -8,7 +8,7 @@
       下家name{{getNextPlayerName(currentTurnPlayerName, 1)}}
     </div>
 
-<!--    &lt;!&ndash; 玩家手牌展示区 &ndash;&gt;-->
+
 <!--    <div class="tiles">-->
 <!--      <div v-for="(tile, index) in playerTiles" :key="index" class="tile-container">-->
 <!--        <img src="@/assets/tiles_back/playerTiles.png" class="player-tiles-back" alt="tile back"/>-->
@@ -17,12 +17,19 @@
 <!--      </div>-->
 <!--    </div>-->
 
+    <!-- 玩家手牌展示区 -->
+    <!-- 玩家手牌展示区 -->
     <div class="tiles">
       <div
           v-for="(tile, index) in playerTiles"
           :key="index"
           class="tile-container"
-          :class="{ 'highlighted-tile': tile === drawnTile }"
+          :class="{
+          'highlighted-tile': tile === drawnTile,
+          'highlighted': highlightedTiles.includes(index)
+        }"
+          @mouseover="highlightTiles([index])"
+          @mouseleave="resetHighlight()"
       >
         <img
             src="@/assets/tiles_back/playerTiles.png"
@@ -82,10 +89,22 @@
       </div>
     </div>
 
-    <!-- 操作按钮区域 -->
+<!--    &lt;!&ndash; 操作按钮区域 &ndash;&gt;-->
+<!--    <div class="action-buttons">-->
+<!--      <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">-->
+<!--        {{ action }}-->
+<!--      </button>-->
+<!--    </div>-->
+
     <div class="action-buttons">
       <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">
         {{ action }}
+      </button>
+      <button v-for="(tiles, index) in tilesToEat" :key="'eat-' + index"
+              @click="handleEatAction(index)"
+              @mouseover="highlightTiles(tiles)"
+              @mouseleave="resetHighlight()">
+        吃牌 {{ index + 1 }}
       </button>
     </div>
 
@@ -114,6 +133,8 @@ export default {
       playerTiles: [], // 玩家手牌
       drawnTile: null,
 
+      tilesToEat: [],
+      highlightedTiles: [], // 高亮的牌索引
       showTiles: [[], [], [], []], // 玩家的明牌
 
       notification: {
@@ -194,7 +215,7 @@ export default {
     //获取玩家行为
     handlePlayerActions(message) {
       this.playerActions = message.playerActions;
-
+      this.tilesToEat = message.tilesToEat;
       if (message.state === "Draw"){
         this.playerTiles = message.playerTiles;
         this.drawnTile = message.drawnTile;
@@ -323,15 +344,22 @@ export default {
     },
 
     // 处理操作按钮的点击事件
-    handleAction(action) {
+    handleAction(action, tilesIndex = -1) {
       console.log('Action clicked:', action); // 调试信息
       const message = JSON.stringify({ type: 'action',
                                             behavior: action,
                                             state: 'Playing' ,
                                             roomId: this.roomId ,
                                             playIndex: this.players.indexOf(this.playerIndex),
-                                            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
+                                            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
+                                            tilesToEatIndex : tilesIndex
+      });
+
+
+
       this.$ws.send(message);
+
+      this.playerTiles = [];
 
       // 点击按钮后清除自动跳过的超时
       if (this.skipTimeout) {
@@ -339,6 +367,20 @@ export default {
         this.skipTimeout = null;
       }
     },
+
+    // 在事件处理程序中调用 handleAction
+    handleEatAction(index) {
+      this.handleAction('Chi', index);
+    },
+
+    highlightTiles(tiles) {
+      this.highlightedTiles = tiles;
+    },
+
+    resetHighlight() {
+      this.highlightedTiles = [];
+    },
+
 
     handleMessage(event) {
       const message = JSON.parse(event.data);
@@ -426,6 +468,11 @@ export default {
   left: 2px;
   z-index: 2;
   cursor: pointer;
+}
+
+.highlighted {
+  transform: translateY(-10px);
+  transition: transform 0.2s ease;
 }
 
 .highlighted-tile {
