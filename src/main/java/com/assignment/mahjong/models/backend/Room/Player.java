@@ -15,19 +15,19 @@ import lombok.Setter;
 public class Player {
     // Getter and Setter methods
     @Getter
-    private UUID id; // Player ID
+    private UUID id;
     @Getter
     @Setter
-    private String name; // Player name
-    private boolean isReady; // Whether the player is ready
+    private String name;
+    private boolean isReady;
     @Getter
-    private Hand hand; // Player's hand
+    private Hand hand;
     @Getter
-    private Point points; // Player's points object
+    private Point points;
     @Setter
-    private boolean lastActionWasDraw; // Whether the last action was a draw
+    private boolean lastActionWasDraw;
     @Getter
-    private List<Meld> melds; // List of player's melds
+    private List<Meld> melds;
 
     /**
      * Constructor for Player
@@ -35,13 +35,13 @@ public class Player {
      * @param name The name of the player
      */
     public Player(String name) {
-        this.id = UUID.randomUUID(); // Generate a random UUID
+        this.id = UUID.randomUUID();
         this.name = name;
         this.isReady = true;
-        this.hand = new Hand(); // Initialize the hand
-        this.points = new Point(); // Initialize the points object
-        this.lastActionWasDraw = false; // Default the last action to not be a draw
-        this.melds = new ArrayList<>(); // Initialize the meld list
+        this.hand = new Hand();
+        this.points = new Point();
+        this.lastActionWasDraw = false;
+        this.melds = new ArrayList<>();
     }
 
     public boolean isReady() {
@@ -58,9 +58,9 @@ public class Player {
      * @param tiles The list of tiles to set as the player's hand
      */
     public void setHand(List<TileInterface> tiles) {
-        this.hand.getTiles().clear();  // Clear the hand
-        this.hand.getTiles().addAll(tiles);  // Add new tiles to the hand
-        this.hand.arrangeHand();  // Sort the hand
+        this.hand.getTiles().clear();
+        this.hand.getTiles().addAll(tiles);
+        this.hand.arrangeHand();
     }
 
     public boolean getLastActionWasDraw() {
@@ -73,6 +73,6 @@ public class Player {
      * @param meld The meld to add
      */
     public void addMeld(Meld meld) {
-        this.melds.add(meld); // Add a meld to the list
+        this.melds.add(meld);
     }
 }
