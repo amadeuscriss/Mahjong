@@ -9,24 +9,24 @@ import java.util.stream.Collectors;
 
 public class Room {
     @Getter
-    private static List<Player> players;  // List of players in the room
-    private final int maxPlayers = 4;  // Maximum number of players in the room
+    private static List<Player> players;
+    private final int maxPlayers = 4;
     @Getter
-    private boolean gameStarted = false;  // Whether the game has started
+    private boolean gameStarted = false;
     @Getter
-    private String roomCode;  // Room code
+    private String roomCode;
     @Getter
-    private TileInterface lastDiscardedTile;  // The last discarded tile
+    private TileInterface lastDiscardedTile;
     @Getter
-    private String lastDiscardedByPlayerName;  // Name of the player who discarded the last tile
-    private Set<String> activeRoomCodes = new HashSet<>();  // Set of active room codes
-    private RoomManager roomManager;  // Manager for the room
+    private String lastDiscardedByPlayerName;
+    private Set<String> activeRoomCodes = new HashSet<>();
+    private RoomManager roomManager;
     @Setter
-    private String currentTurnPlayerName;  // Name of the player whose turn it is
+    private String currentTurnPlayerName;
     @Getter
-    private List<TileInterface> tiles; // List of tiles
-    private Random random = new Random(); // Random instance for generating random numbers
-    public static List<TileInterface> tableTiles = new ArrayList<>(); // Tiles on the table
+    private List<TileInterface> tiles;
+    private Random random = new Random();
+    public static List<TileInterface> tableTiles = new ArrayList<>();
 
     /**
      * Constructor for Room
@@ -106,7 +106,7 @@ public class Room {
      */
     private String generateRoomCode() {
         Random rand = new Random();
-        int number = rand.nextInt(900000) + 100000;  // Generate a number between 100000 and 999999
+        int number = rand.nextInt(900000) + 100000;
         return String.valueOf(number);
     }
 
@@ -116,7 +116,7 @@ public class Room {
      * @param roomCode The code of the room to remove
      */
     public void removeRoom(String roomCode) {
-        activeRoomCodes.remove(roomCode);  // Remove the room code from the set
+        activeRoomCodes.remove(roomCode);
         System.out.println("Room " + roomCode + " has been removed.");
     }
 
@@ -231,7 +231,7 @@ public class Room {
         Player firstPlayer = null;
 
         for (Player player : players) {
-            int roll = random.nextInt(6) + 1; // Simulate a six-sided dice roll
+            int roll = random.nextInt(6) + 1;
             System.out.println(player.getName() + " rolled a " + roll);
 
             if (roll > maxRoll) {
@@ -251,7 +251,7 @@ public class Room {
      */
     public void moveToNextPlayer() {
         if (players.size() < 2) {
-            return;  // Not enough players to move to the next player
+            return;
         }
 
         int currentIndex = -1;
@@ -263,7 +263,7 @@ public class Room {
         }
 
         if (currentIndex == -1) {
-            return;  // Current turn player not found
+            return;
         }
 
         int nextIndex = (currentIndex + 1) % players.size();
