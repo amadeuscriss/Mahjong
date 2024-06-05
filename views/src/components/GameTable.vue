@@ -319,7 +319,8 @@ export default {
             data: tileIndex,
             roomId: this.roomId,
             playIndex: this.players.indexOf(this.playerIndex),
-            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)
+            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
+            players: this.players,
           });
 
           // 发送消息
