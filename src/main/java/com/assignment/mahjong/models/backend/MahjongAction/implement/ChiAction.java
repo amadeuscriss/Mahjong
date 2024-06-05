@@ -10,50 +10,66 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ChiAction extends MahjongAction {
-    private TileInterface tileToAdd; // To be added from the table
     private Player player;  // Player performing the action
 
-    public ChiAction(TileInterface currentTile, List<TileInterface> playerHand, TileInterface tileToAdd, Player player) {
+    public ChiAction(TileInterface currentTile, List<TileInterface> playerHand, Player player) {
         super(currentTile, playerHand);
-        this.tileToAdd = tileToAdd;
         this.player = player;
     }
 
     public void execute() {
-        Optional<Integer> maybeValue = Optional.of(currentTile.getNumber());
-        if (!maybeValue.isPresent()) {
-            System.out.println("Cannot chi: Not a numeric tile.");
-            isSuccessful = false;
-            return;
-        }
-
         if (canChi(playerHand, currentTile)) {
+            // 中间牌情况：currentTile - 1, currentTile, currentTile + 1
             TileInterface predecessorTile = findPredecessorTile(playerHand, currentTile);
             TileInterface successorTile = findSuccessorTile(playerHand, currentTile);
-
             if (predecessorTile != null && successorTile != null) {
-                List<TileInterface> chiTiles = new ArrayList<>();
-                chiTiles.add(predecessorTile);
-                chiTiles.add(currentTile);
-                chiTiles.add(successorTile);
-
-                Meld chiMeld = new Meld("CHI", chiTiles);
-                player.addMeld(chiMeld);
-                player.getHand().getTiles().remove(predecessorTile);
-                player.getHand().getTiles().remove(successorTile);
-                player.getHand().getTiles().remove(currentTile);
-
-                System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
-                isSuccessful = true;
-            } else {
-                System.out.println("Cannot chi: Necessary tiles not found.");
-                isSuccessful = false;
+                performChi(predecessorTile, currentTile, successorTile);
+                return;
             }
+
+            // 左边缘情况：currentTile, currentTile + 1, currentTile + 2
+            TileInterface firstSuccessor = findSuccessorTile(playerHand, currentTile);
+            if (firstSuccessor != null) {
+                TileInterface secondSuccessor = findSuccessorTile(playerHand, firstSuccessor);
+                if (secondSuccessor != null) {
+                    performChi(currentTile, firstSuccessor, secondSuccessor);
+                    return;
+                }
+            }
+
+            // 右边缘情况：currentTile - 2, currentTile - 1, currentTile
+            TileInterface firstPredecessor = findPredecessorTile(playerHand, currentTile);
+            if (firstPredecessor != null) {
+                TileInterface secondPredecessor = findPredecessorTile(playerHand, firstPredecessor);
+                if (secondPredecessor != null) {
+                    performChi(secondPredecessor, firstPredecessor, currentTile);
+                    return;
+                }
+            }
+
+            System.out.println("Cannot chi: Necessary tiles not found.");
+            isSuccessful = false;
         } else {
             System.out.println("Cannot chi: No suitable tiles.");
             isSuccessful = false;
         }
     }
+
+    private void performChi(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
+        List<TileInterface> chiTiles = new ArrayList<>();
+        chiTiles.add(tile1);
+        chiTiles.add(tile2);
+        chiTiles.add(tile3);
+
+        Meld chiMeld = new Meld("CHI", chiTiles);
+        player.addMeld(chiMeld);
+        player.getHand().getTiles().remove(tile1);
+        player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
+
+        System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
+        isSuccessful = true;
+    }
+
 
     public static boolean canChi(List<TileInterface> tiles, TileInterface tile) {
         int tileValue = tile.getNumber();
@@ -63,7 +79,11 @@ public class ChiAction extends MahjongAction {
         }
         boolean hasPredecessor = tiles.stream().anyMatch(t -> t.getNumber() == tileValue - 1 && t.getType().equals(tileType));
         boolean hasSuccessor = tiles.stream().anyMatch(t -> t.getNumber() == tileValue + 1 && t.getType().equals(tileType));
-        return hasPredecessor && hasSuccessor;
+        boolean hasPrePredecessor = tiles.stream().anyMatch(t -> t.getNumber() == tileValue - 2 && t.getType().equals(tileType));
+        boolean hasSucSuccessor = tiles.stream().anyMatch(t -> t.getNumber() == tileValue + 2 && t.getType().equals(tileType));
+
+        // Check the three possible chi combinations
+        return (hasPredecessor && hasSuccessor) || (hasSuccessor && hasSucSuccessor) || (hasPrePredecessor && hasPredecessor);
     }
 
     public static TileInterface findPredecessorTile(List<TileInterface> tiles, TileInterface tile) {
