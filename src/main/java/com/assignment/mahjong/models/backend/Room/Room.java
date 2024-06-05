@@ -291,4 +291,14 @@ public class Room {
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
     }
+
+    public void setCurrentPlayer(Player player) {
+        if (player != null && players.contains(player)) {
+            this.currentTurnPlayerName = player.getName();
+            System.out.println("Current turn is now set to player: " + player.getName());
+        } else {
+            System.out.println("Player not found in the room.");
+        }
+    }
+
 }

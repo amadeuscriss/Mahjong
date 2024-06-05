@@ -115,41 +115,49 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerName}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody int discardedTileIndex) {
+    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody int discardedTileIndex) {
         Room room = roomManager.getRoom(roomCode);
-        TileInterface Discardtile1 = room.getAllDiscardedTiles().get(room.getAllDiscardedTiles().size()-1);
-        List<String> actions = new ArrayList<>();
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                if (Discardtile1 == null) {
-                    // First player to act, no discarded tile, can only discard
-                    actions.add("Discard");
+                List<TileInterface> discardedTiles = room.getAllDiscardedTiles();
+                if (discardedTiles.isEmpty()) {
+                    return ResponseEntity.badRequest().body(Map.of("message", "No discarded tiles found."));
                 }
-                if (CheckWin.canWin(player.getHand().getTiles(), Discardtile1)) {
+
+                TileInterface discardedTile = discardedTiles.get(discardedTiles.size() - 1);
+                List<String> actions = new ArrayList<>();
+                List<List<Integer>> chiCombinations = new ArrayList<>();
+
+                if (CheckWin.canWin(player.getHand().getTiles(), discardedTile)) {
                     actions.add("Win");
                 }
-                if (PongAction.canPong(player.getHand().getTiles(), Discardtile1)) {
+                if (PongAction.canPong(player.getHand().getTiles(), discardedTile)) {
                     actions.add("Pong");
                 }
-                if (KongAction.canKong(player.getHand().getTiles(), Discardtile1)) {
+                if (KongAction.canKong(player.getHand().getTiles(), discardedTile)) {
                     actions.add("Kong");
                 }
-                if (ChiAction.canChi(player.getHand().getTiles(), Discardtile1)) {
+                if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
                     actions.add("Chi");
+
+                    // 获取所有可能的吃牌组合
+                    chiCombinations = getChiCombinations(player);
                 }
-            }
+
                 return ResponseEntity.ok(Map.of(
                         "type", "playerActions",
-                        "playerActions", actions
+                        "playerActions", actions,
+                        "chiCombinations", chiCombinations
                 ));
             }
-
-        return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
+        }
+        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
     @PostMapping("/handleAction/{roomCode}/{playerName}")
-    public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request,@PathVariable int number) {
         String action = (String) request.get("behavior");
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
@@ -163,7 +171,7 @@ public class GameController {
                         break;
                     case "Kong":
                         // 执行杠牌操作
-                        kongTile(roomCode, playerName, (Integer) request.get("tileIndex"));
+                        kongTile(roomCode, playerName);
                         break;
                     case "Pong":
                         // 执行碰牌操作
@@ -171,7 +179,7 @@ public class GameController {
                         break;
                     case "Chi":
                         // 执行吃牌操作
-                        chiTile(roomCode, playerName);
+                        chiTile(roomCode, playerName,number);
                         break;
                     case "Skip":
                         room.moveToNextPlayer();
@@ -313,6 +321,10 @@ public class GameController {
                                     .map(TileInterface::getValueAsString)
                                     .collect(Collectors.toList());
                             player.getHand().getTiles().removeAll(tileIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
+
+                            // 更新回合到执行碰操作的玩家
+                            room.setCurrentPlayer(player);
+
                             return ResponseEntity.ok(Map.of(
                                     "type", "playerActions",
                                     "state", "Pong",
@@ -341,38 +353,62 @@ public class GameController {
 
 
 
+
     @PostMapping("/kong/{roomCode}/{playerName}/{tileIndex}")
-    public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
+    public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
-            if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size()) {
-                TileInterface tileToKong = player.getHand().getTiles().get(tileIndex);
-                boolean isSelfKong = checkIfSelfKong(tileToKong, player); // 检查是否为自摸杠
-                KongAction kongAction = new KongAction(tileToKong, player.getHand().getTiles(), isSelfKong, player.getPoints(), player);
-                kongAction.execute();
-                if (kongAction.isActionSuccessful()) {
-                    // 明牌列表显示
-                    List<String> showTiles = Collections.nCopies(4, tileToKong.getValueAsString()); // 显示4张杠的牌
-                    // 更新玩家的手牌并响应杠牌成功
-                    return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "Kong",
-                            "showTiles", showTiles,
-                            "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
-                    ));
+            if (player != null) {
+                // 获取桌面上最后一张牌
+                TileInterface lastDiscardedTile = room.getLastDiscardedTile();
+                if (lastDiscardedTile != null) {
+                    // 查找与最后一张牌相同的牌在玩家手牌中的索引
+                    List<Integer> tileIndices = IntStream.range(0, player.getHand().getTiles().size())
+                            .filter(i -> player.getHand().getTiles().get(i).getValueAsString().equals(lastDiscardedTile.getValueAsString()))
+                            .boxed()
+                            .collect(Collectors.toList());
+                    // 确保找到了两个相同的牌
+                    if (tileIndices.size() == 2) {
+                        // 执行碰牌操作
+                        KongAction kongAction = new KongAction(lastDiscardedTile, player.getHand().getTiles(), false, player.getPoints(), player);
+                        kongAction.execute();
+                        if (kongAction.isActionSuccessful()) {
+                            List<String> showTiles = player.getMelds().stream()
+                                    .filter(meld -> meld.getType().equals("KONG"))
+                                    .flatMap(meld -> meld.getTiles().stream())
+                                    .map(TileInterface::getValueAsString)
+                                    .collect(Collectors.toList());
+                            player.getHand().getTiles().removeAll(tileIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
+
+                            // 更新回合到执行碰操作的玩家
+                            room.setCurrentPlayer(player);
+
+                            return ResponseEntity.ok(Map.of(
+                                    "type", "playerActions",
+                                    "state", "Kong",
+                                    "showTiles", showTiles,
+                                    "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
+                            ));
+                        } else {
+                            return ResponseEntity.ok(Map.of(
+                                    "type", "playerActions",
+                                    "state", "Failed",
+                                    "message", "Failed to execute pong with tile: " + lastDiscardedTile.getValueAsString()
+                            ));
+                        }
+                    } else {
+                        return ResponseEntity.badRequest().body(Map.of("message", "No matching tiles found in player's hand."));
+                    }
                 } else {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "FailedKong",
-                            "message", "Kong failed."
-                    ));
+                    return ResponseEntity.badRequest().body(Map.of("message", "No last discarded tile on the table."));
                 }
             }
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index or player not found."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
+
 
 
     // 辅助方法，检查是否为自摸杠
@@ -381,56 +417,34 @@ public class GameController {
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
 
-    @PostMapping("/chi/{roomCode}/{playerName}")
-    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName) {
+    @PostMapping("/chi/{roomCode}/{playerName}/{chiCombinationIndex}")
+    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int chiCombinationIndex) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                List<TileInterface> playerHand = player.getHand().getTiles();
-                List<List<Integer>> chiCombinations = new ArrayList<>();
+                // 获取所有可能的吃牌组合
+                List<List<Integer>> chiCombinations = getChiCombinations(player);
 
-                // 遍历手牌，查找所有可以吃牌的组合索引
-                for (int i = 0; i < playerHand.size(); i++) {
-                    TileInterface tileToChi = playerHand.get(i);
+                if (chiCombinationIndex >= 0 && chiCombinationIndex < chiCombinations.size()) {
+                    List<Integer> chiIndices = chiCombinations.get(chiCombinationIndex);
+                    List<TileInterface> chiTiles = chiIndices.stream().map(index -> player.getHand().getTiles().get(index)).collect(Collectors.toList());
 
-                    if (ChiAction.canChi(playerHand, tileToChi)) {
-                        List<Integer> chiIndices = new ArrayList<>();
-                        chiIndices.add(i);
-
-                        Optional<TileInterface> predecessorTileOpt = Optional.ofNullable(ChiAction.findPredecessorTile(playerHand, tileToChi));
-                        Optional<TileInterface> successorTileOpt = Optional.ofNullable(ChiAction.findSuccessorTile(playerHand, tileToChi));
-
-                        if (predecessorTileOpt.isPresent() && successorTileOpt.isPresent()) {
-                            TileInterface predecessorTile = predecessorTileOpt.get();
-                            TileInterface successorTile = successorTileOpt.get();
-
-                            chiIndices.add(playerHand.indexOf(predecessorTile));
-                            chiIndices.add(playerHand.indexOf(successorTile));
-
-                            // 排除重复的组合
-                            if (chiIndices.stream().distinct().count() == 3) {
-                                chiCombinations.add(chiIndices);
-                            }
-                        }
-                    }
-                }
-
-                System.out.println(chiCombinations);
-                if (!chiCombinations.isEmpty()) {
-                    // 使用找到的第一个组合进行吃牌操作
-                    List<Integer> chiIndices = chiCombinations.get(0);
-                    List<TileInterface> chiTiles = chiIndices.stream().map(playerHand::get).collect(Collectors.toList());
-
-                    ChiAction chiAction = new ChiAction(chiTiles.get(0), playerHand, chiTiles.get(1), player);
+                    ChiAction chiAction = new ChiAction(chiTiles.get(0), player.getHand().getTiles(), chiTiles.get(1), player);
                     chiAction.execute();
 
                     if (chiAction.isSuccessful()) {
                         return ResponseEntity.ok(Map.of(
                                 "type", "playerActions",
                                 "state", "Chi",
-                                "showTiles", player.getMelds().stream().filter(m -> m.getType().equals("CHI")).flatMap(m -> m.getTiles().stream().map(TileInterface::getValueAsString)).collect(Collectors.toList()),  // 显示吃牌涉及的牌
-                                "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()) // 更新后的玩家手牌
+                                "showTiles", player.getMelds().stream()
+                                        .filter(m -> m.getType().equals("CHI"))
+                                        .flatMap(m -> m.getTiles().stream())
+                                        .map(TileInterface::getValueAsString)
+                                        .collect(Collectors.toList()),  // 显示吃牌涉及的牌
+                                "playerTiles", player.getHand().getTiles().stream()
+                                        .map(TileInterface::getValueAsString)
+                                        .collect(Collectors.toList()) // 更新后的玩家手牌
                         ));
                     } else {
                         return ResponseEntity.ok(Map.of(
@@ -440,7 +454,7 @@ public class GameController {
                         ));
                     }
                 } else {
-                    return ResponseEntity.badRequest().body(Map.of("message", "No valid Chi actions found."));
+                    return ResponseEntity.badRequest().body(Map.of("message", "Invalid Chi combination index."));
                 }
             }
             return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
@@ -448,7 +462,37 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
+    private List<List<Integer>> getChiCombinations(Player player) {
+        List<TileInterface> playerHand = player.getHand().getTiles();
+        List<List<Integer>> chiCombinations = new ArrayList<>();
 
+        // 遍历手牌，查找所有可以吃牌的组合索引
+        for (int i = 0; i < playerHand.size(); i++) {
+            TileInterface tileToChi = playerHand.get(i);
+
+            if (ChiAction.canChi(playerHand, tileToChi)) {
+                List<Integer> chiIndices = new ArrayList<>();
+                chiIndices.add(i);
+
+                Optional<TileInterface> predecessorTileOpt = Optional.ofNullable(ChiAction.findPredecessorTile(playerHand, tileToChi));
+                Optional<TileInterface> successorTileOpt = Optional.ofNullable(ChiAction.findSuccessorTile(playerHand, tileToChi));
+
+                if (predecessorTileOpt.isPresent() && successorTileOpt.isPresent()) {
+                    TileInterface predecessorTile = predecessorTileOpt.get();
+                    TileInterface successorTile = successorTileOpt.get();
+
+                    chiIndices.add(playerHand.indexOf(predecessorTile));
+                    chiIndices.add(playerHand.indexOf(successorTile));
+
+                    // 排除重复的组合
+                    if (chiIndices.stream().distinct().count() == 3) {
+                        chiCombinations.add(chiIndices);
+                    }
+                }
+            }
+        }
+        return chiCombinations;
+    }
 
     @GetMapping("/checkWin/{roomCode}/{playerName}")
     public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable String playerName) {
