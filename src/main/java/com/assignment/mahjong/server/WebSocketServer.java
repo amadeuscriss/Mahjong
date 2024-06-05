@@ -129,7 +129,7 @@ public class WebSocketServer {
                                 String tempMessage = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                 sendMessageToUser(tempMessage, player.getName());
                                 if (!player.getName().equals(session.getId())) {
-                                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")));
+                                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
                                     sendMessageToUser(tempMessage, player.getName());
                                 }
                             }
