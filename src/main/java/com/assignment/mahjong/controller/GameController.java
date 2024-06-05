@@ -7,6 +7,7 @@ import com.assignment.mahjong.models.backend.Room.RoomManager;
 import com.assignment.mahjong.models.backend.Room.Player;
 import com.assignment.mahjong.models.backend.Rule.CheckWin;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import com.assignment.mahjong.models.backend.Tile.implement.Tile;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -170,7 +171,7 @@ public class GameController {
                         break;
                     case "Chi":
                         // 执行吃牌操作
-                        chiTile(roomCode, playerName, (Integer) request.get("tileIndex"));
+                        chiTile(roomCode, playerName);
                         break;
                     case "Skip":
                         room.moveToNextPlayer();
@@ -312,9 +313,6 @@ public class GameController {
                                     .map(TileInterface::getValueAsString)
                                     .collect(Collectors.toList());
                             player.getHand().getTiles().removeAll(tileIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
-                            System.out.println(1231231);
-                            System.out.println(player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()));
-                            System.out.println(2312312);
                             return ResponseEntity.ok(Map.of(
                                     "type", "playerActions",
                                     "state", "Pong",
@@ -383,37 +381,72 @@ public class GameController {
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
 
-    @PostMapping("/chi/{roomCode}/{playerName}/{tileIndex}")
-    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
+    @PostMapping("/chi/{roomCode}/{playerName}")
+    public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
-            if (player != null && tileIndex >= 0 && tileIndex < player.getHand().getTiles().size() - 1) {
-                TileInterface tileToChi = player.getHand().getTiles().get(tileIndex);
-                TileInterface nextTile = player.getHand().getTiles().get(tileIndex + 1);
+            if (player != null) {
+                List<TileInterface> playerHand = player.getHand().getTiles();
+                List<List<Integer>> chiCombinations = new ArrayList<>();
 
-                // 创建 ChiAction，传入玩家对象和相关牌
-                ChiAction chiAction = new ChiAction(tileToChi, player.getHand().getTiles(), nextTile, player);
-                chiAction.execute();
-                if (chiAction.isSuccessful()) {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "Chi",
-                            "showTiles", player.getMelds().stream().filter(m -> m.getType().equals("CHI")).flatMap(m -> m.getTiles().stream().map(TileInterface::getValueAsString)).collect(Collectors.toList()),  // 显示吃牌涉及的牌
-                            "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()) // 更新后的玩家手牌
-                    ));
+                // 遍历手牌，查找所有可以吃牌的组合索引
+                for (int i = 0; i < playerHand.size(); i++) {
+                    TileInterface tileToChi = playerHand.get(i);
+                    if (ChiAction.canChi(playerHand, tileToChi)) {
+                        List<Integer> chiIndices = new ArrayList<>();
+                        chiIndices.add(i);
+
+                        Optional<TileInterface> predecessorTileOpt = Optional.ofNullable(ChiAction.findPredecessorTile(playerHand, tileToChi));
+                        Optional<TileInterface> successorTileOpt = Optional.ofNullable(ChiAction.findSuccessorTile(playerHand, tileToChi));
+
+                        if (predecessorTileOpt.isPresent() && successorTileOpt.isPresent()) {
+                            TileInterface predecessorTile = predecessorTileOpt.get();
+                            TileInterface successorTile = successorTileOpt.get();
+
+                            chiIndices.add(playerHand.indexOf(predecessorTile));
+                            chiIndices.add(playerHand.indexOf(successorTile));
+
+                            // 排除重复的组合
+                            if (chiIndices.stream().distinct().count() == 3) {
+                                chiCombinations.add(chiIndices);
+                            }
+                        }
+                    }
+                }
+
+                System.out.println(chiCombinations);
+                if (!chiCombinations.isEmpty()) {
+                    // 使用找到的第一个组合进行吃牌操作
+                    List<Integer> chiIndices = chiCombinations.get(0);
+                    List<TileInterface> chiTiles = chiIndices.stream().map(playerHand::get).collect(Collectors.toList());
+
+                    ChiAction chiAction = new ChiAction(chiTiles.get(0), playerHand, chiTiles.get(1), player);
+                    chiAction.execute();
+
+                    if (chiAction.isSuccessful()) {
+                        return ResponseEntity.ok(Map.of(
+                                "type", "playerActions",
+                                "state", "Chi",
+                                "showTiles", player.getMelds().stream().filter(m -> m.getType().equals("CHI")).flatMap(m -> m.getTiles().stream().map(TileInterface::getValueAsString)).collect(Collectors.toList()),  // 显示吃牌涉及的牌
+                                "playerTiles", player.getHand().getTiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList()) // 更新后的玩家手牌
+                        ));
+                    } else {
+                        return ResponseEntity.ok(Map.of(
+                                "type", "playerActions",
+                                "state", "FailedChi",
+                                "message", "Failed to perform chi with tiles."
+                        ));
+                    }
                 } else {
-                    return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "FailedChi",
-                            "message", "Failed to perform chi with tiles."
-                    ));
+                    return ResponseEntity.badRequest().body(Map.of("message", "No valid Chi actions found."));
                 }
             }
-            return ResponseEntity.badRequest().body(Map.of("message", "Invalid tile index or player not found."));
+            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
         }
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
+
 
 
     @GetMapping("/checkWin/{roomCode}/{playerName}")
