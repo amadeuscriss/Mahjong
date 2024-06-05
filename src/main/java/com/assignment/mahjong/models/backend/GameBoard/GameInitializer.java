@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 public class GameInitializer {
-    private List<TileInterface> tiles;
+    public static List<TileInterface> tiles = new ArrayList<>();
     private List<Player> players;
     private final Random random = new Random();
     private Room room; // 将 Room 对象包括进来
@@ -24,7 +24,6 @@ public class GameInitializer {
     }
 
     public void initializeGame() {
-        setupTiles();
         setupPlayers();
         shuffleTiles();
         int firstPlayerIndex = rollDiceToDecideFirstPlayer();  // 掷骰子决定先手玩家
@@ -37,7 +36,6 @@ public class GameInitializer {
     }
 
     private void initializeTiles() {
-        tiles = new ArrayList<>();  // 确保tiles被初始化
         // 填充牌堆
         String[] types = {"Bamboo", "Dot", "Character"};
         for (String type : types) {
@@ -61,37 +59,37 @@ public class GameInitializer {
         }
     }
 
-    private void setupTiles() {
-        tiles.clear();  // 先清空列表，确保没有重复的牌
-
-        // 添加数字牌：条（Bamboo）、饼（Dot）、万（Character）
-        String[] types = {"Bamboo", "Dot", "Character"};
-        for (String type : types) {
-            for (int num = 1; num <= 9; num++) {
-                for (int i = 0; i < 4; i++) {  // 每种牌4张
-                    tiles.add(new NumericTile(type, num));
-                }
-            }
-        }
-
-        // 添加风牌：东、南、西、北
-        String[] winds = {"East", "South", "West", "North"};
-        for (String wind : winds) {
-            for (int i = 0; i < 4; i++) {  // 每种风牌4张
-                tiles.add(new WordTile("Wind", wind));
-            }
-        }
-
-        // 添加三元牌：中、发、白
-        String[] dragons = {"Red", "Green", "White"};
-        for (String dragon : dragons) {
-            for (int i = 0; i < 4; i++) {  // 每种三元牌4张
-                tiles.add(new WordTile("Dragon", dragon));
-            }
-        }
-        shuffleTiles();
-        System.out.println("Tiles are set up with total " + tiles.size() + " tiles.");  // 打印牌的总数，确认牌已经正确添加
-    }
+//    private void setupTiles() {
+//        tiles.clear();  // 先清空列表，确保没有重复的牌
+//
+//        // 添加数字牌：条（Bamboo）、饼（Dot）、万（Character）
+//        String[] types = {"Bamboo", "Dot", "Character"};
+//        for (String type : types) {
+//            for (int num = 1; num <= 9; num++) {
+//                for (int i = 0; i < 4; i++) {  // 每种牌4张
+//                    tiles.add(new NumericTile(type, num));
+//                }
+//            }
+//        }
+//
+//        // 添加风牌：东、南、西、北
+//        String[] winds = {"East", "South", "West", "North"};
+//        for (String wind : winds) {
+//            for (int i = 0; i < 4; i++) {  // 每种风牌4张
+//                tiles.add(new WordTile("Wind", wind));
+//            }
+//        }
+//
+//        // 添加三元牌：中、发、白
+//        String[] dragons = {"Red", "Green", "White"};
+//        for (String dragon : dragons) {
+//            for (int i = 0; i < 4; i++) {  // 每种三元牌4张
+//                tiles.add(new WordTile("Dragon", dragon));
+//            }
+//        }
+//        shuffleTiles();
+//        System.out.println("Tiles are set up with total " + tiles.size() + " tiles.");  // 打印牌的总数，确认牌已经正确添加
+//    }
 
     private void shuffleTiles() {
         Collections.shuffle(tiles);

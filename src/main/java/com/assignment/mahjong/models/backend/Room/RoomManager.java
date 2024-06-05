@@ -1,11 +1,10 @@
 package com.assignment.mahjong.models.backend.Room;
 
-import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
+import com.assignment.mahjong.models.backend.GameBoard.GameInitializer;
+import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 @Component
@@ -18,8 +17,8 @@ public class RoomManager {
 
     // 创建房间并返回房间号
     public String createRoom(String name) {
-        MahjongSet mahjongSet = new MahjongSet(); // 假设MahjongSet可以如此简单初始化
-        Room newRoom = new Room(this, mahjongSet);
+        List<TileInterface> tiles = GameInitializer.tiles;
+        Room newRoom = new Room(this, tiles);
         String roomCode = generateRoomCode();
 
         // 创建一个默认玩家
@@ -38,7 +37,6 @@ public class RoomManager {
         return UUID.randomUUID().toString().substring(0, 6);  // 生成一个随机的6位UUID字符串
     }
 
-    // 加入房间
     // 加入房间
     public boolean joinRoom(String roomCode, Player player) {
         Room room = rooms.get(roomCode);
@@ -64,3 +62,4 @@ public class RoomManager {
         return rooms.get(roomCode);
     }
 }
+
