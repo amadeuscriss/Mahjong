@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,8 +31,8 @@ public class WebSocketServer {
 
     // Server room instance
     Room serverRoom;
-    String[] playerOrder;
-    String[][] playerActions;
+    ArrayList<String> playerOrder;
+    Map<String, Object> playerActions;
 
     // Game controller instance
     private final GameController gameController = new GameController();
@@ -96,7 +97,14 @@ public class WebSocketServer {
                         }
 
                         if (serverRoom.getPlayers().size() == 4) {
+
+//                            this.playerOrder = (ArrayList<String>) respond.get("players");
+//                            for (String s : playerOrder) {
+//                                System.out.println(s);
+//                            }
+
                             jsonObject.put("type", "gameStart");
+
                             for (Player player : serverRoom.getPlayers()) {
                                 sendMessageToUser(jsonObject.toJSONString(), player.getName());
                             }
@@ -124,14 +132,30 @@ public class WebSocketServer {
                     case "action":
                         serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
                         if (((String) jsonObject.get("behavior")).equals("Discard")) {
+
                             messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
                             sendMessageToUser(messageToSend, session.getId());
+
+
+//                            for (int i = 0; i < serverRoom.getPlayers().size(); i++) {
+//                                playerOrder.set(i, serverRoom.getPlayers().get(i).getName());
+//                                playerActions.put(serverRoom.getPlayers().get(i).getName(),gameController.availableActions((String) jsonObject.get("roomId"), serverRoom.getPlayers().get(i).getName(), (int) jsonObject.get("data")).get("playerActions"));
+//                            }
+
+//                            for (String s : playerOrder) {
+//                                System.out.println(s);
+//                            }
+//                            for (Map.Entry<String, Object> entry : playerActions.entrySet()) {
+//                                String key = entry.getKey();
+//                                Object value = entry.getValue();
+//                                System.out.println("Key: " + key + ", Value: " + value);
+//                            }
 
                             for (Player player : serverRoom.getPlayers()) {
                                 String tempMessage = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                 sendMessageToUser(tempMessage, player.getName());
                                 if (!player.getName().equals(session.getId())) {
-                                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
+                                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")));
                                     sendMessageToUser(tempMessage, player.getName());
                                 }
                             }
