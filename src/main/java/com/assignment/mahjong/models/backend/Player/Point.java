@@ -1,46 +1,46 @@
 package com.assignment.mahjong.models.backend.Player;
 
 public class Point {
-    private int totalPoints; // 总分
-    private int basePoints;  // 基础分数
-    private double multiplier; // 总倍率，用于计算总分
+    private int totalPoints;
+    private int basePoints;
+    private double multiplier; // Total multiplier used for calculating total points
 
-    // 构造函数，初始化分数和倍率
+    // Constructor to initialize scores and multiplier
     public Point() {
-        this.totalPoints = 0;  // 初始总分为0
-        this.basePoints = 0;   // 初始基础分为0
-        this.multiplier = 1.0; // 初始倍率设为1
+        this.totalPoints = 0;
+        this.basePoints = 0;
+        this.multiplier = 1.0; // Initial multiplier is set to 1
     }
 
-    // 设置基础分数，并更新总分
+    // Set base points and update total points
     public void setBasePoints(int points) {
-        basePoints = points;  // 设置基础分数
-        updateTotalPoints();  // 更新总分
+        basePoints = points;
+        updateTotalPoints();
     }
 
-    // 增加倍率，并更新总分
+    // Increase multiplier and update total points
     public void addMultiplier(double increment) {
-        multiplier += increment; // 增加倍率
-        updateTotalPoints();     // 更新总分
+        multiplier += increment; // Increase multiplier
+        updateTotalPoints();
     }
 
-    // 重置倍率为1，并更新总分
+    // Reset multiplier to 1 and update total points
     public void resetMultiplier() {
-        multiplier = 1.0;    // 重置倍率
-        updateTotalPoints(); // 更新总分
+        multiplier = 1.0;
+        updateTotalPoints();
     }
 
-    // 更新总分的方法，根据基础分和倍率计算
+    // Method to update total points based on base points and multiplier
     private void updateTotalPoints() {
-        totalPoints = (int) (basePoints * multiplier); // 总分 = 基础分 * 倍率
+        totalPoints = (int) (basePoints * multiplier); // Total points = Base points * Multiplier
     }
 
-    // 获取当前的总分
+    // Get current total points
     public int getTotalPoints() {
         return totalPoints;
     }
 
-    // 获取分数详情的字符串描述
+    // Get string description of score details
     public String getScoreDetails() {
         return "Base Points: " + basePoints +
                 ", Multiplier: " + multiplier +

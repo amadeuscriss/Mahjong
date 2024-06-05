@@ -3,11 +3,11 @@ package com.assignment.mahjong.models.backend.Room;
 public class TestRoom {
     public static void main(String[] args) {
         RoomManager roomManager = new RoomManager();
-        String roomCode = roomManager.createRoom("lilisi");  // 创建一个房间并获取房间号
+        String roomCode = roomManager.createRoom("lilisi");  // Create a room and get the room number
 
         System.out.println("Testing Room Class");
 
-        // 测试加入玩家
+        // Test join players
         Player alice = new Player("Alice");
         boolean aliceJoined = roomManager.joinRoom(roomCode, alice);
         System.out.println("Expected: Alice added, Actual: " + (aliceJoined ? "Alice added" : "Alice not added"));
@@ -24,15 +24,15 @@ public class TestRoom {
         boolean davidJoined = roomManager.joinRoom(roomCode, david);
         System.out.println("Expected: David added, Actual: " + (davidJoined ? "David added" : "David not added"));
 
-        // 测试添加超过最大玩家数
+        // Test add more than the maximum number of players
         Player eve = new Player("Eve");
         boolean eveJoined = roomManager.joinRoom(roomCode, eve);
         System.out.println("Expected: Room full, Actual: " + (!eveJoined ? "Room overflow" : "Room not overflow"));
 
-        // 获取房间状态
+        // Get room status
         Room room = roomManager.getRoom(roomCode);
 
-        // 设置玩家准备状态
+        // Set player readiness
         if (room != null) {
             alice.setReady(true);
             bob.setReady(true);
@@ -43,7 +43,7 @@ public class TestRoom {
             System.out.println("Room was not found.");
         }
 
-        // 测试重置房间
+        // Test reset room
         if (room != null) {
             room.resetRoom();
             System.out.println("Expected: Room reset, Actual: Room reset? " + (room.getPlayers().stream().noneMatch(Player::isReady) && !room.isGameStarted()));

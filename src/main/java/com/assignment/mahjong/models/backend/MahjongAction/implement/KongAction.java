@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 public class KongAction extends MahjongAction {
-    private boolean isSelfKong;  // 标记是否为自摸杠
-    private Point points;  // 玩家分数对象，用于更新倍率
-    private Player player;  // 操作的玩家
+    private boolean isSelfKong;  // Mark whether it is a self-touching Kong
+    private Point points;  // Player score object, used to update the multiplier
+    private Player player;  // Operational player
 
     public KongAction(TileInterface currentTile, List<TileInterface> playerHand, boolean isSelfKong, Point points, Player player) {
         super(currentTile, playerHand);
@@ -28,10 +28,10 @@ public class KongAction extends MahjongAction {
     public void execute() {
         if (canKong(playerHand, currentTile)) {
             if (isSelfKong) {
-                points.addMultiplier(2.0); // 假设自摸杠倍率为2
+                points.addMultiplier(2.0); // Suppose that the ratio of self-touching Kong is 2
                 System.out.println("Self-Kong with tile: " + currentTile.getValueAsString());
             } else {
-                points.addMultiplier(1.5); // 假设明杠倍率为1.5
+                points.addMultiplier(1.5); // Suppose that the ratio of self-touching Kong is 1.5
                 System.out.println("Melded Kong with tile: " + currentTile.getValueAsString());
             }
             isSuccessful = true;
@@ -45,12 +45,12 @@ public class KongAction extends MahjongAction {
         }
     }
 
-    // 检查是否可以执行杠牌，基于牌的数量
+    // Check whether the bar can be executed, based on the number of cards
     public static boolean canKong(List<TileInterface> playerHand, TileInterface tile) {
         long count = playerHand.stream()
                 .filter(t -> t.getValueAsString().equals(tile.getValueAsString()))
                 .count();
-        return count >= 3;  // 需要至少有三张与当前牌相同的牌
+        return count >= 3;  // Need to have at least three cards that are the same as the current card
     }
 }
 

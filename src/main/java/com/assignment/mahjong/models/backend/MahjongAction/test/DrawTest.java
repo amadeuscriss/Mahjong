@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DrawTest {
     public static void main(String[] args) {
-        // 创建一个牌库，包含数字牌和字牌
+        // Create a tile set containing numeric tiles and word tiles
         List<TileInterface> mahjongSet = new ArrayList<>();
         mahjongSet.addAll(Arrays.asList(
             new NumericTile("Bamboo", 1),
@@ -21,10 +21,10 @@ public class DrawTest {
             new WordTile("Dragon", "Red")
         ));
 
-        // 创建 DrawAction 实例
+        // Create an instance of DrawAction
         DrawAction drawAction = new DrawAction(mahjongSet);
 
-        // 执行摸牌动作，多次执行以测试不同类型的牌
+        // Execute the draw action, repeat to test different types of tiles
         while (!mahjongSet.isEmpty()) {
             drawAction.execute();
             if (drawAction.isActionSuccessful()) {

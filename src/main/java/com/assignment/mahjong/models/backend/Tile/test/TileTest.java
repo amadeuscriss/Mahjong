@@ -6,16 +6,16 @@ import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 public class TileTest {
     public static void main(String[] args) {
 
-        /* 洗牌发牌的测试代码**/
+        // Test code for shuffling and dealing tiles
         System.out.println("start");
 
-        // 创建麻将牌集合
+        // Create a Mahjong tile set
         MahjongSet mahjongSet = new MahjongSet();
 
-        // 洗牌
+        // Shuffle the tiles
         mahjongSet.shuffle();
 
-        // 打印洗牌后的前10张牌
+        // Print the first 10 tiles after shuffling
         System.out.println("Shuffled Tiles:");
         for (int i = 0; i < 10; i++) {
             TileInterface tile = mahjongSet.getTiles().get(i);

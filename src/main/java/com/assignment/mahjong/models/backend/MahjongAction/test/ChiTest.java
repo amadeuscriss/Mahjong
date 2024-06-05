@@ -13,67 +13,67 @@ import java.util.List;
 
 public class ChiTest {
     public static void main(String[] args) {
-        // 创建手牌
+        // Create hand
         List<TileInterface> handTiles = new ArrayList<>();
         handTiles.add(new NumericTile("Bamboo", 1));
         handTiles.add(new NumericTile("Bamboo", 2));
         handTiles.add(new NumericTile("Bamboo", 4));
         handTiles.add(new NumericTile("Bamboo", 5));
 
-        // 创建被吃的数字牌
+        // Create a number card to be Chi
         TileInterface tileToChiNumeric = new NumericTile("Bamboo", 3);
 
-        // 创建被吃的字牌，注意字牌通常不用于吃牌操作
+        // Create the Chi deck. Note that the deck is not usually used for Chi
         TileInterface tileToChiNonNumeric = new WordTile("Wind", "East");
 
-        // 创建玩家对象，传入吃牌动作
+        // Create a player object and pass in a card eating action
         Player player = new Player("Test Player");
 
-        // 创建 ChiAction 实例并进行测试
+        // Create the ChiAction instance and test it
         testChiAction(tileToChiNumeric, handTiles, player);
 //        testChiAction(tileToChiNonNumeric, handTiles, player);
     }
 
-    // 测试吃牌动作
+    // Test the Chi action
     private static void testChiAction(TileInterface tileToChi, List<TileInterface> handTiles, Player player) {
-        // 假设tileToChi是要吃的牌，handTiles是玩家手中的牌
+        // Suppose tileToChi is the card to be eaten and handTiles is the card in the player's hand
         ChiAction chiAction = new ChiAction(tileToChi, handTiles, tileToChi, player);
 
-        // 执行吃牌动作
+        // Perform the Chi operation
         chiAction.execute();
 
-        // 打印结果
+        // Print the result
         if (chiAction.isActionSuccessful()) {
             System.out.println("Test Passed: Chi action was successful for " + tileToChi.getValueAsString() + ".");
             System.out.println("Tiles in hand after chi:");
             handTiles.forEach(tile -> System.out.println(tile.getValueAsString()));
             System.out.println("Melds created:");
-            // 获取玩家的所有牌组合
+            // Gets all the player's card combinations
             List<Meld> melds = player.getMelds();
-            // 遍历每一组牌
+            // Go through each set of cards
             for (Meld meld : melds) {
-                // 获取当前牌组的所有牌
+                // Gets all the cards in the current deck
                 List<TileInterface> tiles = meld.getTiles();
                 System.out.println(meld.getTiles().stream().map(TileInterface::getValueAsString).reduce("", (acc, tile) -> acc + tile + ", ").trim());
 
-                // 构建一个字符串来存储当前牌组的所有牌的值
+                // Builds a string to store the values of all the cards in the current deck
                 StringBuilder meldValues = new StringBuilder();
 
-                // 遍历当前牌组的每一张牌
+                // Go through each set of current cards
                 for (int i = 0; i < tiles.size(); i++) {
-                    // 获取当前牌的值
+                    // Get the value of the current card
                     String value = tiles.get(i).getValueAsString();
 
-                    // 将牌的值添加到字符串中
+                    // Adds the value of the card to the string
                     meldValues.append(value);
 
-                    // 如果不是最后一张牌，则添加逗号和空格
+                    // If it is not the last card, add a comma and a space
                     if (i < tiles.size() - 1) {
                         meldValues.append(", ");
                     }
                 }
 
-                // 打印当前牌组的所有牌的值
+                // Prints the value of all cards in the current deck
                 System.out.println(meldValues.toString());
             }
         } else {

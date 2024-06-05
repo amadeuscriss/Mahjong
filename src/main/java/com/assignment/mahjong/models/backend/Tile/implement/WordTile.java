@@ -3,31 +3,33 @@ package com.assignment.mahjong.models.backend.Tile.implement;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Tile.implement.Tile;
 
-// 定义WordTile类，继承自Tile类，表示字牌
+// Define the WordTile class, which inherits from the Tile class and represents word tiles
 public class WordTile extends Tile implements TileInterface {
-    private String value; // value属性用于存储字牌的名称，如“东风”
+    // The value attribute is used to store the name of the word tile, such as "East Wind"
+    private String value;
 
-    // 构造函数，初始化牌的类型和名称
+    // Constructor to initialize the type and name of the tile
     public WordTile(String type, String value) {
         super(type);
         this.value = value;
     }
 
-    // 重写getType方法，返回牌的类型
+    // Override the getType method to return the type of the tile
     @Override
     public String getType() {
-        return type; // 假设父类Tile已经有了type字段和相应的getType方法实现
+        // Assuming the parent class Tile already has the 'type' field and the corresponding implementation of the getType method
+        return type;
     }
 
-    // 实现接口中的getNumber方法，因为字牌没有具体数值，返回-1作为标识
+    // Implement the getNumber method from the interface
     @Override
     public int getNumber() {
-        return -1; // 字牌没有具体数值，返回-1作为标识
+        return -1; // Word tiles do not have specific numerical values, returning -1 as a marker
     }
 
-    // 实现接口中的getValueAsString方法，返回字牌的名称
+    // Implement the getValueAsString method from the interface
     @Override
     public String getValueAsString() {
-        return value; // 返回字牌的名称，如“East Wind”
+        return value; // Return the name of the word tile
     }
 }
