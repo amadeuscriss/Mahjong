@@ -393,9 +393,6 @@ export default {
         case 'playerActions':
           this.handlePlayerActions(message);
           break;
-        case 'done':
-          this.updateAfterActing(message);
-          break;
         case 'notification':
           console.log("notification")
           this.updateShownTiles(message);

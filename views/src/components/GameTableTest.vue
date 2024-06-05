@@ -141,10 +141,7 @@ export default {
       this.playActions = message.playActions;
       this.playerTiles = message.playerTiles;
     },
-    //在执行操作后更新手牌
-    updateAfterActing(message){
-      this.playerTiles = message.playerTiles;
-    },
+
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
