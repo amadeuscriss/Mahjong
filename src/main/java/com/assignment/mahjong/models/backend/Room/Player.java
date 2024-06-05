@@ -7,40 +7,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-// 引入Meld类，代表吃、碰、杠的组合
+// Import Meld class to represent chi, pong, and kong sets
 import com.assignment.mahjong.models.backend.Tile.implement.Meld;
+import lombok.Getter;
+import lombok.Setter;
 
 public class Player {
-    private UUID id; // 玩家ID
-    private String name; // 玩家名称
-    private boolean isReady; // 玩家是否准备好
-    private Hand hand; // 玩家的手牌
-    private Point points; // 玩家的分数对象
-    private boolean lastActionWasDraw; // 上一个动作是否为摸牌
-    private List<Meld> melds; // 玩家的明牌列表
+    // Getter and Setter methods
+    @Getter
+    private UUID id; // Player ID
+    @Getter
+    @Setter
+    private String name; // Player name
+    private boolean isReady; // Whether the player is ready
+    @Getter
+    private Hand hand; // Player's hand
+    @Getter
+    private Point points; // Player's points object
+    @Setter
+    private boolean lastActionWasDraw; // Whether the last action was a draw
+    @Getter
+    private List<Meld> melds; // List of player's melds
 
-    // 构造函数
+    /**
+     * Constructor for Player
+     *
+     * @param name The name of the player
+     */
     public Player(String name) {
-        this.id = UUID.randomUUID(); // 生成一个随机的UUID
+        this.id = UUID.randomUUID(); // Generate a random UUID
         this.name = name;
         this.isReady = true;
-        this.hand = new Hand(); // 初始化手牌列表
-        this.points = new Point(); // 初始化分数对象
-        this.lastActionWasDraw = false; // 默认上一个动作不是摸牌
-        this.melds = new ArrayList<>(); // 初始化明牌列表
-    }
-
-    // Getter 和 Setter 方法
-    public UUID getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.hand = new Hand(); // Initialize the hand
+        this.points = new Point(); // Initialize the points object
+        this.lastActionWasDraw = false; // Default the last action to not be a draw
+        this.melds = new ArrayList<>(); // Initialize the meld list
     }
 
     public boolean isReady() {
@@ -51,33 +52,27 @@ public class Player {
         isReady = ready;
     }
 
-    public Hand getHand() {
-        return hand;
-    }
-
+    /**
+     * Sets the hand with new tiles, clears existing ones and sorts them.
+     *
+     * @param tiles The list of tiles to set as the player's hand
+     */
     public void setHand(List<TileInterface> tiles) {
-        this.hand.getTiles().clear();  // 清空手牌
-        this.hand.getTiles().addAll(tiles);  // 添加新牌
-        this.hand.arrangeHand();  // 排序手牌
-    }
-
-    public Point getPoints() {
-        return points;
+        this.hand.getTiles().clear();  // Clear the hand
+        this.hand.getTiles().addAll(tiles);  // Add new tiles to the hand
+        this.hand.arrangeHand();  // Sort the hand
     }
 
     public boolean getLastActionWasDraw() {
         return lastActionWasDraw;
     }
 
-    public void setLastActionWasDraw(boolean lastActionWasDraw) {
-        this.lastActionWasDraw = lastActionWasDraw;
-    }
-
-    public List<Meld> getMelds() {
-        return melds;
-    }
-
+    /**
+     * Adds a meld to the player's meld list.
+     *
+     * @param meld The meld to add
+     */
     public void addMeld(Meld meld) {
-        this.melds.add(meld); // 添加一个明牌组合
+        this.melds.add(meld); // Add a meld to the list
     }
 }
