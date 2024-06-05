@@ -347,13 +347,21 @@ export default {
     // 处理操作按钮的点击事件
     handleAction(action, tilesIndex = -1) {
       console.log('Action clicked:', action); // 调试信息
+
+      let skipType = null;
+      if (this.playerActions.includes("Win") && action === "Skip") {
+        // 添加 SkipType
+        skipType = "Hu";
+      }
+
       const message = JSON.stringify({ type: 'action',
                                             behavior: action,
                                             state: 'Playing' ,
                                             roomId: this.roomId ,
                                             playIndex: this.players.indexOf(this.playerIndex),
                                             nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
-                                            tilesToEatIndex : tilesIndex
+                                            tilesToEatIndex : tilesIndex,
+                                            skipType: skipType // 将 SkipType 添加到消息中
       });
 
 
