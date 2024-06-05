@@ -2,45 +2,60 @@ package com.assignment.mahjong.models.backend.Rule;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Player.Point;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 public class CheckWin {
-    private Point points;  // 用于记录玩家分数的Point对象
+    private Point points;  // Point object for recording player scores
 
     public CheckWin(Point points) {
         this.points = points;
     }
 
-    public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin) {
+    // Method to determine if adding a specific tile results in a win
+    public static boolean canWin(List<TileInterface> handTiles, TileInterface candidateTile) {
+//        List<TileInterface> testHand = new ArrayList<>(handTiles);
+//        testHand.add(candidateTile);
+//        return isStandardWin(testHand) || isSevenPairs(testHand) || isThirteenOrphans(testHand) || isAllOneSuit(testHand);
+        return false;
+    }
+
+    public boolean checkIfWin(List<TileInterface> handTiles, boolean isSelfDrawn, boolean isWinByDiscard, boolean isKongFlowerWin, boolean isLastTileWin) {
         boolean won = false;
         if (isStandardWin(handTiles)) {
-            points.setBasePoints(10); // 标准胡牌基础分为10
+            points.setBasePoints(10);
             if (isSelfDrawn) {
-                points.addMultiplier(2.0); // 自摸胡的倍率
+                points.addMultiplier(2.0);
             } else if (isWinByDiscard) {
-                points.addMultiplier(1.5); // 点炮胡的倍率
+                points.addMultiplier(1.5);
             }
             won = true;
         } else if (isSevenPairs(handTiles)) {
-            points.setBasePoints(20); // 七小对的基础分为20
-            points.addMultiplier(2.0); // 七小对的倍率
+            points.setBasePoints(20);
             if (isSelfDrawn) {
-                points.addMultiplier(3.0); // 七小对自摸的额外倍率
+                points.addMultiplier(3.0);
             }
             won = true;
         } else if (isThirteenOrphans(handTiles)) {
-            points.setBasePoints(50); // 十三幺的基础分为50
-            points.addMultiplier(5.0); // 十三幺的倍率
+            points.setBasePoints(50);
             if (isSelfDrawn) {
-                points.addMultiplier(10.0); // 十三幺自摸的额外倍率
+                points.addMultiplier(10.0);
+            }
+            won = true;
+        } else if (isAllOneSuit(handTiles)) {
+            points.setBasePoints(30);
+            if (isSelfDrawn) {
+                points.addMultiplier(4.0);
             }
             won = true;
         }
 
         if (isKongFlowerWin) {
-            points.addMultiplier(2.0); // 杠上开花的倍率
+            points.addMultiplier(2.0);
+        }
+
+        if (isLastTileWin) {
+            points.addMultiplier(2.0);
         }
 
         if (won) {
@@ -50,13 +65,75 @@ public class CheckWin {
         return won;
     }
 
-    // 实现胡牌的具体逻辑
-    private boolean isStandardWin(List<TileInterface> handTiles) {
-        // 实现略
+    private static boolean isStandardWin(List<TileInterface> handTiles) {
+        System.out.println(1);
+        if (handTiles.size() % 3 != 2) return false;
+
+        Collections.sort(handTiles, Comparator.comparing(TileInterface::getValueAsString));
+        for (int i = 0; i < handTiles.size() - 1; i++) {
+            if (handTiles.get(i).getValueAsString().equals(handTiles.get(i + 1).getValueAsString())) {
+                List<TileInterface> remainingTiles = new ArrayList<>(handTiles);
+                remainingTiles.remove(i);
+                remainingTiles.remove(i);
+                if (canFormMelds(remainingTiles)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
-    private boolean isSevenPairs(List<TileInterface> handTiles) {
+    private static boolean canFormMelds(List<TileInterface> tiles) {
+        if (tiles.isEmpty()) return true;
+
+        if (tiles.size() >= 3) {
+            String firstVal = tiles.get(0).getValueAsString();
+            if (countMatches(tiles, firstVal) >= 3 && canFormMelds(removeTiles(tiles, firstVal, 3))) {
+                return true;
+            }
+
+            String nextVal = generateNextValue(firstVal, 1);
+            String nextNextVal = generateNextValue(firstVal, 2);
+            if (tiles.stream().anyMatch(t -> t.getValueAsString().equals(nextVal)) &&
+                    tiles.stream().anyMatch(t -> t.getValueAsString().equals(nextNextVal))) {
+                List<TileInterface> rest = new ArrayList<>(tiles);
+                rest.removeIf(t -> t.getValueAsString().equals(firstVal) || t.getValueAsString().equals(nextVal) || t.getValueAsString().equals(nextNextVal));
+                return canFormMelds(rest);
+            }
+        }
+        return false;
+    }
+
+    private static int countMatches(List<TileInterface> tiles, String value) {
+        return (int) tiles.stream().filter(t -> t.getValueAsString().equals(value)).count();
+    }
+
+    private static List<TileInterface> removeTiles(List<TileInterface> tiles, String value, int count) {
+        List<TileInterface> modifiedList = new ArrayList<>(tiles);
+        Iterator<TileInterface> iterator = modifiedList.iterator();
+        while (iterator.hasNext() && count > 0) {
+            TileInterface tile = iterator.next();
+            if (tile.getValueAsString().equals(value)) {
+                iterator.remove();
+                count--;
+            }
+        }
+        return modifiedList;
+    }
+
+    private static String generateNextValue(String value, int increment) {
+        String[] parts = value.split(" ");
+        try {
+            int num = Integer.parseInt(parts[1]) + increment;
+            return parts[0] + " " + num;
+        } catch (Exception e) {
+            System.out.println("Error generating next tile value for " + value + ": " + e.getMessage());
+            return value;  // Return the original value in case of formatting error
+        }
+    }
+
+    private static boolean isSevenPairs(List<TileInterface> handTiles) {
+        System.out.println(2);
         if (handTiles.size() != 14) return false;
         Map<String, Integer> countMap = new HashMap<>();
         for (TileInterface tile : handTiles) {
@@ -65,26 +142,24 @@ public class CheckWin {
         return countMap.values().stream().allMatch(count -> count == 2);
     }
 
-    private boolean isThirteenOrphans(List<TileInterface> handTiles) {
-        if (handTiles.size() != 14) return false;
+    private static boolean isThirteenOrphans(List<TileInterface> handTiles) {
+        System.out.println(3);
         final String[] requiredTiles = {
                 "1 Wan", "9 Wan", "1 Tiao", "9 Tiao", "1 Tong", "9 Tong",
                 "East", "South", "West", "North", "Red", "Green", "White"
         };
-        Map<String, Integer> countMap = new HashMap<>();
+        Set<String> uniqueTiles = new HashSet<>(Arrays.asList(requiredTiles));
         for (TileInterface tile : handTiles) {
-            countMap.merge(tile.getValueAsString(), 1, Integer::sum);
+            uniqueTiles.remove(tile.getValueAsString());
         }
-        boolean hasPair = false;
-        for (String requiredTile : requiredTiles) {
-            if (!countMap.containsKey(requiredTile) || countMap.get(requiredTile) > 2) {
-                return false;
-            }
-            if (countMap.get(requiredTile) == 2) {
-                if (hasPair) return false;
-                hasPair = true;
-            }
-        }
-        return hasPair;
+        return uniqueTiles.isEmpty() && handTiles.stream().anyMatch(t -> Collections.frequency(handTiles, t) == 2);
+    }
+
+    private static boolean isAllOneSuit(List<TileInterface> handTiles) {
+        System.out.println(4);
+        if (handTiles.isEmpty()) return false;
+        String suit = handTiles.get(0).getType();
+        return handTiles.stream().allMatch(tile -> tile.getType().equals(suit));
     }
 }
+

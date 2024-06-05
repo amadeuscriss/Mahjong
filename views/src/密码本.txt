@@ -1,0 +1,103 @@
+1.玩家输入房间号点击确定后：
+  发送 send(JSON.stringify({ type: 'joinRoom', roomId: roomId, state:'Waiting' }));
+    希望收到：type: 'joinRoomResponse'
+            state: 'roomJoined'  or   'roomNotFound'
+            roomId: roomId（房间号）
+            players: players
+            playerIndex: playerIndex（当前玩家的索引）
+
+2.玩家点击新建后：
+    发送 send(JSON.stringify({ type: 'createRoom',state: 'Waiting' }));
+        希望收到：type: 'roomCreated'
+                roomId: roomId（房间号）
+                players: players（储存玩家Id的列表）
+
+
+3.玩家在等待房间时（目前默认满四个人直接开始）：
+    希望收到（房间全服更新）： type: 'updateRoom'
+                          players: players（储存玩家ID的列表）
+                          playerIndex: playerIndex（当前玩家的索引）
+
+    希望收到（游戏开始）： type: 'gameStart'
+
+
+4.玩家在游戏时
+
+            tile的字符串具体内容可前往views/src/assets/tiles_front查看，与图片的文件名相同（不包含拓展名.png）
+
+    希望收到（游戏全服初始化）: type：'gameInitialization'
+                         currentTurnPlayerName: currentTurnPlayerName（当前回合的玩家ID）
+                         playerTiles: playerTiles（玩家手牌）
+
+    希望收到（玩家的操作）: type: 'playerActions'
+                           playerActions: playerActions (储存玩家可执行行为的列表： ['Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,  'Discard'（出牌）, 'SelfKong'（自摸杠）]
+
+    在收到玩家可执行操作后（是否抢占的发送）
+    1. 发送抢占（玩家执行的操作）:JSON.stringify({ type: 'action',
+                            behavior: action,
+                            state: 'Playing' ,
+                            roomId: this.roomId,
+                            playerIndex: this.playerIndex(实际上是name),
+                            nextPlayerName: this.getNextPlayerName(this.playerIndex, 1) (下家的name)});
+                            action包括 'Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃） ,
+
+    2. 发送非抢占: JSON.stringify({ type: 'action',
+                                   behavior: 'Skip'（跳过）,
+                                   state: 'Playing' ,
+                                   roomId: this.roomId,
+                                   playerIndex: this.playerIndex(实际上是name)
+                                   nextPlayerName： this.getNextPlayerName(this.playerIndex, 1)(下家name)});
+                             该信息意味着玩家无法抢占、或取消了抢占。
+                             若下家无法抢占或不执行抢占，下家将会在7秒后自动发送，其他无法抢占的玩家不会发送。
+                             若玩家可以抢占，但是不执行，5秒后会发送取消信息（下家会在7秒后）。
+
+           前端发送是否抢占后信息后(无论是否发生抢占)，希望收到回合变动的信息：
+                希望收到：type： "Turn change"
+                        currentTurnPlayerName: currentTurnPlayerName（当前回合的玩家Name）
+
+           前端发送是否抢占信息后（若发生抢占），希望收到的信息（后端执行相关抢占操作后）：
+           靠通知来更新桌面与所有玩家展示的开门的对子或顺子，需要在执行后再通知
+           出牌也是通知的一环
+                希望收到（全服行为通知）：type： 'notification'
+                                      tableTiles: tableTiles（牌桌上打出去的所有牌的列表）
+                                      action: action (包括 'Win'（胡）, 'Kong'（杠）, 'Pong'（碰） , 'Chi'（吃）, 'Discard'（出牌）)
+                                      showTiles: showTiles（执行以上操作的玩家的明牌，开门的对子或顺子，给我的是具体什么类型，注释里写好，是所有玩家的嵌套列表，还是该玩家的所有对子，还是仅本回合的开门牌）
+                                      performerIndex: performerIndex（执行者的索引，不是name，是索引，实在不行name也可以）
+
+    在玩家收到回合变动的信息后，能出牌的玩家会出牌，一般情况会受到摸牌信息，同时判断是否可以自摸杠与自摸胡：
+                希望收到摸牌信息：type： "playerActions",
+                               state： "Draw",
+                               playerTiles： playerTiles（摸牌后的玩家手牌，14张牌）
+                               drawnTile： drawnTile（刚摸到的牌，必须包含在玩家手牌中）
+                               playerActions： playerActions（玩家行为，默认有一个出牌，必须有一个出牌）
+
+                向后端发送出牌信息
+                发送：JSON.stringify({ type: 'action',
+                                       behavior: 'Discard',
+                                       state: 'Playing' ,
+                                       data: tileIndex（牌在手牌列表中的索引） ,
+                                       roomId: this.roomId ,
+                                       playIndex: this.playerIndex
+                                       nextPlayerName: nextPlayerName(出牌人下一位的name)
+                                       });
+
+                希望收到一条出牌完成信息：
+                希望收到： type: "updateGame"
+                         playerTiles: playerTiles（该玩家手牌，出完牌之后的13张牌）
+
+
+    如果有人胡牌或流局，希望收到信息（全服）：
+                type： "game over"
+                playerTiles: playerTiles(所有玩家手牌，与游戏初始化时的相同，4个人的)
+                codeList: codeList(玩家积分列表，类似于playerTiles)
+
+
+
+
+
+
+
+
+
+
+

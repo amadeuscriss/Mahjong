@@ -1,6 +1,7 @@
 package com.assignment.mahjong.models.backend.GameBoard;
 
 import com.assignment.mahjong.models.backend.Room.Player;
+import com.assignment.mahjong.models.backend.Room.Room;
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
 import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
@@ -11,20 +12,30 @@ import java.util.List;
 import java.util.Random;
 
 public class GameInitializer {
-    private List<TileInterface> tiles;
-    private List<Player> players;
-    private final Random random = new Random();
+    public static List<TileInterface> tiles = new ArrayList<>();  // List to hold all tiles in the game
+    private List<Player> players;  // List of players in the game
+    private final Random random = new Random();  // Random number generator for shuffling tiles and rolling dice
+    private Room room;  // Room object containing game information
 
-    public GameInitializer(List<TileInterface> tiles, List<Player> players) {
-        this.tiles = tiles;
-        this.players = players;
+    /**
+     * Constructor for GameInitializer
+     *
+     * @param room The Room object containing game and player information
+     */
+    public GameInitializer(Room room) {
+        this.room = room;
+        initializeTiles();
+        this.players = new ArrayList<>(room.getPlayers());
     }
 
+    /**
+     * Initializes the game by setting up players, shuffling tiles, deciding the first player,
+     * distributing tiles, and starting the game if all players are ready.
+     */
     public void initializeGame() {
-        setupTiles();
         setupPlayers();
         shuffleTiles();
-        int firstPlayerIndex = rollDiceToDecideFirstPlayer();  // 掷骰子决定先手玩家
+        int firstPlayerIndex = rollDiceToDecideFirstPlayer();  // Roll dice to decide the first player
         distributeTiles(firstPlayerIndex);
         if (checkAllPlayersReady()) {
             startGame();
@@ -33,85 +44,106 @@ public class GameInitializer {
         }
     }
 
-    private void setupTiles() {
-        tiles.clear();  // 先清空列表，确保没有重复的牌
-
-        // 添加数字牌：条（Bamboo）、饼（Dot）、万（Character）
+    /**
+     * Initializes the tiles for the game.
+     */
+    private void initializeTiles() {
+        // Fill the tile set with numeric and word tiles
         String[] types = {"Bamboo", "Dot", "Character"};
         for (String type : types) {
             for (int num = 1; num <= 9; num++) {
-                for (int i = 0; i < 4; i++) {  // 每种牌4张
+                for (int i = 0; i < 4; i++) {
                     tiles.add(new NumericTile(type, num));
                 }
             }
         }
-
-        // 添加风牌：东、南、西、北
         String[] winds = {"East", "South", "West", "North"};
         for (String wind : winds) {
-            for (int i = 0; i < 4; i++) {  // 每种风牌4张
+            for (int i = 0; i < 4; i++) {
                 tiles.add(new WordTile("Wind", wind));
             }
         }
-
-        // 添加三元牌：中、发、白
         String[] dragons = {"Red", "Green", "White"};
         for (String dragon : dragons) {
-            for (int i = 0; i < 4; i++) {  // 每种三元牌4张
+            for (int i = 0; i < 4; i++) {
                 tiles.add(new WordTile("Dragon", dragon));
             }
         }
-
-        System.out.println("Tiles are set up with total " + tiles.size() + " tiles.");  // 打印牌的总数，确认牌已经正确添加
     }
 
+    /**
+     * Shuffles the tiles.
+     */
     private void shuffleTiles() {
         Collections.shuffle(tiles);
         System.out.println("Tiles have been shuffled.");
     }
 
-    private int rollDiceToDecideFirstPlayer() {
+    /**
+     * Rolls dice to decide the first player.
+     *
+     * @return The index of the first player
+     */
+    public int rollDiceToDecideFirstPlayer() {
+        List<Player> players = room.getPlayers();
         int maxRoll = 0;
         int firstPlayerIndex = 0;
         for (int i = 0; i < players.size(); i++) {
-            int roll = random.nextInt(6) + 1;  // Assume a 6-sided dice
+            int roll = random.nextInt(6) + 1;  // Assume a six-sided dice is used
             System.out.println(players.get(i).getName() + " rolled a " + roll);
             if (roll > maxRoll) {
                 maxRoll = roll;
                 firstPlayerIndex = i;
             }
         }
-        System.out.println(players.get(firstPlayerIndex).getName() + " will start the game.");
+        room.setCurrentTurnPlayerName(players.get(firstPlayerIndex).getName());  // Set the current turn player ID in the room
+        System.out.println(players.get(firstPlayerIndex).getName() + " will start the game as the dealer.");
         return firstPlayerIndex;
     }
 
+    /**
+     * Distributes tiles to players.
+     *
+     * @param firstPlayerIndex The index of the player who will start the game
+     */
     private void distributeTiles(int firstPlayerIndex) {
-        int tilesPerPlayer = 13; // 每位玩家的牌数
+        int tilesPerPlayer = 13; // Number of tiles each player should have
         int index = 0;
 
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get((firstPlayerIndex + i) % players.size());
             if (tiles.size() >= index + tilesPerPlayer) {
-                // 创建一个新的牌的列表来存储每位玩家的手牌
+                // Create a new list to store the player's hand tiles
                 List<TileInterface> playerTiles = new ArrayList<>(tiles.subList(index, index + tilesPerPlayer));
-                player.getHand().getTiles().clear(); // 清空现有手牌以防万一
-                player.getHand().getTiles().addAll(playerTiles); // 将牌添加到玩家的手牌中
-                player.getHand().arrangeHand(); // 对手牌进行排序
+                player.getHand().getTiles().clear(); // Clear existing hand tiles just in case
+                player.getHand().getTiles().addAll(playerTiles); // Add tiles to player's hand
+                player.getHand().arrangeHand(); // Arrange the hand
                 index += tilesPerPlayer;
             }
         }
+
+        // Remove the distributed tiles from the tile set
+        tiles.subList(0, index).clear();
+
         System.out.println("Tiles have been distributed to players and arranged.");
     }
 
-
+    /**
+     * Sets up players by clearing their hands and initializing other settings if needed.
+     */
     private void setupPlayers() {
-        // 初始化玩家的其他设置，如分数或游戏状态
+        // Initialize player settings such as score or game state
         for (Player player : players) {
-            player.getHand().getTiles().clear(); // 确保每个玩家的手牌是空的，适用于游戏开始前的初始化
+            player.getHand().getTiles().clear(); // Ensure each player's hand is empty for initialization
         }
         System.out.println("Players are set up.");
     }
 
+    /**
+     * Checks if all players are ready to start the game.
+     *
+     * @return true if all players are ready, false otherwise
+     */
     private boolean checkAllPlayersReady() {
         for (Player player : players) {
             if (!player.isReady()) {
@@ -121,6 +153,9 @@ public class GameInitializer {
         return true;
     }
 
+    /**
+     * Starts the game.
+     */
     private void startGame() {
         System.out.println("Game has started.");
     }

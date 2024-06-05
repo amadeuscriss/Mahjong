@@ -1,19 +1,18 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
-import com.assignment.mahjong.models.backend.Tile.implement.MahjongSet;
 
 import java.util.List;
 
 // DrawAction类用于实现摸牌动作
 public class DrawAction {
-    private MahjongSet mahjongSet;  // 引用牌库，用于从中摸牌
+    private List<TileInterface> tiles;  // 引用牌库，用于从中摸牌
     private TileInterface drawnTile;  // 存储摸到的牌
     private boolean isSuccessful;  // 操作是否成功的标志
 
     // 构造函数，接受牌库的引用
-    public DrawAction(MahjongSet mahjongSet) {
-        this.mahjongSet = mahjongSet;
+    public DrawAction(List<TileInterface> tiles) {
+        this.tiles = tiles;
     }
 
     // 执行摸牌动作的方法
@@ -30,9 +29,8 @@ public class DrawAction {
         }
     }
 
-    // 从MahjongSet中摸一张牌的私有方法
+    // 从tiles中摸一张牌的私有方法
     private TileInterface drawTileFromSet() {
-        List<TileInterface> tiles = mahjongSet.getTiles(); // 从MahjongSet获取所有牌的列表
         if (!tiles.isEmpty()) {
             // 如果牌库不为空，从牌堆末尾摸一张牌并移除
             return tiles.remove(tiles.size() - 1);
@@ -49,5 +47,9 @@ public class DrawAction {
     // 返回操作是否成功的公共方法
     public boolean isActionSuccessful() {
         return isSuccessful;
+    }
+
+    private TileInterface getdrawntiles(){
+        return drawnTile;
     }
 }
