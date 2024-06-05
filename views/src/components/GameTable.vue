@@ -4,7 +4,8 @@
     <div class="room-id">
       房间号: {{ roomId }}
       玩家name{{playerIndex}}
-      当前回合玩家name{{currentTurnPlayerName}}}
+      当前回合玩家name{{currentTurnPlayerName}}
+      下家name{{getNextPlayerName(currentTurnPlayerName, 1)}}
     </div>
 
 <!--    &lt;!&ndash; 玩家手牌展示区 &ndash;&gt;-->
@@ -41,7 +42,7 @@
     <div class="shown-tiles">
       <!-- 下方玩家 -->
       <div class="shown-tiles-bottom">
-        <div v-for="(tile, index) in showTiles[playerIndex]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in showTiles[playerIndexInList]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -49,7 +50,7 @@
 
       <!-- 右侧玩家 -->
       <div class="shown-tiles-right">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 1) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in showTiles[(playerIndexInList + 1) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -57,7 +58,7 @@
 
       <!-- 上方玩家 -->
       <div class="shown-tiles-top">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 2) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in showTiles[(playerIndexInList + 2) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -65,7 +66,7 @@
 
       <!-- 左侧玩家 -->
       <div class="shown-tiles-left">
-        <div v-for="(tile, index) in showTiles[(playerIndex + 3) % 4]" :key="index" class="shown-tile-container">
+        <div v-for="(tile, index) in showTiles[(playerIndexInList + 3) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
           <img src="@/assets/tiles_back/showedTiles.png" class="shown-tiles-back" alt="tile back"/>
         </div>
@@ -125,16 +126,34 @@ export default {
     };
   },
   computed: {
+    playerIndexInList() {
+      return this.players.indexOf(this.playerIndex);
+    },
+
+
+
+    // filteredActions() {
+    //   console.log(this.playerActions);
+    //   const actions = [];
+    //   if (Array.isArray(this.playerActions)) {
+    //     actions.push(this.playerActions.filter(action => action !== 'Discard'));
+    //   } else if (typeof this.playerActions === 'string') {
+    //     console.error("playerActions is a string:", this.playerActions);
+    //   }
+    //   return actions;
+    // }
+
+    //剔除'Discard', 'SelfKong'
     filteredActions() {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
         this.playerActions.forEach(action => {
-          if (!['Discard', 'SelfKong', 'Win'].includes(action)) {
+          if (!['Discard', 'SelfKong'].includes(action)) {
             actions.push(action);
           }
         });
       } else if (typeof this.playerActions === 'string') {
-        if (!['Discard', 'SelfKong', 'Win'].includes(this.playerActions)) {
+        if (!['Discard', 'SelfKong'].includes(this.playerActions)) {
           actions.push(this.playerActions);
         }
       } else {
@@ -152,6 +171,13 @@ export default {
 
 
   methods: {
+    // 根据当前玩家ID获取下一个玩家ID
+    getNextPlayerName(currentTurnPlayerName, offset) {
+      const currentIdx = this.players.indexOf(currentTurnPlayerName);
+      const nextIdx = (currentIdx + offset) % 4;
+      return this.players[nextIdx];
+    },
+
     gameInitialization(message){
       console.log("gameInitialization" + this.playerActions);
       this.playerTiles = message.playerTiles[this.playerIndex];
@@ -176,27 +202,32 @@ export default {
 
       // this.playerTiles = message.playerTiles[this.playerIndex];
 
-      // 如果 playerActions 有超过2个操作，5秒内没有点击则自动点击 Skip
-      if (this.filteredActions.length > 0 || this.currentTurnPlayerName !== this.playerIndex) {
+      // 如果该玩家不在回合内，且有抢占行为,增加跳过按钮
+      if (this.filteredActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
+        //10秒内没有点击则自动点击 Skip
+
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
         }
 
         this.skipTimeout = setTimeout(() => {
           this.handleAction('Skip');
-        }, 5000);
+        }, 10000);
+
       }
-      //如果当前玩家是下一个玩家，则自动点击 Skip
-      if(this.getNextPlayerName(this.currentTurnPlayerName) === this.playerIndex ){
+
+      //如果不能进行任何抢占操作,且当前玩家是下家，则15秒后自动点击 Skip
+      if(this.getNextPlayerName(this.currentTurnPlayerName, 1) === this.playerIndex && this.filteredActions.length === 0){
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
         }
 
         this.skipTimeout = setTimeout(() => {
           this.handleAction('Skip');
-        }, 7000);
+        }, 15000);
       }
     },
+
     //在执行操作后更新手牌
     updateAfterActing(message){
       this.playerTiles = message.playerTiles[this.playerIndex];
@@ -204,7 +235,7 @@ export default {
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
-      const position = positions[(performerIndex - this.playerIndex + 4) % 4];
+      const position = positions[(performerIndex - this.playerIndexInList + 4) % 4];
 
       this.notification = {
         show: true,
@@ -214,11 +245,17 @@ export default {
 
       setTimeout(() => {
         this.notification.show = false;
-      }, 2000);
+      }, 5000);
     },
     //接收通知，更新明牌库
     updateShownTiles(message){
+      this.tableTiles = message.tableTiles;
+      if (this.playerIndex === this.players[message.performerIndex]){
+        this.playerTiles = message.playernowtiles
+      }
       this.showTiles[message.performerIndex] = message.showTiles;
+      console.log("performerIndex " +  message.performerIndex);
+      console.log(message.showTiles);
       this.showNotification(message.action, message.performerIndex);
     },
     // 动态获取图片路径
@@ -229,34 +266,68 @@ export default {
         return '';
       }
     },
-    // 根据当前玩家ID获取下一个玩家ID
-    getNextPlayerName(currentTurnPlayerName, offset) {
-      const currentIdx = this.players.indexOf(currentTurnPlayerName);
-      const nextIdx = (currentIdx + offset) % 4;
-      return this.players[nextIdx];
-    },
+
+    // // 处理牌面的点击事件
+    // handleTileClick(tile) {
+    //   if (this.currentTurnPlayerName === this.playerIndex){
+    //     const tileIndex = this.playerTiles.indexOf(tile);
+    //     const message = JSON.stringify({ type: 'action',
+    //                                             behavior: 'Discard',
+    //                                             state: 'Playing' ,
+    //                                             data: tileIndex ,
+    //                                             roomId: this.roomId ,
+    //                                             playIndex: this.players.indexOf(this.playerIndex),
+    //                                             nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
+    //     this.$ws.send(message);
+    //     this.playerActions = [];
+    //     this.drawnTile = null;
+    //   }
+    // },
+
     // 处理牌面的点击事件
     handleTileClick(tile) {
-      if (this.playerActions.length === 1 &&
-          this.playerActions[0] === 'Discard'){
-        const tileIndex = this.playerTiles.indexOf(tile);
-        const message = JSON.stringify({ type: 'action',
-                                                behavior: 'Discard',
-                                                state: 'Playing' ,
-                                                data: tileIndex ,
-                                                roomId: this.roomId ,
-                                                playIndex: this.players.indexOf(this.playerIndex),
-                                                nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
-        this.$ws.send(message);
-        this.playerActions = [];
-        this.drawnTile = null;
+      // 如果当前玩家是当前回合的玩家
+      if (this.currentTurnPlayerName === this.playerIndex) {
+        // 如果没有在冷却中
+        if (!this.clickCooldown) {
+          const tileIndex = this.playerTiles.indexOf(tile);
+          const message = JSON.stringify({
+            type: 'action',
+            behavior: 'Discard',
+            state: 'Playing',
+            data: tileIndex,
+            roomId: this.roomId,
+            playIndex: this.players.indexOf(this.playerIndex),
+            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)
+          });
+
+          // 发送消息
+          this.$ws.send(message);
+
+          // 设置冷却时间
+          this.clickCooldown = true;
+          setTimeout(() => {
+            // 清除冷却状态
+            this.clickCooldown = false;
+          }, 15000); // 15秒冷却时间
+
+          // 重置其他状态
+          this.playerActions = [];
+          this.drawnTile = null;
+        } else {
+          console.log('点击冷却中，无法再次点击。');
+        }
+      } else {
+        console.log('当前玩家不是回合玩家，无法执行操作。');
       }
     },
+
     // 处理操作按钮的点击事件
     handleAction(action) {
       console.log('Action clicked:', action); // 调试信息
       const message = JSON.stringify({ type: 'action',
-                                            behavior: action, state: 'Playing' ,
+                                            behavior: action,
+                                            state: 'Playing' ,
                                             roomId: this.roomId ,
                                             playIndex: this.players.indexOf(this.playerIndex),
                                             nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
@@ -271,8 +342,6 @@ export default {
 
     handleMessage(event) {
       const message = JSON.parse(event.data);
-      console.log("GameStart");
-      console.log(this.players)
       switch (message.type) {
         case 'updateGame':
           console.log("updateGame")
@@ -285,8 +354,8 @@ export default {
           this.updateAfterActing(message);
           break;
         case 'notification':
+          console.log("notification")
           this.updateShownTiles(message);
-          this.tableTiles = message.tableTiles;
           break;
         case 'gameInitialization':
           this.gameInitialization(message);
@@ -298,11 +367,13 @@ export default {
     }
   },
   mounted() {
-    // 使用全局 WebSocket 连接
-    this.$ws.onmessage = this.handleMessage;
+    if (this.$ws) {
+      this.$ws.onmessage = this.handleMessage;
+    } else {
+      console.error("WebSocket is not defined.");
+    }
   },
   beforeUnmount() {
-    // 清除任何未清除的超时
     if (this.skipTimeout) {
       clearTimeout(this.skipTimeout);
     }
