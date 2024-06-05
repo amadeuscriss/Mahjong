@@ -6,38 +6,51 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-
 @Component
 public class RoomManager {
-    public Map<String, Room> rooms;  // 存储房间号和房间的映射
+    public Map<String, Room> rooms;  // Mapping of room codes to rooms
 
     public RoomManager() {
         rooms = new HashMap<>();
     }
 
-    // 创建房间并返回房间号
+    /**
+     * Creates a room and returns the room code
+     *
+     * @param name The name of the default player
+     * @return The room code
+     */
     public String createRoom(String name) {
         List<TileInterface> tiles = GameInitializer.tiles;
         Room newRoom = new Room(this, tiles);
         String roomCode = generateRoomCode();
 
-        // 创建一个默认玩家
+        // Create a default player
         Player defaultPlayer = new Player(name);
-        newRoom.addPlayer(defaultPlayer); // 将玩家添加到新创建的房间
+        newRoom.addPlayer(defaultPlayer); // Add the player to the newly created room
 
         rooms.put(roomCode, newRoom);
         System.out.println("Room created with code: " + roomCode + ", Default player added");
 
-        return roomCode;  // 返回房间代码
+        return roomCode;  // Return the room code
     }
 
-
-    // 生成房间号
+    /**
+     * Generates a room code
+     *
+     * @return A random 6-character UUID string as the room code
+     */
     private String generateRoomCode() {
-        return UUID.randomUUID().toString().substring(0, 6);  // 生成一个随机的6位UUID字符串
+        return UUID.randomUUID().toString().substring(0, 6);  // Generate a random 6-character UUID string
     }
 
-    // 加入房间
+    /**
+     * Joins a player to a room
+     *
+     * @param roomCode The code of the room to join
+     * @param player The player to join the room
+     * @return True if the player successfully joined the room, false otherwise
+     */
     public boolean joinRoom(String roomCode, Player player) {
         Room room = rooms.get(roomCode);
         if (room != null && !room.isGameStarted()) {
@@ -48,7 +61,11 @@ public class RoomManager {
         return false;
     }
 
-    // 删除房间
+    /**
+     * Removes a room
+     *
+     * @param roomCode The code of the room to remove
+     */
     public void removeRoom(String roomCode) {
         if (rooms.remove(roomCode) != null) {
             System.out.println("Room " + roomCode + " has been removed.");
@@ -57,9 +74,13 @@ public class RoomManager {
         }
     }
 
-    // 获取房间对象，以便进行其他操作
+    /**
+     * Gets a room object for further operations
+     *
+     * @param roomCode The code of the room to get
+     * @return The room object, or null if not found
+     */
     public Room getRoom(String roomCode) {
         return rooms.get(roomCode);
     }
 }
-

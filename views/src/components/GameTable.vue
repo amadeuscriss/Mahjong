@@ -249,6 +249,7 @@ export default {
                                                 nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
         this.$ws.send(message);
         this.playerActions = [];
+        this.drawnTile = null;
       }
     },
     // 处理操作按钮的点击事件
