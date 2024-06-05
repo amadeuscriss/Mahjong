@@ -3,7 +3,8 @@
     <!-- 显示房间号 -->
     <div class="room-id">
       房间号: {{ roomId }}
-      用户名：{{ playerIndex }}
+      玩家name{{playerIndex}}
+      当前回合玩家name{{currentTurnPlayerName}}}
     </div>
 
 <!--    &lt;!&ndash; 玩家手牌展示区 &ndash;&gt;-->
@@ -173,7 +174,6 @@ export default {
         this.drawnTile = message.drawnTile;
       }
 
-      console.log("handlePlayerActions" + this.playerActions)
       // this.playerTiles = message.playerTiles[this.playerIndex];
 
       // 如果 playerActions 有超过2个操作，5秒内没有点击则自动点击 Skip
@@ -230,8 +230,8 @@ export default {
       }
     },
     // 根据当前玩家ID获取下一个玩家ID
-    getNextPlayerName(playerIndex, offset) {
-      const currentIdx = this.players.indexOf(playerIndex);
+    getNextPlayerName(currentTurnPlayerName, offset) {
+      const currentIdx = this.players.indexOf(currentTurnPlayerName);
       const nextIdx = (currentIdx + offset) % 4;
       return this.players[nextIdx];
     },
@@ -245,8 +245,8 @@ export default {
                                                 state: 'Playing' ,
                                                 data: tileIndex ,
                                                 roomId: this.roomId ,
-                                                playIndex: this.playerIndex,
-                                                nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
+                                                playIndex: this.players.indexOf(this.playerIndex),
+                                                nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
         this.$ws.send(message);
         this.playerActions = [];
       }
@@ -257,8 +257,8 @@ export default {
       const message = JSON.stringify({ type: 'action',
                                             behavior: action, state: 'Playing' ,
                                             roomId: this.roomId ,
-                                            playIndex: this.playerIndex ,
-                                            nextPlayerName: this.getNextPlayerName(this.playerIndex, 1)});
+                                            playIndex: this.players.indexOf(this.playerIndex),
+                                            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
       this.$ws.send(message);
 
       // 点击按钮后清除自动跳过的超时
@@ -270,7 +270,8 @@ export default {
 
     handleMessage(event) {
       const message = JSON.parse(event.data);
-      console.log("Gamestart");
+      console.log("GameStart");
+      console.log(this.players)
       switch (message.type) {
         case 'updateGame':
           console.log("updateGame")

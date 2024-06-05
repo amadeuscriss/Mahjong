@@ -122,8 +122,8 @@ public class WebSocketServer {
                             if (session1.getId().equals(currentPlayer)) {
 
                                 sendMessageToUser(messageToSend, session1.getId());
-                                messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), currentPlayer, null).getBody());
-                                sendMessageToUser(messageToSend, session1.getId());
+//                                messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), currentPlayer, null).getBody());
+//                                sendMessageToUser(messageToSend, session1.getId());
                             }
                         }
                         break;
@@ -132,13 +132,16 @@ public class WebSocketServer {
                         if (((String) jsonObject.get("behavior")).equals("Discard")) {
                             messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
                             sendMessageToUser(messageToSend, session.getId());
-                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), Integer.parseInt((String) jsonObject.get("playIndex"))));
 
                             for (Player player : serverRoom.getPlayers()) {
+                                messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                 sendMessageToUser(messageToSend, player.getName());
-                                messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (TileInterface) jsonObject.get("discardedTile")).getBody());
+                                messageToSend = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
                                 sendMessageToUser(messageToSend, player.getName());
                             }
+
+                            // 加一个turn round 的方法
+
 
                         } else {
                             if (((String) jsonObject.get("behavior")).equals("Skip") && session.getId().equals((String) jsonObject.get("nextPlayerName"))) {
@@ -158,7 +161,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (int) jsonObject.get("playIndex")));
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")));
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
 
@@ -170,7 +173,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (int) jsonObject.get("playIndex")));
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")));
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
                                 }

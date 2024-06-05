@@ -50,4 +50,8 @@ public class DrawAction {
     public boolean isActionSuccessful() {
         return isSuccessful;
     }
+
+    private TileInterface getdrawntiles(){
+        return drawnTile;
+    }
 }
