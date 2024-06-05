@@ -34,7 +34,11 @@ public class CheckWinTest {
 
             @Override
             public int getNumber() {
-                return 0;
+                try {
+                    return Integer.parseInt(value);
+                } catch (NumberFormatException e) {
+                    return -1; // 非数字牌
+                }
             }
         };
     }
@@ -42,20 +46,20 @@ public class CheckWinTest {
     @Test
     public void testStandardWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("5 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("7 Wan", "Wan"));
-        handTiles.add(createTile("8 Wan", "Wan"));
-        handTiles.add(createTile("9 Wan", "Wan"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("5", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("7", "Character"));
+        handTiles.add(createTile("8", "Character"));
+        handTiles.add(createTile("9", "Character"));
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
         assertEquals(10 * 2, points.getTotalPoints(), 0.01);
@@ -64,20 +68,20 @@ public class CheckWinTest {
     @Test
     public void testSevenPairsWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("5 Wan", "Wan"));
-        handTiles.add(createTile("5 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("7 Wan", "Wan"));
-        handTiles.add(createTile("7 Wan", "Wan"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("5", "Character"));
+        handTiles.add(createTile("5", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("7", "Character"));
+        handTiles.add(createTile("7", "Character"));
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
         assertEquals(20 * 3, points.getTotalPoints(), 0.01);
@@ -86,12 +90,12 @@ public class CheckWinTest {
     @Test
     public void testThirteenOrphansWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("9 Wan", "Wan"));
-        handTiles.add(createTile("1 Tiao", "Tiao"));
-        handTiles.add(createTile("9 Tiao", "Tiao"));
-        handTiles.add(createTile("1 Tong", "Tong"));
-        handTiles.add(createTile("9 Tong", "Tong"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("9", "Character"));
+        handTiles.add(createTile("1", "Bamboo"));
+        handTiles.add(createTile("9", "Bamboo"));
+        handTiles.add(createTile("1", "Circle"));
+        handTiles.add(createTile("9", "Circle"));
         handTiles.add(createTile("East", "Wind"));
         handTiles.add(createTile("South", "Wind"));
         handTiles.add(createTile("West", "Wind"));
@@ -99,7 +103,7 @@ public class CheckWinTest {
         handTiles.add(createTile("Red", "Dragon"));
         handTiles.add(createTile("Green", "Dragon"));
         handTiles.add(createTile("White", "Dragon"));
-        handTiles.add(createTile("1 Wan", "Wan")); // Pair
+        handTiles.add(createTile("1", "Character")); // Pair
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
         assertEquals(50 * 10, points.getTotalPoints(), 0.01);
@@ -108,20 +112,20 @@ public class CheckWinTest {
     @Test
     public void testAllOneSuitWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("1 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("2 Wan", "Wan"));
-        handTiles.add(createTile("3 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("4 Wan", "Wan"));
-        handTiles.add(createTile("5 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("6 Wan", "Wan"));
-        handTiles.add(createTile("7 Wan", "Wan"));
-        handTiles.add(createTile("8 Wan", "Wan"));
-        handTiles.add(createTile("9 Wan", "Wan"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("2", "Character"));
+        handTiles.add(createTile("3", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("4", "Character"));
+        handTiles.add(createTile("5", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("6", "Character"));
+        handTiles.add(createTile("7", "Character"));
+        handTiles.add(createTile("8", "Character"));
+        handTiles.add(createTile("9", "Character"));
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
         assertEquals(30 * 4, points.getTotalPoints(), 0.01);
