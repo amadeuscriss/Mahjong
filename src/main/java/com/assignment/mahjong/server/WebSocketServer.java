@@ -30,6 +30,8 @@ public class WebSocketServer {
 
     // Server room instance
     Room serverRoom;
+    String[] playerOrder;
+    String[][] playerActions;
 
     // Game controller instance
     private final GameController gameController = new GameController();
@@ -151,7 +153,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
 
@@ -162,7 +164,7 @@ public class WebSocketServer {
 
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, session.getId());
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
                                 }
