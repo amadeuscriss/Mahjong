@@ -241,7 +241,7 @@ public class GameController {
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
-                DrawAction drawAction = new DrawAction(room.getMahjongSet());
+                DrawAction drawAction = new DrawAction(room.getTiles());
                 drawAction.execute();
                 if (drawAction.isActionSuccessful()) {
                     // 更新玩家的最后行动为摸牌
@@ -393,6 +393,7 @@ public class GameController {
                 // 遍历手牌，查找所有可以吃牌的组合索引
                 for (int i = 0; i < playerHand.size(); i++) {
                     TileInterface tileToChi = playerHand.get(i);
+
                     if (ChiAction.canChi(playerHand, tileToChi)) {
                         List<Integer> chiIndices = new ArrayList<>();
                         chiIndices.add(i);
