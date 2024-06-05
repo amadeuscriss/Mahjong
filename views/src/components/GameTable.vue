@@ -17,7 +17,7 @@
 <!--      </div>-->
 <!--    </div>-->
 
-    <!-- 玩家手牌展示区 -->
+
     <!-- 玩家手牌展示区 -->
     <div class="tiles">
       <div
@@ -25,7 +25,7 @@
           :key="index"
           class="tile-container"
           :class="{
-          'highlighted-tile': tile === drawnTile,
+          'highlighted-tile': index === 13 && playerTiles.length === 14,
           'highlighted': highlightedTiles.includes(index)
         }"
           @mouseover="highlightTiles([index])"
@@ -169,19 +169,19 @@ export default {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
         this.playerActions.forEach(action => {
-          if (!['Discard', 'SelfKong'].includes(action)) {
+          if (!['Discard'].includes(action)) {
             actions.push(action);
           }
         });
       } else if (typeof this.playerActions === 'string') {
-        if (!['Discard', 'SelfKong'].includes(this.playerActions)) {
+        if (!['Discard'].includes(this.playerActions)) {
           actions.push(this.playerActions);
         }
       } else {
         console.error("playerActions is neither an array nor a string:", this.playerActions);
       }
 
-      if (actions.length > 0) {
+      if (actions.length > 0 && this.currentTurnPlayerName === this.playerIndex) {
         actions.push('Skip'); // 添加“跳过”按钮
       }
 
