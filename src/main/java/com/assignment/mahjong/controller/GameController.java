@@ -115,10 +115,11 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerName}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody int discardedTileIndex) {
+    public Map<String, Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody int discardedTileIndex) {
         Room room = roomManager.getRoom(roomCode);
         TileInterface Discardtile1 = room.getAllDiscardedTiles().get(room.getAllDiscardedTiles().size()-1);
         List<String> actions = new ArrayList<>();
+        Map<String, Object> response = new HashMap<>();
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
             if (player != null) {
@@ -139,13 +140,13 @@ public class GameController {
                     actions.add("Chi");
                 }
             }
-                return ResponseEntity.ok(Map.of(
-                        "type", "playerActions",
-                        "playerActions", actions
-                ));
-            }
+            response.put("type", "playerActions");
+            response.put("playerActions", actions);
 
-        return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
+            return response;
+        }
+        response.put("message", "Room or player not found.");
+        return response;
     }
 
     @PostMapping("/handleAction/{roomCode}/{playerName}")

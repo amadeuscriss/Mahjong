@@ -1,9 +1,9 @@
 package com.assignment.mahjong.models.backend.Room;
-/**
+
 public class TestRoom {
     public static void main(String[] args) {
         RoomManager roomManager = new RoomManager();
-        String roomCode = roomManager.createRoom();  // 创建一个房间并获取房间号
+        String roomCode = roomManager.createRoom("lilisi");  // 创建一个房间并获取房间号
 
         System.out.println("Testing Room Class");
 
@@ -50,4 +50,3 @@ public class TestRoom {
         }
     }
 }
-**/
