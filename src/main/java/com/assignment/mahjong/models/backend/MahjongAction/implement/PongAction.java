@@ -35,7 +35,6 @@ public class PongAction extends MahjongAction {
         long count = handTiles.stream()
                 .filter(t -> t.getValueAsString().equals(tile.getValueAsString()))
                 .count();
-        System.out.println(count);
         return count >= 2;  // 需要至少两张与打出牌相同的牌
     }
 
