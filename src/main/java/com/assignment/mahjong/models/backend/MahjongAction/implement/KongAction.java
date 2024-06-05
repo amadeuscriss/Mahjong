@@ -48,7 +48,7 @@ public class KongAction extends MahjongAction {
     // 检查是否可以执行杠牌，基于牌的数量
     public static boolean canKong(List<TileInterface> playerHand, TileInterface tile) {
         long count = playerHand.stream()
-                .filter(t -> t.equals(tile))
+                .filter(t -> t.getValueAsString().equals(tile.getValueAsString()))
                 .count();
         return count >= 3;  // 需要至少有三张与当前牌相同的牌
     }
