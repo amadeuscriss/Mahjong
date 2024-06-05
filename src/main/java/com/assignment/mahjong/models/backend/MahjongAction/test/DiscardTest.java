@@ -1,6 +1,5 @@
 package com.assignment.mahjong.models.backend.MahjongAction.test;
 
-import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Tile.implement.NumericTile;
 import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
 import com.assignment.mahjong.models.backend.MahjongAction.implement.DiscardAction;
