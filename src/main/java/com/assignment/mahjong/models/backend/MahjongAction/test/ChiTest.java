@@ -12,6 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChiTest {
+    /**
+     * Main method for testing the Chi action functionality.
+     *
+     * This method demonstrates the usage of the Chi action by creating a hand of tiles,
+     * specifying a tile to be used for Chi, creating a player, and testing the Chi action.
+     * It also provides the option to test the Chi action with a non-numeric tile, although
+     * note that Chi actions are typically performed with numeric tiles.
+     *
+     * @param args The command-line arguments (not used in this implementation).
+     */
     public static void main(String[] args) {
         // Create hand
         List<TileInterface> handTiles = new ArrayList<>();
@@ -31,49 +41,49 @@ public class ChiTest {
 
         // Create the ChiAction instance and test it
         testChiAction(tileToChiNumeric, handTiles, player);
-//        testChiAction(tileToChiNonNumeric, handTiles, player);
     }
 
-    // Test the Chi action
+    /**
+     * Tests the Chi action functionality.
+     *
+     * This method creates a ChiAction instance with the specified tile to be eaten (chi-ed),
+     * the player's hand tiles, and the player object. It then executes the Chi action,
+     * prints the result, and displays the updated hand tiles and melds created if the action was successful.
+     *
+     * @param tileToChi The tile to be eaten (chi-ed).
+     * @param handTiles The list of tiles in the player's hand.
+     * @param player    The player object.
+     */
     private static void testChiAction(TileInterface tileToChi, List<TileInterface> handTiles, Player player) {
         // Suppose tileToChi is the card to be eaten and handTiles is the card in the player's hand
         ChiAction chiAction = new ChiAction(tileToChi, handTiles, tileToChi, player);
 
-        // Perform the Chi operation
         chiAction.execute();
 
-        // Print the result
         if (chiAction.isActionSuccessful()) {
             System.out.println("Test Passed: Chi action was successful for " + tileToChi.getValueAsString() + ".");
             System.out.println("Tiles in hand after chi:");
             handTiles.forEach(tile -> System.out.println(tile.getValueAsString()));
             System.out.println("Melds created:");
-            // Gets all the player's card combinations
             List<Meld> melds = player.getMelds();
             // Go through each set of cards
             for (Meld meld : melds) {
-                // Gets all the cards in the current deck
                 List<TileInterface> tiles = meld.getTiles();
                 System.out.println(meld.getTiles().stream().map(TileInterface::getValueAsString).reduce("", (acc, tile) -> acc + tile + ", ").trim());
 
-                // Builds a string to store the values of all the cards in the current deck
                 StringBuilder meldValues = new StringBuilder();
 
                 // Go through each set of current cards
                 for (int i = 0; i < tiles.size(); i++) {
-                    // Get the value of the current card
                     String value = tiles.get(i).getValueAsString();
 
-                    // Adds the value of the card to the string
                     meldValues.append(value);
 
-                    // If it is not the last card, add a comma and a space
                     if (i < tiles.size() - 1) {
                         meldValues.append(", ");
                     }
                 }
 
-                // Prints the value of all cards in the current deck
                 System.out.println(meldValues.toString());
             }
         } else {

@@ -8,7 +8,7 @@ import java.util.*;
 
 @Component
 public class RoomManager {
-    public Map<String, Room> rooms;  // Mapping of room codes to rooms
+    public Map<String, Room> rooms;
 
     public RoomManager() {
         rooms = new HashMap<>();
@@ -27,12 +27,12 @@ public class RoomManager {
 
         // Create a default player
         Player defaultPlayer = new Player(name);
-        newRoom.addPlayer(defaultPlayer); // Add the player to the newly created room
+        newRoom.addPlayer(defaultPlayer);
 
         rooms.put(roomCode, newRoom);
         System.out.println("Room created with code: " + roomCode + ", Default player added");
 
-        return roomCode;  // Return the room code
+        return roomCode;
     }
 
     /**
@@ -41,7 +41,7 @@ public class RoomManager {
      * @return A random 6-character UUID string as the room code
      */
     private String generateRoomCode() {
-        return UUID.randomUUID().toString().substring(0, 6);  // Generate a random 6-character UUID string
+        return UUID.randomUUID().toString().substring(0, 6);
     }
 
     /**

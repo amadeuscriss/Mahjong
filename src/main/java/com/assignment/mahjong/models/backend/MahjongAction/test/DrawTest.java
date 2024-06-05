@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Test class for evaluating the functionality of drawing tiles from a Mahjong tile set.
+ */
 public class DrawTest {
     public static void main(String[] args) {
         // Create a tile set containing numeric tiles and word tiles

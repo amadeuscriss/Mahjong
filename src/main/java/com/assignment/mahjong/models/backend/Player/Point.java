@@ -5,42 +5,65 @@ public class Point {
     private int basePoints;
     private double multiplier; // Total multiplier used for calculating total points
 
-    // Constructor to initialize scores and multiplier
+    /**
+     * Represents a point system used in a game.
+     * Initializes the total points, base points, and multiplier.
+     */
     public Point() {
         this.totalPoints = 0;
         this.basePoints = 0;
-        this.multiplier = 1.0; // Initial multiplier is set to 1
+        this.multiplier = 1.0;
     }
 
-    // Set base points and update total points
+    /**
+     * Sets the base points to a specified value and updates the total points accordingly.
+     *
+     * @param points The new value for the base points.
+     */
     public void setBasePoints(int points) {
         basePoints = points;
         updateTotalPoints();
     }
 
-    // Increase multiplier and update total points
+    /**
+     * Increases the multiplier by a specified increment and updates the total points accordingly.
+     *
+     * @param increment The amount by which to increase the multiplier.
+     */
     public void addMultiplier(double increment) {
-        multiplier += increment; // Increase multiplier
+        multiplier += increment;
         updateTotalPoints();
     }
 
-    // Reset multiplier to 1 and update total points
+    /**
+     * Resets the multiplier to its initial value of 1.0 and updates the total points accordingly.
+     */
     public void resetMultiplier() {
         multiplier = 1.0;
         updateTotalPoints();
     }
 
-    // Method to update total points based on base points and multiplier
+    /**
+     * Method to update total points based on base points and multiplier
+     */
     private void updateTotalPoints() {
         totalPoints = (int) (basePoints * multiplier); // Total points = Base points * Multiplier
     }
 
-    // Get current total points
+    /**
+     * Retrieves the total points accumulated.
+     *
+     * @return The total points accumulated.
+     */
     public int getTotalPoints() {
         return totalPoints;
     }
 
-    // Get string description of score details
+    /**
+     * Retrieves the details of the score, including base points, multiplier, and total points.
+     *
+     * @return A string containing the details of the score.
+     */
     public String getScoreDetails() {
         return "Base Points: " + basePoints +
                 ", Multiplier: " + multiplier +

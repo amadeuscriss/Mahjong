@@ -52,6 +52,13 @@ public class GameController {
     }
 
 
+    /**
+     * Controller method for joining a room.
+     *
+     * @param roomCode The code of the room to join.
+     * @param player The player attempting to join the room.
+     * @return A map containing the response to the join room request.
+     */
     @PostMapping("/joinRoom/{roomCode}")
     public Map<String, Object> joinRoom(@PathVariable String roomCode, @RequestBody Player player) {
         // Attempt to join the specified room with the provided player
@@ -77,6 +84,12 @@ public class GameController {
     }
 
 
+    /**
+     * Controller method for updating room information.
+     *
+     * @param roomCode The code of the room to update.
+     * @return A map containing the response to the update room request.
+     */
     @PostMapping("/updateRoom/{roomCode}")
     public Map<String, Object> updateRoom(@PathVariable String roomCode) {
         Room room = roomManager.getRoom(roomCode);
@@ -91,6 +104,12 @@ public class GameController {
 
 
 
+    /**
+     * Controller method for starting a game in a specified room.
+     *
+     * @param roomCode The code of the room where the game should be started.
+     * @return A ResponseEntity containing the response to the start game request.
+     */
     @PostMapping("/startGame/{roomCode}")
     public ResponseEntity<Object> startGame(@PathVariable String roomCode) {
         // Retrieve the Room object associated with the provided room code
@@ -127,6 +146,14 @@ public class GameController {
         ));
     }
 
+    /**
+     * Controller method to retrieve available actions for a player in a specified room.
+     *
+     * @param roomCode The code identifying the room.
+     * @param playerName The name of the player for whom to retrieve available actions.
+     * @param discardedTileIndex Index of the latest discarded tile.
+     * @return ResponseEntity<Object> containing available actions.
+     */
     @PostMapping("/availableActions/{roomCode}/{playerName}")
     public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName,@RequestBody int discardedTileIndex) {
         // Get the specified room
@@ -167,6 +194,14 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room or player not found."));
     }
 
+    /**
+     * Controller method to handle player actions in a Mahjong game.
+     *
+     * @param roomCode    The code identifying the game room.
+     * @param playerName  The name of the player performing the action.
+     * @param request     The request body containing the action details.
+     * @return ResponseEntity<Object> representing the response of the action handling.
+     */
     @PostMapping("/handleAction/{roomCode}/{playerName}")
     public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
         String action = (String) request.get("behavior");
@@ -220,7 +255,14 @@ public class GameController {
     }
 
 
-    // Handle the player's card action
+    /**
+     * Endpoint for discarding a tile in a specific room by a player.
+     *
+     * @param roomCode The code identifying the room.
+     * @param playerName The name of the player discarding the tile.
+     * @param request The request body containing the tile index to discard.
+     * @return ResponseEntity<Object> indicating the success or failure of the discard action.
+     */
     @PostMapping("/discardTile/{roomCode}/{playerName}")
     public ResponseEntity<Object> discardTile(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request) {
         // Get the specified room
@@ -263,6 +305,13 @@ public class GameController {
     }
 
 
+    /**
+     * Endpoint to handle a player drawing a tile in a specific room.
+     *
+     * @param roomCode The unique identifier of the room where the tile is being drawn.
+     * @param playerName The name of the player who is drawing the tile.
+     * @return ResponseEntity<Object> ResponseEntity representing the result of the draw action.
+     */
     @PostMapping("/drawTile/{roomCode}/{playerName}")
     public ResponseEntity<Object> drawTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
@@ -315,6 +364,14 @@ public class GameController {
     }
 
 
+    /**
+     * This method handles the "Pong" action, where a player claims a set of two identical tiles from the table.
+     * It allows a player to declare a Pong by providing the room code and player name.
+     *
+     * @param roomCode   The unique identifier of the room where the action takes place.
+     * @param playerName The name of the player initiating the Pong action.
+     * @return ResponseEntity<Object> A response entity indicating the success or failure of the Pong action.
+     */
     @PostMapping("/pong/{roomCode}/{playerName}")
     public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
@@ -369,6 +426,15 @@ public class GameController {
 
 
 
+    /**
+     * This method handles the "Kong" action, where a player declares a set of four identical tiles from their hand.
+     * It allows a player to declare a Kong by providing the room code, player name, and the index of the tile to declare as a Kong.
+     *
+     * @param roomCode   The unique identifier of the room where the action takes place.
+     * @param playerName The name of the player initiating the Kong action.
+     * @param tileIndex  The index of the tile in the player's hand to declare as a Kong.
+     * @return ResponseEntity<Object> A response entity indicating the success or failure of the Kong action.
+     */
     @PostMapping("/kong/{roomCode}/{playerName}/{tileIndex}")
     public ResponseEntity<Object> kongTile(@PathVariable String roomCode, @PathVariable String playerName, @PathVariable int tileIndex) {
         Room room = roomManager.getRoom(roomCode);
@@ -409,6 +475,13 @@ public class GameController {
         return player.getLastActionWasDraw() && player.getHand().getTiles().contains(tile);
     }
 
+    /**
+     * This method is used to handle a POST request to chi a tile in a mahjong game.
+     *
+     * @param roomCode The code identifying the room where the chi action is taking place.
+     * @param playerName The name of the player performing the chi action.
+     * @return ResponseEntity<Object> A response entity representing the result of the chi action.
+     */
     @PostMapping("/chi/{roomCode}/{playerName}")
     public ResponseEntity<Object> chiTile(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
@@ -478,6 +551,13 @@ public class GameController {
 
 
 
+    /**
+     * This method checks if a player has won the game in a specified room by evaluating various win conditions.
+     *
+     * @param roomCode   The code identifying the room where the game is being played.
+     * @param playerName The name of the player whose win condition is being checked.
+     * @return A ResponseEntity containing a message indicating the result of the win check.
+     */
     @GetMapping("/checkWin/{roomCode}/{playerName}")
     public ResponseEntity<Object> checkWin(@PathVariable String roomCode, @PathVariable String playerName) {
         Room room = roomManager.getRoom(roomCode);
@@ -502,6 +582,14 @@ public class GameController {
         return ResponseEntity.badRequest().body("Room not found.");
     }
 
+    /**
+     * Broadcasts an action performed in a room to all players.
+     *
+     * @param room           The room where the action is performed.
+     * @param action         The type of action being performed.
+     * @param performerIndex The index of the player performing the action.
+     * @return A ResponseEntity containing the notification message with details of the action.
+     */
     public ResponseEntity<Object> broadcastAction(Room room, String action, int performerIndex) {
         // Get all the tiles discarded on the table and convert them to strings
         List<String> tableTiles = room.getAllDiscardedTiles().stream()
@@ -533,6 +621,13 @@ public class GameController {
     }
 
 
+    /**
+     * Retrieves the tiles of a specific player in a room.
+     *
+     * @param roomCode    The code of the room where the player is located.
+     * @param playerName  The name of the player whose tiles are being retrieved.
+     * @return A ResponseEntity containing the player's tiles if found, or an error message if the room or player is not found.
+     */
     @PostMapping("/getPlayerTiles/{roomCode}/{playerName}")
     public ResponseEntity<Object> getPlayerTiles(@PathVariable String roomCode, @PathVariable String playerName) {
         // Retrieve the room using the provided room code

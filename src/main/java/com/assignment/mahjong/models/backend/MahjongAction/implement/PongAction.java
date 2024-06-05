@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PongAction extends MahjongAction {
-    private TileInterface tileToPong; // The tile to form the Pong with
-    private Player player; // The player performing the Pong action
+    private TileInterface tileToPong;
+    private Player player;
 
     public PongAction(TileInterface tileToPong, List<TileInterface> playerHand, Player player) {
         super(tileToPong, playerHand);
@@ -18,7 +18,11 @@ public class PongAction extends MahjongAction {
         this.player = player;
     }
 
-    // Executes the Pong action
+    /**
+     * Executes the Pong action if possible, updating the player's hand and melds accordingly.
+     * If the Pong action is successful, the player's hand and melds are adjusted accordingly.
+     * If the Pong action is not possible, a message indicating the failure is printed.
+     */
     @Override
     public void execute() {
         if (PongAction.canPong(playerHand, tileToPong)) {
@@ -32,6 +36,13 @@ public class PongAction extends MahjongAction {
         }
     }
 
+    /**
+     * Checks if a Pong action can be performed with the given hand tiles and a specified tile.
+     *
+     * @param handTiles The list of tiles in the player's hand.
+     * @param tile      The tile to check for Pong eligibility.
+     * @return True if a Pong action can be performed with the given tiles, false otherwise.
+     */
     public static boolean canPong(List<TileInterface> handTiles, TileInterface tile) {
         long count = handTiles.stream()
                 .filter(t -> t.getValueAsString().equals(tile.getValueAsString()))
@@ -39,7 +50,10 @@ public class PongAction extends MahjongAction {
         return count >= 2;  // At least two identical tiles are required to form a Pong
     }
 
-    // Adjust the player's hand after forming the Pong by removing the used tiles
+    /**
+     * Adjusts the player's hand after successfully executing a Pong action.
+     * Removes two instances of the specified tile from the player's hand.
+     */
     private void adjustPlayerHand() {
         List<TileInterface> toRemove = playerHand.stream()
                 .filter(tile -> tile.equals(tileToPong))
@@ -49,7 +63,10 @@ public class PongAction extends MahjongAction {
         playerHand.removeAll(toRemove);
     }
 
-    // Create a meld (set of tiles) representing the formed Pong and adds it to the player's melds
+    /**
+     * Creates a Pong meld with the specified tile and adds it to the player's melds.
+     * A Pong meld consists of three identical tiles.
+     */
     private void createMeld() {
         List<TileInterface> meldTiles = new ArrayList<>();
         meldTiles.add(tileToPong);

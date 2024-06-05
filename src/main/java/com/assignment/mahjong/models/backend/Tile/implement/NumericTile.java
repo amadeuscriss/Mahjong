@@ -16,19 +16,16 @@ public class NumericTile implements TileInterface {
         this.number = number;
     }
 
-    // Get the type of the tile
     @Override
     public String getType() {
         return type;
     }
 
-    // Get the numeric value of the tile
     @Override
     public int getNumber() {
         return number;
     }
 
-    // Get the string representation of the tile's value
     @Override
     public String getValueAsString() {
         return type + " " + number;

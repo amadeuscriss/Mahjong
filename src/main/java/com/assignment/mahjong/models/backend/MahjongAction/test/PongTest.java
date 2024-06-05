@@ -8,9 +8,11 @@ import com.assignment.mahjong.models.backend.Room.Player;
 
 import java.util.ArrayList;
 
+/**
+ * Test class for evaluating the functionality of executing a Pong action in a Mahjong game.
+ */
 public class PongTest {
     public static void main(String[] args) {
-        // Create the player
         Player player = new Player("Tester");
 
         // Initialize the hand with at least two identical cards
@@ -18,15 +20,13 @@ public class PongTest {
         hand.addTile(new NumericTile("Bamboo", 5));
         hand.addTile(new NumericTile("Bamboo", 5));
         hand.addTile(new NumericTile("Bamboo", 3)); // Another unrelated card
-        player.setHand(hand.getTiles()); // Set the player's hand
+        player.setHand(hand.getTiles());
 
         // Create the other player's cards, the same as the two in your hand
         TileInterface tileToPong = new NumericTile("Bamboo", 5);
 
-        // Create a PongAction instance and pass in the player and hand
         PongAction pongAction = new PongAction(tileToPong, player.getHand().getTiles(), player);
 
-        // Perform a card touch
         pongAction.execute();
 
         // Print the result

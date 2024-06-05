@@ -5,6 +5,9 @@ import com.assignment.mahjong.models.backend.Tile.implement.WordTile;
 import com.assignment.mahjong.models.backend.MahjongAction.implement.DiscardAction;
 import com.assignment.mahjong.models.backend.Player.Hand;
 
+/**
+ * Test class for evaluating the functionality of discarding a tile from a hand.
+ */
 public class DiscardTest {
     public static void main(String[] args) {
         // Initialize hand
@@ -15,7 +18,6 @@ public class DiscardTest {
         hand.addTile(new WordTile("Wind", "East"));
         hand.addTile(new WordTile("Dragon", "Red"));
 
-        // Assuming we want to discard the first tile
         int tileIndexToDiscard = 0; // Index for the first tile in the list
 
         // Create DiscardAction instance with the hand's tiles

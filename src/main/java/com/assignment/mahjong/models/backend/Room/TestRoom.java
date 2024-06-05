@@ -1,9 +1,12 @@
 package com.assignment.mahjong.models.backend.Room;
 
+/**
+ * Test class for the RoomManager and Player classes.
+ */
 public class TestRoom {
     public static void main(String[] args) {
         RoomManager roomManager = new RoomManager();
-        String roomCode = roomManager.createRoom("lilisi");  // Create a room and get the room number
+        String roomCode = roomManager.createRoom("lilisi");
 
         System.out.println("Testing Room Class");
 
@@ -29,7 +32,6 @@ public class TestRoom {
         boolean eveJoined = roomManager.joinRoom(roomCode, eve);
         System.out.println("Expected: Room full, Actual: " + (!eveJoined ? "Room overflow" : "Room not overflow"));
 
-        // Get room status
         Room room = roomManager.getRoom(roomCode);
 
         // Set player readiness

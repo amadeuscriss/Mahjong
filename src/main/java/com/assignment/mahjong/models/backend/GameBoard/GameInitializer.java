@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Random;
 
 public class GameInitializer {
-    public static List<TileInterface> tiles = new ArrayList<>();  // List to hold all tiles in the game
-    private List<Player> players;  // List of players in the game
+    public static List<TileInterface> tiles = new ArrayList<>();
+    private List<Player> players;
     private final Random random = new Random();  // Random number generator for shuffling tiles and rolling dice
-    private Room room;  // Room object containing game information
+    private Room room;
 
     /**
      * Constructor for GameInitializer
@@ -115,9 +115,9 @@ public class GameInitializer {
             if (tiles.size() >= index + tilesPerPlayer) {
                 // Create a new list to store the player's hand tiles
                 List<TileInterface> playerTiles = new ArrayList<>(tiles.subList(index, index + tilesPerPlayer));
-                player.getHand().getTiles().clear(); // Clear existing hand tiles just in case
-                player.getHand().getTiles().addAll(playerTiles); // Add tiles to player's hand
-                player.getHand().arrangeHand(); // Arrange the hand
+                player.getHand().getTiles().clear();
+                player.getHand().getTiles().addAll(playerTiles);
+                player.getHand().arrangeHand();
                 index += tilesPerPlayer;
             }
         }
@@ -134,7 +134,7 @@ public class GameInitializer {
     private void setupPlayers() {
         // Initialize player settings such as score or game state
         for (Player player : players) {
-            player.getHand().getTiles().clear(); // Ensure each player's hand is empty for initialization
+            player.getHand().getTiles().clear();
         }
         System.out.println("Players are set up.");
     }

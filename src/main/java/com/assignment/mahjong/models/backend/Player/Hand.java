@@ -8,31 +8,46 @@ import java.util.List;
 
 // Represent a player's hand in a tile-based game
 public class Hand {
-    private List<TileInterface> tiles; // List to store tiles in the hand
+    private List<TileInterface> tiles;
 
     public Hand() {
-        this.tiles = new ArrayList<>(); // Initialize the list of tiles
+        this.tiles = new ArrayList<>();
     }
 
+    /**
+     * Adds a tile to the hand.
+     *
+     * @param tile The tile to be added.
+     */
     public void addTile(TileInterface tile) {
-        tiles.add(tile); // Add the tile to the hand
+        tiles.add(tile);
         System.out.println("Added tile: " + tile.getValueAsString() + " to hand.");
     }
 
+    /**
+     * Removes a tile from the hand.
+     *
+     * @param tile The tile to be removed.
+     * @return true if the tile was successfully removed, false otherwise.
+     */
     public boolean removeTile(TileInterface tile) {
-        boolean removed = tiles.remove(tile); // Attempt to remove the tile
+        boolean removed = tiles.remove(tile);
         if (removed) {
             System.out.println("Removed tile: " + tile.getValueAsString() + " from hand.");
         } else {
             System.out.println("Failed to remove tile: " + tile.getValueAsString() + " from hand.");
         }
-        return removed; // Return whether the removal was successful
+        return removed;
     }
 
     public List<TileInterface> getTiles() {
         return tiles;
     }
 
+    /**
+     * Arranges the tiles in the hand in a specific order.
+     * The tiles are sorted first by type and then by number.
+     */
     public void arrangeHand() {
         Collections.sort(tiles, new Comparator<TileInterface>() {
             @Override

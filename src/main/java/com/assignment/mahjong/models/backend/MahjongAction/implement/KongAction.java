@@ -12,9 +12,18 @@ import java.util.Map;
 
 public class KongAction extends MahjongAction {
     private boolean isSelfKong;  // Mark whether it is a self-touching Kong
-    private Point points;  // Player score object, used to update the multiplier
-    private Player player;  // Operational player
+    private Point points;
+    private Player player;
 
+    /**
+     * Represents an action of declaring a Kong (four-of-a-kind) in a Mahjong game.
+     *
+     * @param currentTile The tile being used to declare the Kong.
+     * @param playerHand  The current hand of the player.
+     * @param isSelfKong  Indicates whether the Kong is a self-drawn Kong.
+     * @param points      The points awarded for declaring the Kong.
+     * @param player      The player performing the Kong action.
+     */
     public KongAction(TileInterface currentTile, List<TileInterface> playerHand, boolean isSelfKong, Point points, Player player) {
         super(currentTile, playerHand);
         this.isSelfKong = isSelfKong;
@@ -23,7 +32,9 @@ public class KongAction extends MahjongAction {
     }
 
 
-
+    /**
+     * Executes the action of declaring a Kong (four-of-a-kind) in a Mahjong game.
+     */
     @Override
     public void execute() {
         if (canKong(playerHand, currentTile)) {
@@ -45,7 +56,13 @@ public class KongAction extends MahjongAction {
         }
     }
 
-    // Check whether the bar can be executed, based on the number of cards
+    /**
+     * Checks if a Kong (four-of-a-kind) can be declared with the given player's hand and tile.
+     *
+     * @param playerHand The current hand of the player.
+     * @param tile       The tile being used to declare the Kong.
+     * @return True if a Kong can be declared, false otherwise.
+     */
     public static boolean canKong(List<TileInterface> playerHand, TileInterface tile) {
         long count = playerHand.stream()
                 .filter(t -> t.getValueAsString().equals(tile.getValueAsString()))

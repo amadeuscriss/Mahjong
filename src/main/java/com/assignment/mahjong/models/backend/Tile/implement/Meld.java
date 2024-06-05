@@ -10,13 +10,23 @@ public class Meld {
     private List<TileInterface> tiles;
     private String type; // "CHI", "PONG", "KONG"
 
-    // Constructor initializes with specific type and optionally some tiles
+    /**
+     * Constructs a meld with the specified type and tiles.
+     *
+     * @param type  The type of meld.
+     * @param tiles The list of tiles comprising the meld. If null, an empty list is created.
+     */
     public Meld(String type, List<TileInterface> tiles) {
         this.type = type;
         this.tiles = tiles != null ? new ArrayList<>(tiles) : new ArrayList<>();
     }
 
-    // Adds a single tile to the meld, if it does not violate meld constraints
+    /**
+     * Adds a tile to the meld if it's addable according to the meld's rules.
+     *
+     * @param tile The tile to add.
+     * @return True if the tile was successfully added, false otherwise.
+     */
     public boolean addTile(TileInterface tile) {
         if (isTileAddable(tile)) {
             tiles.add(tile);
@@ -25,9 +35,13 @@ public class Meld {
         return false;
     }
 
-    // Checks if a tile can be added based on meld type and current tiles
+    /**
+     * Checks if a tile can be added to the meld based on the meld's type and game rules.
+     *
+     * @param tile The tile to check.
+     * @return True if the tile can be added according to the rules, false otherwise.
+     */
     private boolean isTileAddable(TileInterface tile) {
-        // Example logic, needs to be tailored to specific game rules
         switch (this.type) {
             case "CHI":
                 return canFormSequence(tile);
@@ -39,18 +53,20 @@ public class Meld {
         }
     }
 
-    // Determine if a tile can form a sequence (for CHI)
     private boolean canFormSequence(TileInterface tile) {
-        // Example: Check if the numbers form a continuous sequence
-        return true; // Simplified, implement sequence logic based on your game rules
+        return true;
     }
 
-    // Determine if a tile can form a group (for PONG or KONG)
+    /**
+     * Determines if adding a tile allows forming a group within the meld.
+     *
+     * @param tile The tile to check for forming a group.
+     * @return True if the tile enables forming a group within the meld, false otherwise.
+     */
     private boolean canFormGroup(TileInterface tile) {
         return tiles.isEmpty() || tiles.get(0).getType().equals(tile.getType());
     }
 
-    // Getters
     public List<TileInterface> getTiles() {
         return tiles;
     }
@@ -59,7 +75,6 @@ public class Meld {
         return type;
     }
 
-    // A convenient method to get the display of the meld
     public String display() {
         return type + ": " + tiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", "));
     }

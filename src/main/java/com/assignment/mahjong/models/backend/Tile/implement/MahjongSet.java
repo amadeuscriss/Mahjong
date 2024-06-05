@@ -14,7 +14,12 @@ public class MahjongSet {
         initializeTiles();
     }
 
-    // Method of generating cards
+    /**
+     * Initializes the tiles for the game, including numeric tiles (bamboo, dot, and character)
+     * ranging from 1 to 9, as well as special tiles such as winds (East, South, West, North)
+     * and dragons (Red, Green, White).
+     */
+
     private void initializeTiles() {
         // Generate bamboo, dot, and character
         for (int i = 1; i <= 9; i++) {
@@ -38,12 +43,15 @@ public class MahjongSet {
         }
     }
 
-    // Shuffling algorithm
     public void shuffle() {
         Collections.shuffle(tiles);
     }
 
-    // Access the current set of cards
+    /**
+     * Retrieves the list of tiles.
+     *
+     * @return The list of tiles.
+     */
     public List<TileInterface> getTiles() {
         return tiles;
     }

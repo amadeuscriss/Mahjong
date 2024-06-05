@@ -10,15 +10,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ChiAction extends MahjongAction {
-    private TileInterface tileToAdd; // To be added from the table
-    private Player player;  // Player performing the action
+    private TileInterface tileToAdd;
+    private Player player;
 
+    /**
+     * Represents a "Chi" action, which involves adding a tile to a player's hand.
+     * This class extends the Action class and provides additional functionality specific to the "Chi" action.
+     */
     public ChiAction(TileInterface currentTile, List<TileInterface> playerHand, TileInterface tileToAdd, Player player) {
         super(currentTile, playerHand);
         this.tileToAdd = tileToAdd;
         this.player = player;
     }
 
+    /**
+     * Executes a "Chi" action, which involves forming a meld of three consecutive tiles from the player's hand.
+     * If successful, removes the tiles from the player's hand and adds the meld to the player's melds.
+     * Prints relevant messages for success or failure.
+     */
     public void execute() {
         Optional<Integer> maybeValue = Optional.of(currentTile.getNumber());
         if (!maybeValue.isPresent()) {
@@ -93,6 +102,13 @@ public class ChiAction extends MahjongAction {
                 .orElse(null);
     }
 
+    /**
+     * Finds the successor tile of a given tile in a list of tiles.
+     *
+     * @param tiles The list of tiles to search within.
+     * @param tile  The tile for which the successor is being searched.
+     * @return The successor tile if found, or null if not found.
+     */
     public static TileInterface findSuccessorTile(List<TileInterface> tiles, TileInterface tile) {
         int value = tile.getNumber();
         String type = tile.getType();

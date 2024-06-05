@@ -9,6 +9,9 @@ import com.assignment.mahjong.models.backend.Player.Point;
 
 import java.util.ArrayList;
 
+/**
+ * Test class for evaluating the functionality of executing a Kong action in a Mahjong game.
+ */
 public class KongTest {
     public static void main(String[] args) {
         // Initialize the hand with four identical cards to simulate a bar
@@ -16,23 +19,19 @@ public class KongTest {
         hand.addTile(new NumericTile("Bamboo", 9));
         hand.addTile(new NumericTile("Bamboo", 9));
         hand.addTile(new NumericTile("Bamboo", 9));
-        hand.addTile(new NumericTile("Bamboo", 9));  // The fourth identical card
+        hand.addTile(new NumericTile("Bamboo", 9));
 
-        // Initialize the scoring system
         Point points = new Point();
 
-        // Initialize the player
         Player player = new Player("Test Player");
         player.setHand(hand.getTiles());
 
         // Create the current card for the bar action (touched or played)
         TileInterface currentTile = new NumericTile("Bamboo", 9);
-        boolean isSelfKong = false;  // Assume this is the open bar）
+        boolean isSelfKong = false;  // Assume this is the open bar
 
-        // Create KongAction instance and pass score object and player object
         KongAction kongAction = new KongAction(currentTile, player.getHand().getTiles(), isSelfKong, points, player);
 
-        // Perform the bar action
         kongAction.execute();
 
         // Print the result
