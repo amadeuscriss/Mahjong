@@ -173,6 +173,7 @@ export default {
             actions.push(action);
           }
         });
+
       } else if (typeof this.playerActions === 'string') {
         if (!['Chi'].includes(this.playerActions)) {
           actions.push(this.playerActions);
@@ -185,7 +186,6 @@ export default {
       //   actions.push('Skip'); // 添加“跳过”按钮
       // }
 
-      console.log("filteredActions:", actions);
       return actions;
     }
   },
@@ -219,6 +219,15 @@ export default {
       if (message.state === "Draw"){
         this.playerTiles = message.playerTiles;
         this.drawnTile = message.drawnTile;
+      }
+
+      //如果不是下家，删除吃牌操作
+      if (this.getNextPlayerName(this.currentTurnPlayerName, 1) !== this.playerIndex){
+        const chiIndex = this.playerActions.indexOf('Chi');
+        if (chiIndex !== -1) {
+          this.playerActions.splice(chiIndex, 1);
+        }
+        this.tilesToEat = [];
       }
 
       // this.playerTiles = message.playerTiles[this.playerIndex];
@@ -273,10 +282,15 @@ export default {
     //接收通知，更新明牌库
     updateShownTiles(message){
       this.tableTiles = message.tableTiles;
+
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
       }
+
       this.showTiles[message.performerIndex] = message.showTiles;
+
+      //接受通知，清空行为列表。避免有玩家吃牌后，还能杠
+      this.playerActions = [];
       console.log("performerIndex " +  message.performerIndex);
       console.log(message.showTiles);
       this.showNotification(message.action, message.performerIndex);
