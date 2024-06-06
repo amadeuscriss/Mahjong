@@ -219,8 +219,6 @@ public class WebSocketServer {
                         }
                         break;
                     case "gameEnd":
-                        serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
-                        messageToSend = objectMapper.writeValueAsString(gameController.endGame(serverRoom).getBody());
                     default:
                         break;
                 }
