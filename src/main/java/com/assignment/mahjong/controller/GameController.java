@@ -181,7 +181,6 @@ public class GameController {
                         chiTile(roomCode, playerName,theindex);
                         break;
                     case "Skip":
-                        room.moveToNextPlayer();
                         break;
                     default:
                         return ResponseEntity.badRequest().body(Map.of("message", "Invalid action."));
@@ -235,6 +234,8 @@ public class GameController {
         }
 
         room.setLastDiscardedTile(tileToDiscard, playerName);
+        player.getHand().arrangeHand();
+        room.moveToNextPlayer();
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
                 "discardedTile", discardAction.getleasttiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
@@ -619,6 +620,26 @@ public class GameController {
         } else {
             return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
         }
+    }
+
+    // 在GameController类中添加新方法
+    public ResponseEntity<Object> endGame(Room room) {
+        // 获取所有玩家的分数
+        List<Integer> scoresList = room.getPlayers().stream()
+                .map(player -> player.getPoints().getTotalPoints())
+                .collect(Collectors.toList());
+
+        // 创建gameEnd响应
+        Map<String, Object> gameEndResponse = Map.of(
+                "type", "gameEnd",
+                "scoresList", scoresList
+        );
+
+        // 清空房间
+        roomManager.removeRoom(room.getRoomCode());
+
+        // 返回gameEnd响应
+        return ResponseEntity.ok(gameEndResponse);
     }
 
 }
