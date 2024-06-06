@@ -440,7 +440,8 @@ public class GameController {
                                 .flatMap(meld -> meld.getTiles().stream())
                                 .map(TileInterface::getValueAsString)
                                 .collect(Collectors.toList());
-                        player.getHand().getTiles().removeAll(chiIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
+                        player.getHand().getTiles().removeAll(chiIndices.stream().limit(2).map(player.getHand().getTiles()::get).collect(Collectors.toList()));
+
                         room.moveToNextPlayer();
 
                         return ResponseEntity.ok(Map.of(
