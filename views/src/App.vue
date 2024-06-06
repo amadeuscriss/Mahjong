@@ -21,14 +21,13 @@ import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
 import GameTable from "@/components/GameTable.vue";
 
-
 export default {
   name: 'App',
   components: {
     WelcomePage,
     InputRoomNumber,
     WaitingRoom,
-    GameTable
+    GameTable,
   },
   data() {
     return {
@@ -36,6 +35,7 @@ export default {
       players: [],
       playerIndex: null,
       roomId: null,
+      ScoresList: null,
     };
   },
   methods: {
@@ -72,7 +72,8 @@ export default {
           this.players = data.players;
           this.playerIndex = 0;
           this.currentComponent = 'WaitingRoom';
-        } else if (data.type === 'updateRoom'){
+        }
+        else if (data.type === 'updateRoom'){
           this.players = data.players;
           this.playerIndex = data.playerIndex;
         }
