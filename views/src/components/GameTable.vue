@@ -368,7 +368,7 @@ export default {
 
       this.$ws.send(message);
 
-      this.playerTiles = [];
+      this.playerActions = [];
 
       // 点击按钮后清除自动跳过的超时
       if (this.skipTimeout) {
