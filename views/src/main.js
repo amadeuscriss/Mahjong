@@ -4,7 +4,7 @@ import App from './App.vue'
 const app = createApp(App);
 
 // 设置 WebSocket 连接
-const ws = new WebSocket('ws://10.19.32.72:8081/ws');
+const ws = new WebSocket('ws://localhost/ws');
 ws.onopen = () => {
     console.log('WebSocket 连接已建立');
     // 在连接建立后，您可以执行任何相关操作，如发送初始消息等
