@@ -1,69 +1,46 @@
 package com.assignment.mahjong.models.backend.Player;
 
 public class Point {
-    private int totalPoints;
-    private int basePoints;
-    private double multiplier; // Total multiplier used for calculating total points
+    private int totalPoints; // 总分
+    private int basePoints;  // 基础分数
+    private double multiplier; // 总倍率，用于计算总分
 
-    /**
-     * Represents a point system used in a game.
-     * Initializes the total points, base points, and multiplier.
-     */
+    // 构造函数，初始化分数和倍率
     public Point() {
-        this.totalPoints = 0;
-        this.basePoints = 0;
-        this.multiplier = 1.0;
+        this.totalPoints = 0;  // 初始总分为0
+        this.basePoints = 1;   // 初始基础分为0
+        this.multiplier = 1.0; // 初始倍率设为1
     }
 
-    /**
-     * Sets the base points to a specified value and updates the total points accordingly.
-     *
-     * @param points The new value for the base points.
-     */
+    // 设置基础分数，并更新总分
     public void setBasePoints(int points) {
-        basePoints = points;
-        updateTotalPoints();
+        basePoints = points;  // 设置基础分数
+        updateTotalPoints();  // 更新总分
     }
 
-    /**
-     * Increases the multiplier by a specified increment and updates the total points accordingly.
-     *
-     * @param increment The amount by which to increase the multiplier.
-     */
+    // 增加倍率，并更新总分
     public void addMultiplier(double increment) {
-        multiplier += increment;
-        updateTotalPoints();
+        multiplier *= increment; // 增加倍率
+        updateTotalPoints();     // 更新总分
     }
 
-    /**
-     * Resets the multiplier to its initial value of 1.0 and updates the total points accordingly.
-     */
+    // 重置倍率为1，并更新总分
     public void resetMultiplier() {
-        multiplier = 1.0;
-        updateTotalPoints();
+        multiplier = 1.0;    // 重置倍率
+        updateTotalPoints(); // 更新总分
     }
 
-    /**
-     * Method to update total points based on base points and multiplier
-     */
+    // 更新总分的方法，根据基础分和倍率计算
     private void updateTotalPoints() {
-        totalPoints = (int) (basePoints * multiplier); // Total points = Base points * Multiplier
+        totalPoints = (int) (basePoints * multiplier); // 总分 = 基础分 * 倍率
     }
 
-    /**
-     * Retrieves the total points accumulated.
-     *
-     * @return The total points accumulated.
-     */
+    // 获取当前的总分
     public int getTotalPoints() {
         return totalPoints;
     }
 
-    /**
-     * Retrieves the details of the score, including base points, multiplier, and total points.
-     *
-     * @return A string containing the details of the score.
-     */
+    // 获取分数详情的字符串描述
     public String getScoreDetails() {
         return "Base Points: " + basePoints +
                 ", Multiplier: " + multiplier +

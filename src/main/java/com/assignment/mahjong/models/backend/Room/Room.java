@@ -27,6 +27,7 @@ public class Room {
     private List<TileInterface> tiles;
     private Random random = new Random();
     public static List<TileInterface> tableTiles = new ArrayList<>();
+    private List<TileInterface> discardedTiles;
 
     /**
      * Constructor for Room
@@ -290,5 +291,20 @@ public class Room {
                 .flatMap(meld -> meld.getTiles().stream())
                 .map(TileInterface::getValueAsString)
                 .collect(Collectors.toList());
+    }
+
+    public void setCurrentPlayer(Player player) {
+        if (player != null && players.contains(player)) {
+            this.currentTurnPlayerName = player.getName();
+            System.out.println("Current turn is now set to player: " + player.getName());
+        } else {
+            System.out.println("Player not found in the room.");
+        }
+    }
+
+    public void removeLastDiscardedTile() {
+        if (!tableTiles.isEmpty()) {
+            tableTiles.remove(tableTiles.size() - 1);
+        }
     }
 }
