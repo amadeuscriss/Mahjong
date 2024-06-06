@@ -9,15 +9,15 @@
     </div>
 
 
-<!--    <div class="tiles">-->
-<!--      <div v-for="(tile, index) in playerTiles" :key="index" class="tile-container">-->
-<!--        <img src="@/assets/tiles_back/playerTiles.png" class="player-tiles-back" alt="tile back"/>-->
-<!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" alt="tile front"/>-->
-<!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" :class="{ 'drawn-tile': index === drawnTileIndex }" alt="tile front"/>-->
-<!--      </div>-->
-<!--    </div>-->
+    <!--    <div class="tiles">-->
+    <!--      <div v-for="(tile, index) in playerTiles" :key="index" class="tile-container">-->
+    <!--        <img src="@/assets/tiles_back/playerTiles.png" class="player-tiles-back" alt="tile back"/>-->
+    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" alt="tile front"/>-->
+    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" :class="{ 'drawn-tile': index === drawnTileIndex }" alt="tile front"/>-->
+    <!--      </div>-->
+    <!--    </div>-->
 
-    <!-- 玩家手牌展示区 -->
+
     <!-- 玩家手牌展示区 -->
     <div class="tiles">
       <div
@@ -25,7 +25,7 @@
           :key="index"
           class="tile-container"
           :class="{
-          'highlighted-tile': tile === drawnTile,
+          'highlighted-tile': index === 13 && playerTiles.length === 14,
           'highlighted': highlightedTiles.includes(index)
         }"
           @mouseover="highlightTiles([index])"
@@ -89,12 +89,12 @@
       </div>
     </div>
 
-<!--    &lt;!&ndash; 操作按钮区域 &ndash;&gt;-->
-<!--    <div class="action-buttons">-->
-<!--      <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">-->
-<!--        {{ action }}-->
-<!--      </button>-->
-<!--    </div>-->
+    <!--    &lt;!&ndash; 操作按钮区域 &ndash;&gt;-->
+    <!--    <div class="action-buttons">-->
+    <!--      <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">-->
+    <!--        {{ action }}-->
+    <!--      </button>-->
+    <!--    </div>-->
 
     <div class="action-buttons">
       <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">
@@ -169,21 +169,21 @@ export default {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
         this.playerActions.forEach(action => {
-          if (!['Discard', 'SelfKong'].includes(action)) {
+          if (!['Chi'].includes(action)) {
             actions.push(action);
           }
         });
       } else if (typeof this.playerActions === 'string') {
-        if (!['Discard', 'SelfKong'].includes(this.playerActions)) {
+        if (!['Chi'].includes(this.playerActions)) {
           actions.push(this.playerActions);
         }
       } else {
         console.error("playerActions is neither an array nor a string:", this.playerActions);
       }
 
-      if (actions.length > 0) {
-        actions.push('Skip'); // 添加“跳过”按钮
-      }
+      // if (actions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
+      //   actions.push('Skip'); // 添加“跳过”按钮
+      // }
 
       console.log("filteredActions:", actions);
       return actions;
@@ -224,8 +224,10 @@ export default {
       // this.playerTiles = message.playerTiles[this.playerIndex];
 
       // 如果该玩家不在回合内，且有抢占行为,增加跳过按钮
-      if (this.filteredActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
+      if (this.playerActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
         //10秒内没有点击则自动点击 Skip
+
+        this.playerActions.push('Skip'); // 添加“跳过”按钮
 
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
@@ -319,7 +321,8 @@ export default {
             data: tileIndex,
             roomId: this.roomId,
             playIndex: this.players.indexOf(this.playerIndex),
-            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)
+            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
+            players: this.players,
           });
 
           // 发送消息
@@ -346,20 +349,29 @@ export default {
     // 处理操作按钮的点击事件
     handleAction(action, tilesIndex = -1) {
       console.log('Action clicked:', action); // 调试信息
+
+      let skipType = null;
+      if (this.playerActions.includes("Win") && action === "Skip") {
+        // 添加 SkipType
+        skipType = "Hu";
+      }
+
       const message = JSON.stringify({ type: 'action',
-                                            behavior: action,
-                                            state: 'Playing' ,
-                                            roomId: this.roomId ,
-                                            playIndex: this.players.indexOf(this.playerIndex),
-                                            nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
-                                            tilesToEatIndex : tilesIndex
+        behavior: action,
+        state: 'Playing' ,
+        roomId: this.roomId ,
+        playIndex: this.players.indexOf(this.playerIndex),
+        nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
+        tilesToEatIndex : tilesIndex,
+        skipType: skipType // 将 SkipType 添加到消息中
       });
 
 
 
       this.$ws.send(message);
 
-      this.playerTiles = [];
+      this.playerActions = [];
+      this.tilesToEat = [];
 
       // 点击按钮后清除自动跳过的超时
       if (this.skipTimeout) {
@@ -391,9 +403,6 @@ export default {
           break;
         case 'playerActions':
           this.handlePlayerActions(message);
-          break;
-        case 'done':
-          this.updateAfterActing(message);
           break;
         case 'notification':
           console.log("notification")
