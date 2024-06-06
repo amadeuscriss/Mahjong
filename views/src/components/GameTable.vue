@@ -8,16 +8,6 @@
       下家name{{getNextPlayerName(currentTurnPlayerName, 1)}}
     </div>
 
-
-    <!--    <div class="tiles">-->
-    <!--      <div v-for="(tile, index) in playerTiles" :key="index" class="tile-container">-->
-    <!--        <img src="@/assets/tiles_back/playerTiles.png" class="player-tiles-back" alt="tile back"/>-->
-    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" alt="tile front"/>-->
-    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" :class="{ 'drawn-tile': index === drawnTileIndex }" alt="tile front"/>-->
-    <!--      </div>-->
-    <!--    </div>-->
-
-
     <!-- 玩家手牌展示区 -->
     <div class="tiles">
       <div
@@ -89,13 +79,6 @@
       </div>
     </div>
 
-    <!--    &lt;!&ndash; 操作按钮区域 &ndash;&gt;-->
-    <!--    <div class="action-buttons">-->
-    <!--      <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">-->
-    <!--        {{ action }}-->
-    <!--      </button>-->
-    <!--    </div>-->
-
     <div class="action-buttons">
       <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">
         {{ action }}
@@ -113,12 +96,28 @@
       {{ notification.action }}
     </div>
 
+    <!-- 结算结果窗口 -->
+    <div v-if="showGameResults" class="results-overlay">
+      <GameResults
+          :players="players"
+          :playerIndex="playerIndex"
+          :roomId="roomId"
+          :ScoresList="ScoresList"
+          @goBack="hideGameResults"
+      />
+    </div>
+
   </div>
 </template>
 
 <script>
+import GameResults from "@/components/GameResults.vue";
+
 export default {
   name: 'GameTable',
+  components: {
+    GameResults,
+  },
   props: {
     roomId: String,
     players: Array,
@@ -126,11 +125,15 @@ export default {
   },
   data() {
     return {
+      showGameResults: false,
+      ScoresList: [],
+
       playerActions: [ ], // 玩家操作
       currentTurnPlayerName: null,
 
       tableTiles: [],
       playerTiles: [], // 玩家手牌
+      AllPlayerTiles: [],
       drawnTile: null,
 
       tilesToEat: [],
@@ -151,19 +154,6 @@ export default {
       return this.players.indexOf(this.playerIndex);
     },
 
-
-
-    // filteredActions() {
-    //   console.log(this.playerActions);
-    //   const actions = [];
-    //   if (Array.isArray(this.playerActions)) {
-    //     actions.push(this.playerActions.filter(action => action !== 'Discard'));
-    //   } else if (typeof this.playerActions === 'string') {
-    //     console.error("playerActions is a string:", this.playerActions);
-    //   }
-    //   return actions;
-    // }
-
     //剔除'Discard', 'SelfKong'
     filteredActions() {
       const actions = [];
@@ -182,10 +172,6 @@ export default {
         console.error("playerActions is neither an array nor a string:", this.playerActions);
       }
 
-      // if (actions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
-      //   actions.push('Skip'); // 添加“跳过”按钮
-      // }
-
       return actions;
     }
   },
@@ -201,6 +187,7 @@ export default {
 
     gameInitialization(message){
       console.log("gameInitialization" + this.playerActions);
+      this.AllPlayerTiles = message.playerTiles;
       this.playerTiles = message.playerTiles[this.playerIndex];
       this.currentTurnPlayerName = message.currentTurnPlayerName;
       if(this.currentTurnPlayerName === this.playerIndex){
@@ -229,8 +216,6 @@ export default {
         }
         this.tilesToEat = [];
       }
-
-      // this.playerTiles = message.playerTiles[this.playerIndex];
 
       // 如果该玩家不在回合内，且有抢占行为,增加跳过按钮
       if (this.playerActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
@@ -264,6 +249,7 @@ export default {
     updateAfterActing(message){
       this.playerTiles = message.playerTiles[this.playerIndex];
     },
+
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
@@ -303,23 +289,6 @@ export default {
         return '';
       }
     },
-
-    // // 处理牌面的点击事件
-    // handleTileClick(tile) {
-    //   if (this.currentTurnPlayerName === this.playerIndex){
-    //     const tileIndex = this.playerTiles.indexOf(tile);
-    //     const message = JSON.stringify({ type: 'action',
-    //                                             behavior: 'Discard',
-    //                                             state: 'Playing' ,
-    //                                             data: tileIndex ,
-    //                                             roomId: this.roomId ,
-    //                                             playIndex: this.players.indexOf(this.playerIndex),
-    //                                             nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
-    //     this.$ws.send(message);
-    //     this.playerActions = [];
-    //     this.drawnTile = null;
-    //   }
-    // },
 
     // 处理牌面的点击事件
     handleTileClick(tile) {
@@ -408,6 +377,14 @@ export default {
     },
 
 
+    hideGameResults() {
+      this.showGameResults = false;
+    },
+    handleGameEnd(message) {
+      this.ScoresList = message.ScoresList;
+      this.showGameResults = true;
+    },
+
     handleMessage(event) {
       const message = JSON.parse(event.data);
       switch (message.type) {
@@ -428,6 +405,8 @@ export default {
         case 'Turn change':
           this.currentTurnPlayerName = message.currentTurnPlayerName;
           break;
+        case 'gameEnd':
+          this.handleGameEnd(message);
       }
     }
   },
@@ -682,4 +661,16 @@ export default {
   transform: translateY(-50%);
 }
 
+.results-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
 </style>

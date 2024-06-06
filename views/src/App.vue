@@ -20,8 +20,6 @@ import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
 import GameTable from "@/components/GameTable.vue";
-import GameResults from "@/components/GameResults.vue";
-
 
 export default {
   name: 'App',
@@ -30,7 +28,6 @@ export default {
     InputRoomNumber,
     WaitingRoom,
     GameTable,
-    GameResults
   },
   data() {
     return {
@@ -93,10 +90,6 @@ export default {
         } else if (data.type === 'gameStart'){
           //开始游戏
           this.currentComponent = 'GameTable';
-        } else if (data.type === 'gameEnd'){
-          //游戏结束
-          this.ScoresList = data.ScoresList;
-          this.currentComponent = 'GameResults';
         }
       };
 
