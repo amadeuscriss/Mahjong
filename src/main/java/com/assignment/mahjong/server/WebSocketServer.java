@@ -205,8 +205,10 @@ public class WebSocketServer {
                                     sendMessageToHu(huName,jsonObject);
                                 } else {
                                     for (Player player : serverRoom.getPlayers()) {
-                                        String tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")));
+                                        Map<String, Object> responds = gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data"));
+                                        responds.put("playerActions", (List<String>) playerActions.get(player.getName()));
 
+                                        String tempMessage = objectMapper.writeValueAsString(responds);
                                         if (!player.getName().equals(jsonObject.get("currentTurnPlayerName"))) {
                                             sendMessageToUser(tempMessage, player.getName());
                                         }
