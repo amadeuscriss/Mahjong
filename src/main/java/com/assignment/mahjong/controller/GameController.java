@@ -155,38 +155,6 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
-    @PostMapping("/availableActions/{roomCode}/{playerName}")
-    public ResponseEntity<Object> availableChiActions(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody int discardedTileIndex) {
-        System.out.println(playerName);
-        Room room = roomManager.getRoom(roomCode);
-        if (room != null) {
-            Player player = room.getPlayerByName(playerName);
-            if (player != null) {
-                List<TileInterface> discardedTiles = room.getAllDiscardedTiles();
-                if (discardedTiles.isEmpty()) {
-                    return ResponseEntity.badRequest().body(Map.of("message", "No discarded tiles found."));
-                }
-
-                TileInterface discardedTile = discardedTiles.get(discardedTiles.size() - 1);
-                List<String> actions = new ArrayList<>();
-                List<List<Integer>> chiCombinations = new ArrayList<>();
-
-                if (ChiAction.canChi(player.getHand().getTiles(), discardedTile)) {
-                    actions.add("Chi");
-                    chiCombinations = getChiCombinations(player, discardedTile);
-                }
-
-                return ResponseEntity.ok(Map.of(
-                        "type", "playerActions",
-                        "playerActions", actions,
-                        "tilesToEat",chiCombinations
-                ));
-            }
-            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
-        }
-        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
-    }
-
     @PostMapping("/handleAction/{roomCode}/{playerName}")
     public ResponseEntity<Object> handleAction(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody Map<String, Object> request, int theindex) {
         String action = (String) request.get("behavior");
@@ -474,7 +442,7 @@ public class GameController {
                                 .collect(Collectors.toList());
                         player.getHand().getTiles().removeAll(chiIndices.stream().limit(2).map(player.getHand().getTiles()::get).collect(Collectors.toList()));
 
-                        room.moveToNextPlayer();
+                        room.setCurrentPlayer(player);
 
                         return ResponseEntity.ok(Map.of(
                                 "type", "playerActions",
