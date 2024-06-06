@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@node-ipc/js-queue": "^2.0.3",
+    "@vue/cli": "^5.0.8",
     "axios": "^1.6.8",
     "core-js": "^3.8.3",
     "element-plus": "^2.7.3",
