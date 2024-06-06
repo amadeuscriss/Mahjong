@@ -221,6 +221,10 @@ public class WebSocketServer {
                     case "gameEnd":
                         serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
                         messageToSend = objectMapper.writeValueAsString(gameController.endGame(serverRoom).getBody());
+
+                        for (Player player : serverRoom.getPlayers()) {
+                            sendMessageToUser(messageToSend, player.getName());
+                        }
                     default:
                         break;
                 }
