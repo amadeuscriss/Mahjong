@@ -218,7 +218,8 @@ public class WebSocketServer {
 
                         }
                         break;
-
+                    case "gameEnd":
+//                        messageToSend =
                     default:
                         break;
                 }
