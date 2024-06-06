@@ -85,6 +85,7 @@ public class WebSocketServer {
 
                     case "joinRoom":
                         Map<String, Object> respond = gameController.joinRoom((String) jsonObject.get("roomId"), new Player(session.getId()));
+
                         serverRoom = roomManager.getRoom((String) jsonObject.get("roomId"));
                         respond.put("playerIndex", session.getId());
                         messageToSend = objectMapper.writeValueAsString(respond);

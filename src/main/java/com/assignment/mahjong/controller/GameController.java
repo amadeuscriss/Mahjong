@@ -443,8 +443,13 @@ public class GameController {
                                 .flatMap(meld -> meld.getTiles().stream())
                                 .map(TileInterface::getValueAsString)
                                 .collect(Collectors.toList());
-                        player.getHand().getTiles().removeAll(chiIndices.stream().limit(2).map(player.getHand().getTiles()::get).collect(Collectors.toList()));
+                        System.out.println(player.getHand().getTiles().stream()
+                                .map(TileInterface::getValueAsString)
+                                .collect(Collectors.toList()));
                         // 从牌桌上移除最后一张牌
+                        System.out.println(player.getHand().getTiles().stream()
+                                .map(TileInterface::getValueAsString)
+                                .collect(Collectors.toList()));
                         room.removeLastDiscardedTile();
                         room.setCurrentPlayer(player);
 

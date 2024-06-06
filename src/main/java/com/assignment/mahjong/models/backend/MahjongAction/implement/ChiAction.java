@@ -23,7 +23,7 @@ public class ChiAction extends MahjongAction {
             TileInterface predecessorTile = findPredecessorTile(playerHand, currentTile);
             TileInterface successorTile = findSuccessorTile(playerHand, currentTile);
             if (predecessorTile != null && successorTile != null) {
-                performChi(predecessorTile, currentTile, successorTile);
+                performChi1(predecessorTile, currentTile, successorTile);
                 return;
             }
 
@@ -32,7 +32,7 @@ public class ChiAction extends MahjongAction {
             if (firstSuccessor != null) {
                 TileInterface secondSuccessor = findSuccessorTile(playerHand, firstSuccessor);
                 if (secondSuccessor != null) {
-                    performChi(currentTile, firstSuccessor, secondSuccessor);
+                    performChi2(currentTile, firstSuccessor, secondSuccessor);
                     return;
                 }
             }
@@ -42,7 +42,7 @@ public class ChiAction extends MahjongAction {
             if (firstPredecessor != null) {
                 TileInterface secondPredecessor = findPredecessorTile(playerHand, firstPredecessor);
                 if (secondPredecessor != null) {
-                    performChi(secondPredecessor, firstPredecessor, currentTile);
+                    performChi3(secondPredecessor, firstPredecessor, currentTile);
                     return;
                 }
             }
@@ -55,7 +55,8 @@ public class ChiAction extends MahjongAction {
         }
     }
 
-    private void performChi(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
+    private void performChi1(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
+        System.out.println(1);
         List<TileInterface> chiTiles = new ArrayList<>();
         chiTiles.add(tile1);
         chiTiles.add(tile2);
@@ -65,6 +66,38 @@ public class ChiAction extends MahjongAction {
         player.addMeld(chiMeld);
         player.getHand().getTiles().remove(tile1);
         player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
+
+        System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
+        isSuccessful = true;
+    }
+
+    private void performChi2(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
+        System.out.println(1);
+        List<TileInterface> chiTiles = new ArrayList<>();
+        chiTiles.add(tile1);
+        chiTiles.add(tile2);
+        chiTiles.add(tile3);
+
+        Meld chiMeld = new Meld("CHI", chiTiles);
+        player.addMeld(chiMeld);
+        player.getHand().getTiles().remove(tile2);
+        player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
+
+        System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
+        isSuccessful = true;
+    }
+
+    private void performChi3(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
+        System.out.println(1);
+        List<TileInterface> chiTiles = new ArrayList<>();
+        chiTiles.add(tile1);
+        chiTiles.add(tile2);
+        chiTiles.add(tile3);
+
+        Meld chiMeld = new Meld("CHI", chiTiles);
+        player.addMeld(chiMeld);
+        player.getHand().getTiles().remove(tile1);
+        player.getHand().getTiles().remove(tile2); // 删除前面和后面的牌
 
         System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
         isSuccessful = true;
