@@ -8,7 +8,7 @@ public class Point {
     // 构造函数，初始化分数和倍率
     public Point() {
         this.totalPoints = 0;  // 初始总分为0
-        this.basePoints = 0;   // 初始基础分为0
+        this.basePoints = 1;   // 初始基础分为0
         this.multiplier = 1.0; // 初始倍率设为1
     }
 
@@ -20,7 +20,7 @@ public class Point {
 
     // 增加倍率，并更新总分
     public void addMultiplier(double increment) {
-        multiplier += increment; // 增加倍率
+        multiplier *= increment; // 增加倍率
         updateTotalPoints();     // 更新总分
     }
 

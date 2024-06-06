@@ -27,6 +27,7 @@ public class Room {
     private List<TileInterface> tiles;
     private Random random = new Random();
     public static List<TileInterface> tableTiles = new ArrayList<>();
+    private List<TileInterface> discardedTiles;
 
     /**
      * Constructor for Room
@@ -301,4 +302,9 @@ public class Room {
         }
     }
 
+    public void removeLastDiscardedTile() {
+        if (!tableTiles.isEmpty()) {
+            tableTiles.remove(tableTiles.size() - 1);
+        }
+    }
 }

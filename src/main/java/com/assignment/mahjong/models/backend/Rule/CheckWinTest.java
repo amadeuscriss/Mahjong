@@ -46,23 +46,24 @@ public class CheckWinTest {
     @Test
     public void testStandardWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1", "Character"));
-        handTiles.add(createTile("1", "Character"));
-        handTiles.add(createTile("2", "Character"));
-        handTiles.add(createTile("3", "Character"));
-        handTiles.add(createTile("2", "Character"));
-        handTiles.add(createTile("3", "Character"));
-        handTiles.add(createTile("4", "Character"));
-        handTiles.add(createTile("4", "Character"));
-        handTiles.add(createTile("5", "Character"));
-        handTiles.add(createTile("6", "Character"));
-        handTiles.add(createTile("6", "Character"));
-        handTiles.add(createTile("7", "Character"));
-        handTiles.add(createTile("8", "Character"));
-        handTiles.add(createTile("9", "Character"));
+        handTiles.add(createTile("Character 1", "Character"));
+        handTiles.add(createTile("Character 1", "Character"));
+        handTiles.add(createTile("Character 2", "Character"));
+        handTiles.add(createTile("Character 3", "Character"));
+        handTiles.add(createTile("Character 4", "Character"));
+        handTiles.add(createTile("Character 3", "Character"));
+        handTiles.add(createTile("Character 4", "Character"));
+        handTiles.add(createTile("Character 5", "Character"));
+        handTiles.add(createTile("Character 4", "Character"));
+        handTiles.add(createTile("Character 5", "Character"));
+        handTiles.add(createTile("Character 6", "Character"));
+        handTiles.add(createTile("Character 7", "Character"));
+        handTiles.add(createTile("Character 8", "Character"));
+        handTiles.add(createTile("Character 9", "Character"));;
+
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
-        assertEquals(10 * 2, points.getTotalPoints(), 0.01);
+        assertEquals(9, points.getTotalPoints(), 0.01);
     }
 
     @Test
@@ -90,7 +91,7 @@ public class CheckWinTest {
     @Test
     public void testThirteenOrphansWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1", "Character"));
+        handTiles.add(createTile("Character 1", "Character"));
         handTiles.add(createTile("9", "Character"));
         handTiles.add(createTile("1", "Bamboo"));
         handTiles.add(createTile("9", "Bamboo"));

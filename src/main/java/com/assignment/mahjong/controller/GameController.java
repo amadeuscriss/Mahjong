@@ -270,8 +270,6 @@ public class GameController {
                         playerActions.add("SelfKong");
                     }
 
-                    playerActions.add("Discard");
-
                     // 广播当前玩家摸到的牌以及更新后的手牌和可执行的操作
                     return ResponseEntity.ok(Map.of(
                             "type", "playerActions",
@@ -321,6 +319,8 @@ public class GameController {
                                     .collect(Collectors.toList());
                             player.getHand().getTiles().removeAll(tileIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
 
+                            // 从牌桌上移除最后一张牌
+                            room.removeLastDiscardedTile();
                             // 更新回合到执行碰操作的玩家
                             room.setCurrentPlayer(player);
 
@@ -377,7 +377,8 @@ public class GameController {
                                     .map(TileInterface::getValueAsString)
                                     .collect(Collectors.toList());
                             player.getHand().getTiles().removeAll(tileIndices.stream().map(player.getHand().getTiles()::get).collect(Collectors.toList()));
-
+                            // 从牌桌上移除最后一张牌
+                            room.removeLastDiscardedTile();
                             // 更新回合到执行碰操作的玩家
                             room.setCurrentPlayer(player);
 
@@ -441,7 +442,8 @@ public class GameController {
                                 .map(TileInterface::getValueAsString)
                                 .collect(Collectors.toList());
                         player.getHand().getTiles().removeAll(chiIndices.stream().limit(2).map(player.getHand().getTiles()::get).collect(Collectors.toList()));
-
+                        // 从牌桌上移除最后一张牌
+                        room.removeLastDiscardedTile();
                         room.setCurrentPlayer(player);
 
                         return ResponseEntity.ok(Map.of(
@@ -534,7 +536,18 @@ public class GameController {
                 }
             }
         }
-        return chiCombinations;
+
+        // 去除重复的组合
+        List<List<Integer>> uniqueChiCombinations = new ArrayList<>();
+        Set<Set<Integer>> seenCombinations = new HashSet<>();
+        for (List<Integer> combination : chiCombinations) {
+            Set<Integer> combinationSet = new HashSet<>(combination);
+            if (seenCombinations.add(combinationSet)) {
+                uniqueChiCombinations.add(combination);
+            }
+        }
+
+        return uniqueChiCombinations;
     }
 
 
