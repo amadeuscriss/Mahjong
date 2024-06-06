@@ -6,6 +6,7 @@ import com.assignment.mahjong.controller.GameController;
 import com.assignment.mahjong.models.backend.Room.Player;
 import com.assignment.mahjong.models.backend.Room.Room;
 import com.assignment.mahjong.models.backend.Room.RoomManager;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +47,9 @@ public class WebSocketServer {
      * Record the current number of connections
      */
     public static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
+
+
+    Map<String, Object> playerActions = new HashMap<>();
 
     /**
      * Method called when the connection is established successfully
@@ -125,55 +131,91 @@ public class WebSocketServer {
                             messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
                             sendMessageToUser(messageToSend, session.getId());
 
+
                             for (Player player : serverRoom.getPlayers()) {
                                 String tempMessage = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                 sendMessageToUser(tempMessage, player.getName());
 
                                 if (!player.getName().equals(session.getId())) {
-                                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).getBody());
-                                    sendMessageToUser(tempMessage, player.getName());
+                                    playerActions.put(player.getName(), gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).get("playerActions"));
                                 }
                             }
+
+
+                            String firstHu = findFirstHu();
+
+
+                            if (firstHu != null) {
+                                sendMessageToHu(firstHu,jsonObject);
+                            } else {
+                                for (Player player : serverRoom.getPlayers()) {
+                                    if (!player.getName().equals(session.getId())) {
+                                        String tempMessage;
+                                        tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")));
+                                        sendMessageToUser(tempMessage, player.getName());
+                                    }
+                                }
+                            }
+
 
                         } else {
-                            if (((String) jsonObject.get("behavior")).equals("Skip") && session.getId().equals((String) jsonObject.get("nextPlayerName"))) {
-                                messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject, (Integer) jsonObject.get("tilesToEatIndex")).getBody());
-                                for (Player player : serverRoom.getPlayers()) {
-                                    sendMessageToUser(messageToSend, player.getName());
-                                }
-                                messageToSend = objectMapper.writeValueAsString(gameController.drawTile((String) jsonObject.get("roomId"), session.getId()).getBody());
-                                sendMessageToUser(messageToSend, session.getId());
-
-                            } else if (((String) jsonObject.get("behavior")).equals("Skip") && !session.getId().equals((String) jsonObject.get("state"))) {
-                                //
-                            } else {
-                                if (((String) jsonObject.get("behavior")).equals("Kong")) {
-                                    String messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject,(Integer) jsonObject.get("tilesToEatIndex")).getBody());
-
+                            if (jsonObject.get("skipType") == null) {
+                                if (((String) jsonObject.get("behavior")).equals("Skip") && session.getId().equals((String) jsonObject.get("nextPlayerName"))) {
+                                    messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject, (Integer) jsonObject.get("tilesToEatIndex")).getBody());
                                     for (Player player : serverRoom.getPlayers()) {
                                         sendMessageToUser(messageToSend, player.getName());
                                     }
-
-                                    for (Player player : serverRoom.getPlayers()) {
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
-                                        sendMessageToUser(messageToSend, player.getName());
-                                    }
-
                                     messageToSend = objectMapper.writeValueAsString(gameController.drawTile((String) jsonObject.get("roomId"), session.getId()).getBody());
                                     sendMessageToUser(messageToSend, session.getId());
+
+                                } else if (((String) jsonObject.get("behavior")).equals("Skip") && !session.getId().equals((String) jsonObject.get("state"))) {
+                                    //
                                 } else {
-                                    String messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject, (Integer) jsonObject.get("tilesToEatIndex")).getBody());
+                                    if (((String) jsonObject.get("behavior")).equals("Kong")) {
+                                        String messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject,(Integer) jsonObject.get("tilesToEatIndex")).getBody());
 
-                                    for (Player player : serverRoom.getPlayers()) {
-                                        sendMessageToUser(messageToSend, player.getName());
+                                        for (Player player : serverRoom.getPlayers()) {
+                                            sendMessageToUser(messageToSend, player.getName());
+                                        }
+
+                                        for (Player player : serverRoom.getPlayers()) {
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            sendMessageToUser(messageToSend, player.getName());
+                                        }
+
+                                        messageToSend = objectMapper.writeValueAsString(gameController.drawTile((String) jsonObject.get("roomId"), session.getId()).getBody());
+                                        sendMessageToUser(messageToSend, session.getId());
+                                    } else {
+                                        String messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject, (Integer) jsonObject.get("tilesToEatIndex")).getBody());
+
+                                        for (Player player : serverRoom.getPlayers()) {
+                                            sendMessageToUser(messageToSend, player.getName());
+                                        }
+
+                                        for (Player player : serverRoom.getPlayers()) {
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            sendMessageToUser(messageToSend, player.getName());
+                                        }
                                     }
+                                }
+                            } else {
+                                String huName = findFirstHu();
 
+                                if (huName != null) {
+                                    sendMessageToHu(huName,jsonObject);
+                                } else {
                                     for (Player player : serverRoom.getPlayers()) {
-                                        messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
-                                        sendMessageToUser(messageToSend, player.getName());
+                                        Map<String, Object> responds = gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data"));
+                                        responds.put("playerActions", (List<String>) playerActions.get(player.getName()));
+
+                                        String tempMessage = objectMapper.writeValueAsString(responds);
+                                        if (!player.getName().equals(jsonObject.get("currentTurnPlayerName"))) {
+                                            sendMessageToUser(tempMessage, player.getName());
+                                        }
                                     }
                                 }
                             }
+
                         }
                         break;
 
@@ -224,6 +266,43 @@ public class WebSocketServer {
         } catch (Exception e) {
             log.error("Error sending message to all clients: " + e);
         }
+    }
+
+
+    private String findFirstHu() {
+        String huName = null;
+        for (Map.Entry<String, Object> entry : playerActions.entrySet()) {
+
+            String key = entry.getKey();
+            List<String> value = (List<String>) entry.getValue();
+
+
+            if (huName == null && value.contains("Win")) {
+                huName = key;
+            }
+        }
+        return huName;
+    }
+
+    private void sendMessageToHu(String huName, JSONObject jsonObject) throws JsonProcessingException {
+        try {
+            for (Map.Entry<String, Object> entry : playerActions.entrySet()) {
+
+                String key = entry.getKey();
+                List<String> value = (List<String>) entry.getValue();
+                String tempMessage;
+
+                if (huName.equals(key)) {
+                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), huName, (int) jsonObject.get("data")));
+                    ((List<String>) playerActions.get(huName)).remove("Win");
+                    sendMessageToUser(tempMessage, huName);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
