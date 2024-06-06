@@ -63,7 +63,7 @@ public class ChiAction extends MahjongAction {
 
         Meld chiMeld = new Meld("CHI", chiTiles);
         player.addMeld(chiMeld);
-        player.getHand().getTiles().remove(tile2);
+        player.getHand().getTiles().remove(tile1);
         player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
 
         System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
@@ -78,8 +78,8 @@ public class ChiAction extends MahjongAction {
 
         Meld chiMeld = new Meld("CHI", chiTiles);
         player.addMeld(chiMeld);
-        player.getHand().getTiles().remove(tile1);
-        player.getHand().getTiles().remove(tile2); // 删除前面和后面的牌
+        player.getHand().getTiles().remove(tile2);
+        player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
 
         System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
         isSuccessful = true;
@@ -94,7 +94,7 @@ public class ChiAction extends MahjongAction {
         Meld chiMeld = new Meld("CHI", chiTiles);
         player.addMeld(chiMeld);
         player.getHand().getTiles().remove(tile1);
-        player.getHand().getTiles().remove(tile3); // 删除前面和后面的牌
+        player.getHand().getTiles().remove(tile2); // 删除前面和后面的牌
 
         System.out.println("Chi performed with tiles: " + chiTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.joining(", ")));
         isSuccessful = true;
