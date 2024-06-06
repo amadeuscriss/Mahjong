@@ -258,6 +258,7 @@ public class GameController {
                     // 获取玩家摸牌后的手牌
                     List<TileInterface> playerTiles = player.getHand().getTiles();
                     TileInterface thedrawtiles = drawAction.getDrawnTile();
+                    System.out.println(playerTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.toList()));
                     playerTiles.add(thedrawtiles);
 
                     // 检测是否可以胡牌或杠牌，并将结果存储在一个列表中
