@@ -157,7 +157,11 @@ public class WebSocketServer {
 
                                     messageToSend = objectMapper.writeValueAsString(gameController.drawTile((String) jsonObject.get("roomId"), session.getId()).getBody());
                                     sendMessageToUser(messageToSend, session.getId());
+//                                    messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
+//                                    sendMessageToUser(messageToSend, session.getId());
                                 } else {
+//                                    messageToSend = objectMapper.writeValueAsString(gameController.discardTile((String) jsonObject.get("roomId"), session.getId(), jsonObject).getBody());
+//                                    sendMessageToUser(messageToSend, session.getId());
                                     messageToSend = objectMapper.writeValueAsString(gameController.handleAction((String) jsonObject.get("roomId"), session.getId(), jsonObject, (int) jsonObject.get("tilesToEatIndex")).getBody());
 
                                     for (Player player : serverRoom.getPlayers()) {
