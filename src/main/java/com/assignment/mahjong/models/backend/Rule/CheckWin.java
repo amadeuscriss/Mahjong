@@ -64,32 +64,57 @@ public class CheckWin {
     private static boolean canFormMelds(List<TileInterface> tiles) {
         if (tiles.isEmpty()) return true;
 
-        List<TileInterface> tileList = new ArrayList<>(tiles);
+        int[] counts = new int[10]; // 假设牌的值范围是 1-9
+        for (TileInterface tile : tiles) {
+            counts[extractNumber(tile.getValueAsString())]++;
+        }
 
-        for (int i = 0; i < tileList.size(); i++) {
-            String tileValue = tileList.get(i).getValueAsString();
+        return canFormMeldsHelper(counts);
+    }
 
-            // 检查是否有三个相同的牌 (刻子)
-            if (countMatches(tileList, tileValue) >= 3) {
-                List<TileInterface> remainingTiles = removeTiles(tileList, tileValue, 3);
-                if (canFormMelds(remainingTiles)) {
-                    return true;
-                }
+    private static boolean canFormMeldsHelper(int[] counts) {
+        for (int i = 0; i < counts.length; i++) {
+            if (counts[i] >= 3) {
+                counts[i] -= 3;
+                if (canFormMeldsHelper(counts)) return true;
+                counts[i] += 3;
             }
-
-            // 检查是否有顺子
-            String nextVal = generateNextValue(tileValue, 1);
-            String nextNextVal = generateNextValue(tileValue, 2);
-            if (countMatches(tileList, nextVal) > 0 && countMatches(tileList, nextNextVal) > 0) {
-                List<TileInterface> remainingTiles = removeTiles(tileList, tileValue, 1);
-                remainingTiles = removeTiles(remainingTiles, nextVal, 1);
-                remainingTiles = removeTiles(remainingTiles, nextNextVal, 1);
-                if (canFormMelds(remainingTiles)) {
-                    return true;
-                }
+            if (i <= 7 && counts[i] > 0 && counts[i + 1] > 0 && counts[i + 2] > 0) {
+                counts[i]--;
+                counts[i + 1]--;
+                counts[i + 2]--;
+                if (canFormMeldsHelper(counts)) return true;
+                counts[i]++;
+                counts[i + 1]++;
+                counts[i + 2]++;
             }
         }
-        return false;
+        return Arrays.stream(counts).sum() == 0;
+    }
+
+    private static int extractNumber(String str) {
+        String num = str.replaceAll("[^\\d]", "");
+        return num.isEmpty() ? -1 : Integer.parseInt(num);
+    }
+
+    private static boolean isNumeric(String str) {
+        return str.matches(".*\\d+.*");
+    }
+
+    private static String generateNextValue(String value, int increment) {
+        String[] parts = value.split(" ");
+        if (parts.length < 2) {
+            System.out.println("Error: value '" + value + "' does not contain both type and number.");
+            return value;
+        }
+
+        try {
+            int num = Integer.parseInt(parts[1]) + increment;
+            return parts[0] + " " + num;
+        } catch (NumberFormatException e) {
+            System.out.println("Error generating next tile value for " + value + ": " + e.getMessage());
+            return value;  // Return the original value in case of formatting error
+        }
     }
 
     private static int countMatches(List<TileInterface> tiles, String value) {
@@ -107,22 +132,6 @@ public class CheckWin {
             }
         }
         return modifiedList;
-    }
-
-    private static String generateNextValue(String value, int increment) {
-        String[] parts = value.split(" ");
-        if (parts.length < 2) {
-            System.out.println("Error: value '" + value + "' does not contain both type and number.");
-            return value;
-        }
-
-        try {
-            int num = Integer.parseInt(parts[1]) + increment;
-            return parts[0] + " " + num;
-        } catch (NumberFormatException e) {
-            System.out.println("Error generating next tile value for " + value + ": " + e.getMessage());
-            return value;  // Return the original value in case of formatting error
-        }
     }
 
 

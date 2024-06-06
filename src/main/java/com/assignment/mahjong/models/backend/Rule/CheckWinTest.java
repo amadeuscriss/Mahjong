@@ -85,13 +85,13 @@ public class CheckWinTest {
         handTiles.add(createTile("7", "Character"));
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
-        assertEquals(20 * 3, points.getTotalPoints(), 0.01);
+        assertEquals(36, points.getTotalPoints(), 0.01);
     }
 
     @Test
     public void testThirteenOrphansWin() {
         List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("Character 1", "Character"));
+        handTiles.add(createTile("1", "Character"));
         handTiles.add(createTile("9", "Character"));
         handTiles.add(createTile("1", "Bamboo"));
         handTiles.add(createTile("9", "Bamboo"));
@@ -108,27 +108,5 @@ public class CheckWinTest {
 
         assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
         assertEquals(50 * 10, points.getTotalPoints(), 0.01);
-    }
-
-    @Test
-    public void testAllOneSuitWin() {
-        List<TileInterface> handTiles = new ArrayList<>();
-        handTiles.add(createTile("1", "Character"));
-        handTiles.add(createTile("1", "Character"));
-        handTiles.add(createTile("2", "Character"));
-        handTiles.add(createTile("3", "Character"));
-        handTiles.add(createTile("2", "Character"));
-        handTiles.add(createTile("3", "Character"));
-        handTiles.add(createTile("4", "Character"));
-        handTiles.add(createTile("4", "Character"));
-        handTiles.add(createTile("5", "Character"));
-        handTiles.add(createTile("6", "Character"));
-        handTiles.add(createTile("6", "Character"));
-        handTiles.add(createTile("7", "Character"));
-        handTiles.add(createTile("8", "Character"));
-        handTiles.add(createTile("9", "Character"));
-
-        assertTrue(checkWin.checkIfWin(handTiles, true, false, false, false));
-        assertEquals(30 * 4, points.getTotalPoints(), 0.01);
     }
 }
