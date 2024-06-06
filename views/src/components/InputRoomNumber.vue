@@ -53,14 +53,6 @@ export default {
     goBack() {
       this.$emit('goBack');
     },
-    handleEvent(event){
-      const message = JSON.parse(event.data);
-      if(message.type === 'roomEntered'){
-        this.$emit('roomEntered', message.roomId);
-      }else if(message.type === 'error'){
-        this.setErrorMessage(message.message);
-      }
-    }
   }
 };
 </script>

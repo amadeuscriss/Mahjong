@@ -218,7 +218,7 @@ public class WebSocketServer {
 
                         }
                         break;
-
+                    case "gameEnd":
                     default:
                         break;
                 }
