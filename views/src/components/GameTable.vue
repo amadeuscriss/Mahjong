@@ -8,16 +8,6 @@
       下家name{{getNextPlayerName(currentTurnPlayerName, 1)}}
     </div>
 
-
-    <!--    <div class="tiles">-->
-    <!--      <div v-for="(tile, index) in playerTiles" :key="index" class="tile-container">-->
-    <!--        <img src="@/assets/tiles_back/playerTiles.png" class="player-tiles-back" alt="tile back"/>-->
-    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" alt="tile front"/>-->
-    <!--        <img :src="getTileImage(tile)" @click="handleTileClick(tile)" class="tile-front" :class="{ 'drawn-tile': index === drawnTileIndex }" alt="tile front"/>-->
-    <!--      </div>-->
-    <!--    </div>-->
-
-
     <!-- 玩家手牌展示区 -->
     <div class="tiles">
       <div
@@ -44,6 +34,33 @@
         />
       </div>
     </div>
+
+    <!-- 展示其他玩家手牌区 -->
+    <div class="other-players-tiles">
+
+      <!-- 右侧玩家手牌 -->
+      <div class="other-players-right">
+        <div v-for="(tile, index) in rightPlayerTiles" :key="index" class="other-players-tile-container">
+          <img src="@/assets/tiles_back/otherPlayerRight.png" class="other-players-tiles-back" alt="tile back"/>
+        </div>
+      </div>
+
+      <!-- 上方玩家手牌 -->
+      <div class="other-players-top">
+        <div v-for="(tile, index) in topPlayerTiles" :key="index" class="other-players-tile-container">
+          <img src="@/assets/tiles_back/otherPlayerTop.png" class="other-players-tiles-back" alt="tile back"/>
+        </div>
+      </div>
+
+      <!-- 左侧玩家手牌 -->
+      <div class="other-players-left">
+        <div v-for="(tile, index) in leftPlayerTiles" :key="index" class="other-players-tile-container">
+          <img src="@/assets/tiles_back/otherPlayerLeft.png" class="other-players-tiles-back" alt="tile back"/>
+        </div>
+      </div>
+
+    </div>
+
 
     <!-- 展示明牌区 -->
     <div class="shown-tiles">
@@ -89,13 +106,6 @@
       </div>
     </div>
 
-    <!--    &lt;!&ndash; 操作按钮区域 &ndash;&gt;-->
-    <!--    <div class="action-buttons">-->
-    <!--      <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">-->
-    <!--        {{ action }}-->
-    <!--      </button>-->
-    <!--    </div>-->
-
     <div class="action-buttons">
       <button v-for="(action, index) in filteredActions" :key="index" @click="handleAction(action)">
         {{ action }}
@@ -113,12 +123,28 @@
       {{ notification.action }}
     </div>
 
+    <!-- 结算结果窗口 -->
+    <div v-if="showGameResults" class="results-overlay">
+      <GameResults
+          :players="players"
+          :playerIndex="playerIndex"
+          :roomId="roomId"
+          :ScoresList="ScoresList"
+          @goBack="hideGameResults"
+      />
+    </div>
+
   </div>
 </template>
 
 <script>
+import GameResults from "@/components/GameResults.vue";
+
 export default {
   name: 'GameTable',
+  components: {
+    GameResults,
+  },
   props: {
     roomId: String,
     players: Array,
@@ -126,11 +152,20 @@ export default {
   },
   data() {
     return {
+      showGameResults: false,
+      ScoresList: [],
+
       playerActions: [ ], // 玩家操作
       currentTurnPlayerName: null,
 
       tableTiles: [],
       playerTiles: [], // 玩家手牌
+
+      rightPlayerTiles: [],
+      topPlayerTiles: [],
+      leftPlayerTiles: [],
+
+
       drawnTile: null,
 
       tilesToEat: [],
@@ -151,20 +186,7 @@ export default {
       return this.players.indexOf(this.playerIndex);
     },
 
-
-
-    // filteredActions() {
-    //   console.log(this.playerActions);
-    //   const actions = [];
-    //   if (Array.isArray(this.playerActions)) {
-    //     actions.push(this.playerActions.filter(action => action !== 'Discard'));
-    //   } else if (typeof this.playerActions === 'string') {
-    //     console.error("playerActions is a string:", this.playerActions);
-    //   }
-    //   return actions;
-    // }
-
-    //剔除'Discard', 'SelfKong'
+    //剔除'Chi'
     filteredActions() {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
@@ -173,6 +195,7 @@ export default {
             actions.push(action);
           }
         });
+
       } else if (typeof this.playerActions === 'string') {
         if (!['Chi'].includes(this.playerActions)) {
           actions.push(this.playerActions);
@@ -181,11 +204,6 @@ export default {
         console.error("playerActions is neither an array nor a string:", this.playerActions);
       }
 
-      // if (actions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
-      //   actions.push('Skip'); // 添加“跳过”按钮
-      // }
-
-      console.log("filteredActions:", actions);
       return actions;
     }
   },
@@ -202,6 +220,14 @@ export default {
     gameInitialization(message){
       console.log("gameInitialization" + this.playerActions);
       this.playerTiles = message.playerTiles[this.playerIndex];
+
+      this.rightPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 1) % 4]];
+      this.topPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 2) % 4]];
+      this.leftPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 3) % 4]];
+
+      console.log("rightPlayerTiles " + this.rightPlayerTiles)
+      console.log("topPlayerTiles " + this.topPlayerTiles)
+      console.log("leftPlayerTiles " + this.leftPlayerTiles)
       this.currentTurnPlayerName = message.currentTurnPlayerName;
       if(this.currentTurnPlayerName === this.playerIndex){
         this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
@@ -216,12 +242,23 @@ export default {
     handlePlayerActions(message) {
       this.playerActions = message.playerActions;
       this.tilesToEat = message.tilesToEat;
+
       if (message.state === "Draw"){
         this.playerTiles = message.playerTiles;
-        this.drawnTile = message.drawnTile;
+      } else if (message.state === "NoMoreTiles"){
+        this.$ws.send(JSON.stringify({ type: 'gameEnd', roomId: this.roomId }));
       }
 
-      // this.playerTiles = message.playerTiles[this.playerIndex];
+
+
+      //如果不是下家，删除吃牌操作
+      if (this.getNextPlayerName(this.currentTurnPlayerName, 1) !== this.playerIndex){
+        const chiIndex = this.playerActions.indexOf('Chi');
+        if (chiIndex !== -1) {
+          this.playerActions.splice(chiIndex, 1);
+        }
+        this.tilesToEat = [];
+      }
 
       // 如果该玩家不在回合内，且有抢占行为,增加跳过按钮
       if (this.playerActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
@@ -255,6 +292,7 @@ export default {
     updateAfterActing(message){
       this.playerTiles = message.playerTiles[this.playerIndex];
     },
+
     // 显示玩家行为通知
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
@@ -273,10 +311,15 @@ export default {
     //接收通知，更新明牌库
     updateShownTiles(message){
       this.tableTiles = message.tableTiles;
+
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
       }
+
       this.showTiles[message.performerIndex] = message.showTiles;
+
+      //接受通知，清空行为列表。避免有玩家吃牌后，还能杠
+      this.playerActions = [];
       console.log("performerIndex " +  message.performerIndex);
       console.log(message.showTiles);
       this.showNotification(message.action, message.performerIndex);
@@ -289,23 +332,6 @@ export default {
         return '';
       }
     },
-
-    // // 处理牌面的点击事件
-    // handleTileClick(tile) {
-    //   if (this.currentTurnPlayerName === this.playerIndex){
-    //     const tileIndex = this.playerTiles.indexOf(tile);
-    //     const message = JSON.stringify({ type: 'action',
-    //                                             behavior: 'Discard',
-    //                                             state: 'Playing' ,
-    //                                             data: tileIndex ,
-    //                                             roomId: this.roomId ,
-    //                                             playIndex: this.players.indexOf(this.playerIndex),
-    //                                             nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1)});
-    //     this.$ws.send(message);
-    //     this.playerActions = [];
-    //     this.drawnTile = null;
-    //   }
-    // },
 
     // 处理牌面的点击事件
     handleTileClick(tile) {
@@ -394,6 +420,14 @@ export default {
     },
 
 
+    hideGameResults() {
+      this.showGameResults = false;
+    },
+    handleGameEnd(message) {
+      this.ScoresList = message.ScoresList;
+      this.showGameResults = true;
+    },
+
     handleMessage(event) {
       const message = JSON.parse(event.data);
       switch (message.type) {
@@ -414,6 +448,8 @@ export default {
         case 'Turn change':
           this.currentTurnPlayerName = message.currentTurnPlayerName;
           break;
+        case 'gameEnd':
+          this.handleGameEnd(message);
       }
     }
   },
@@ -521,6 +557,59 @@ export default {
   width: 25px; /* 根据需要调整大小 */
   height: 40px; /* 根据需要调整大小 */
   z-index: 2;
+}
+
+
+
+
+.other-players-tiles {
+  position: relative;
+}
+
+.other-players-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -400px;
+}
+
+.other-players-top {
+  position: absolute;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: flex-start; /* 将牌靠左对齐 */
+  align-items: flex-start; /* 将牌靠上对齐 */
+}
+
+.other-players-left {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -400px;
+}
+
+.other-players-tile-container {
+  display: flex;
+  margin: -3px; /* 根据需要调整间距 */
+  flex-wrap: wrap;
+}
+
+.other-players-tiles-back {
+  width: 40px; /* 根据需要调整牌背的宽度 */
+  height: 60px; /* 根据需要调整牌背的高度 */
+  margin: 2px; /* 根据需要调整牌背之间的间距 */
+}
+
+/* 右侧玩家的牌背样式 */
+.other-players-right .other-players-tile-container .other-players-tiles-back {
+  margin-bottom: -30px; /* 调整右侧玩家牌之间的垂直间距 */
+}
+
+/* 左侧玩家的牌背样式 */
+.other-players-left .other-players-tile-container .other-players-tiles-back {
+  margin-bottom: -30px; /* 调整左侧玩家牌之间的垂直间距 */
 }
 
 
@@ -668,4 +757,16 @@ export default {
   transform: translateY(-50%);
 }
 
+.results-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
 </style>
