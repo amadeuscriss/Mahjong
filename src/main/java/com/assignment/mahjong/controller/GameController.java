@@ -235,6 +235,7 @@ public class GameController {
         }
 
         room.setLastDiscardedTile(tileToDiscard, playerName);
+        player.getHand().arrangeHand();
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
                 "discardedTile", discardAction.getleasttiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())
