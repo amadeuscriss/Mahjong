@@ -115,7 +115,7 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerName}")
-    public ResponseEntity<Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody int discardedTileIndex) {
+    public Map<String, Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody int discardedTileIndex) {
         System.out.println(playerName);
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
@@ -123,7 +123,7 @@ public class GameController {
             if (player != null) {
                 List<TileInterface> discardedTiles = room.getAllDiscardedTiles();
                 if (discardedTiles.isEmpty()) {
-                    return ResponseEntity.badRequest().body(Map.of("message", "No discarded tiles found."));
+                    return Map.of("message", "No discarded tiles found.");
                 }
 
                 TileInterface discardedTile = discardedTiles.get(discardedTiles.size() - 1);
@@ -144,15 +144,15 @@ public class GameController {
                     chiCombinations = getChiCombinations(player, discardedTile);
                 }
 
-                return ResponseEntity.ok(Map.of(
+                return Map.of(
                         "type", "playerActions",
                         "playerActions", actions,
                         "tilesToEat",chiCombinations
-                ));
+                );
             }
-            return ResponseEntity.badRequest().body(Map.of("message", "Player not found."));
+            return Map.of("message", "Player not found.");
         }
-        return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
+        return Map.of("message", "Room not found.");
     }
 
     @PostMapping("/handleAction/{roomCode}/{playerName}")
