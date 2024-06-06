@@ -65,11 +65,27 @@ public class CheckWin {
         if (tiles.isEmpty()) return true;
 
         int[] counts = new int[10]; // 假设牌的值范围是 1-9
+        List<String> honors = new ArrayList<>(); // 用于存储字牌
+
         for (TileInterface tile : tiles) {
-            counts[extractNumber(tile.getValueAsString())]++;
+            int num = extractNumber(tile.getValueAsString());
+            if (num >= 0 && num < counts.length) {
+                counts[num]++;
+            } else {
+                honors.add(tile.getValueAsString());
+            }
         }
 
-        return canFormMeldsHelper(counts);
+        // 处理字牌，如果有三个相同的字牌，移除它们
+        for (String honor : new HashSet<>(honors)) {
+            if (Collections.frequency(honors, honor) >= 3) {
+                for (int i = 0; i < 3; i++) {
+                    honors.remove(honor);
+                }
+            }
+        }
+
+        return canFormMeldsHelper(counts) && honors.isEmpty();
     }
 
     private static boolean canFormMeldsHelper(int[] counts) {
@@ -79,7 +95,7 @@ public class CheckWin {
                 if (canFormMeldsHelper(counts)) return true;
                 counts[i] += 3;
             }
-            if (i <= 7 && counts[i] > 0 && counts[i + 1] > 0 && counts[i + 2] > 0) {
+            if (i <= 6 && counts[i] > 0 && counts[i + 1] > 0 && counts[i + 2] > 0) {
                 counts[i]--;
                 counts[i + 1]--;
                 counts[i + 2]--;
@@ -94,7 +110,10 @@ public class CheckWin {
 
     private static int extractNumber(String str) {
         String num = str.replaceAll("[^\\d]", "");
-        return num.isEmpty() ? -1 : Integer.parseInt(num);
+        if (num.isEmpty()) {
+            return -1; // 标识为非数字牌
+        }
+        return Integer.parseInt(num);
     }
 
     private static boolean isNumeric(String str) {
@@ -113,9 +132,10 @@ public class CheckWin {
             return parts[0] + " " + num;
         } catch (NumberFormatException e) {
             System.out.println("Error generating next tile value for " + value + ": " + e.getMessage());
-            return value;  // Return the original value in case of formatting error
+            return value;  // 在格式错误时返回原始值
         }
     }
+
 
     private static int countMatches(List<TileInterface> tiles, String value) {
         return (int) tiles.stream().filter(t -> t.getValueAsString().equals(value)).count();

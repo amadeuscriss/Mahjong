@@ -366,7 +366,7 @@ public class GameController {
                             .boxed()
                             .collect(Collectors.toList());
                     // 确保找到了两个相同的牌
-                    if (tileIndices.size() == 2) {
+                    if (tileIndices.size() == 3) {
                         // 执行碰牌操作
                         KongAction kongAction = new KongAction(lastDiscardedTile, player.getHand().getTiles(), false, player.getPoints(), player);
                         kongAction.execute();
