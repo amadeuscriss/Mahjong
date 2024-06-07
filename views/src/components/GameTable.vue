@@ -404,6 +404,8 @@ export default {
           break;
         case 'Turn change':
           this.currentTurnPlayerName = message.currentTurnPlayerName;
+          //接受通知，清空行为列表。避免有玩家吃牌后，还能杠
+          this.playerActions = [];
           break;
         case 'gameEnd':
           this.handleGameEnd(message);
