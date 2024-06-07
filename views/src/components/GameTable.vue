@@ -35,33 +35,6 @@
       </div>
     </div>
 
-    <!-- 展示其他玩家手牌区 -->
-    <div class="other-players-tiles">
-
-      <!-- 右侧玩家手牌 -->
-      <div class="other-players-right">
-        <div v-for="(tile, index) in rightPlayerTiles" :key="index" class="other-players-tile-container">
-          <img src="../assets/tiles_back/otherPlayerLeft.png" class="other-players-tiles-back" alt="tile back"/>
-        </div>
-      </div>
-
-      <!-- 上方玩家手牌 -->
-      <div class="other-players-top">
-        <div v-for="(tile, index) in topPlayerTiles" :key="index" class="other-players-tile-container">
-          <img src="@/assets/tiles_back/otherPlayerTop.png" class="other-players-tiles-back" alt="tile back"/>
-        </div>
-      </div>
-
-      <!-- 左侧玩家手牌 -->
-      <div class="other-players-left">
-        <div v-for="(tile, index) in leftPlayerTiles" :key="index" class="other-players-tile-container">
-          <img src="@/assets/tiles_back/otherPlayerLeft.png" class="other-players-tiles-back" alt="tile back"/>
-        </div>
-      </div>
-
-    </div>
-
-
     <!-- 展示明牌区 -->
     <div class="shown-tiles">
       <!-- 下方玩家 -->
@@ -160,12 +133,7 @@ export default {
 
       tableTiles: [],
       playerTiles: [], // 玩家手牌
-
-      rightPlayerTiles: [],
-      topPlayerTiles: [],
-      leftPlayerTiles: [],
-
-
+      AllPlayerTiles: [],
       drawnTile: null,
 
       tilesToEat: [],
@@ -186,7 +154,7 @@ export default {
       return this.players.indexOf(this.playerIndex);
     },
 
-    //剔除'Chi'
+    //剔除'Discard', 'SelfKong'
     filteredActions() {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
@@ -219,15 +187,8 @@ export default {
 
     gameInitialization(message){
       console.log("gameInitialization" + this.playerActions);
+      this.AllPlayerTiles = message.playerTiles;
       this.playerTiles = message.playerTiles[this.playerIndex];
-
-      this.rightPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 1) % 4]];
-      this.topPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 2) % 4]];
-      this.leftPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 3) % 4]];
-
-      console.log("rightPlayerTiles " + this.rightPlayerTiles)
-      console.log("topPlayerTiles " + this.topPlayerTiles)
-      console.log("leftPlayerTiles " + this.leftPlayerTiles)
       this.currentTurnPlayerName = message.currentTurnPlayerName;
       if(this.currentTurnPlayerName === this.playerIndex){
         this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
@@ -238,18 +199,14 @@ export default {
     updateGame(message) {
       this.playerTiles = message.discardedTile;
     },
-
     //获取玩家行为
     handlePlayerActions(message) {
       this.playerActions = message.playerActions;
       this.tilesToEat = message.tilesToEat;
-
       if (message.state === "Draw"){
         this.playerTiles = message.playerTiles;
-      } else if (message.state === "NoMoreTiles"){
-        this.$ws.send(JSON.stringify({ type: 'gameEnd', roomId: this.roomId }));
+        this.drawnTile = message.drawnTile;
       }
-
 
       //如果不是下家，删除吃牌操作
       if (this.getNextPlayerName(this.currentTurnPlayerName, 1) !== this.playerIndex){
@@ -314,12 +271,6 @@ export default {
 
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 1) % 4){
-        this.rightPlayerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 2) % 4){
-        this.topPlayerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 3) % 4){
-        this.leftPlayerTiles = message.playernowtiles
       }
 
       this.showTiles[message.performerIndex] = message.showTiles;
@@ -398,18 +349,17 @@ export default {
         skipType: skipType // 将 SkipType 添加到消息中
       });
 
-      if (!(action === "SelfKong" && this.currentTurnPlayerName !== this.playerIndex)){
 
-        this.$ws.send(message);
 
-        this.playerActions = [];
-        this.tilesToEat = [];
+      this.$ws.send(message);
 
-        // 点击按钮后清除自动跳过的超时
-        if (this.skipTimeout) {
-          clearTimeout(this.skipTimeout);
-          this.skipTimeout = null;
-        }
+      this.playerActions = [];
+      this.tilesToEat = [];
+
+      // 点击按钮后清除自动跳过的超时
+      if (this.skipTimeout) {
+        clearTimeout(this.skipTimeout);
+        this.skipTimeout = null;
       }
     },
 
@@ -454,6 +404,8 @@ export default {
           break;
         case 'Turn change':
           this.currentTurnPlayerName = message.currentTurnPlayerName;
+          //接受通知，清空行为列表。避免有玩家吃牌后，还能杠
+          this.playerActions = [];
           break;
         case 'gameEnd':
           this.handleGameEnd(message);
@@ -492,7 +444,6 @@ export default {
   font-size: 20px; /* 根据需要调整大小 */
   font-weight: bold; /* 字体加粗 */
   color: white; /* 白色字体 */
-  z-index: 10;
 }
 
 .tiles {
@@ -501,7 +452,6 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  z-index: 40;
 }
 
 .tile-container {
@@ -520,7 +470,7 @@ export default {
   position: absolute;
   top: 8px;
   left: 2px;
-  z-index: 41;
+  z-index: 2;
   cursor: pointer;
 }
 
@@ -540,7 +490,7 @@ export default {
   position: absolute;
   top: -15px;
   left: -10px;
-  z-index: 40;
+  z-index: 1;
 }
 
 .table-tiles {
@@ -552,7 +502,6 @@ export default {
   grid-template-columns: repeat(15, 1fr);
   grid-auto-rows: auto;
   gap: 5px;
-  z-index: 30;
 }
 
 .table-tile-container {
@@ -566,61 +515,7 @@ export default {
 .table-tile {
   width: 25px; /* 根据需要调整大小 */
   height: 40px; /* 根据需要调整大小 */
-  z-index: 31;
-}
-
-
-
-
-.other-players-tiles {
-  position: relative;
-  z-index: 20;
-}
-
-.other-players-right {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: -400px;
-}
-
-.other-players-top {
-  position: absolute;
-  top: -180px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: flex-start; /* 将牌靠左对齐 */
-  align-items: flex-start; /* 将牌靠上对齐 */
-}
-
-.other-players-left {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: -400px;
-}
-
-.other-players-tile-container {
-  display: flex;
-  margin: -3px; /* 根据需要调整间距 */
-  flex-wrap: wrap;
-}
-
-.other-players-tiles-back {
-  width: 40px; /* 根据需要调整牌背的宽度 */
-  height: 60px; /* 根据需要调整牌背的高度 */
-  margin: 2px; /* 根据需要调整牌背之间的间距 */
-}
-
-/* 右侧玩家的牌背样式 */
-.other-players-right .other-players-tile-container .other-players-tiles-back {
-  margin-bottom: -30px; /* 调整右侧玩家牌之间的垂直间距 */
-}
-
-/* 左侧玩家的牌背样式 */
-.other-players-left .other-players-tile-container .other-players-tiles-back {
-  margin-bottom: -30px; /* 调整左侧玩家牌之间的垂直间距 */
+  z-index: 2;
 }
 
 
@@ -632,18 +527,17 @@ export default {
   justify-content: center;
   align-items: center;
   pointer-events: none; /* 禁用指针事件 */
-  z-index: 10;
 }
 
 .shown-tiles-bottom {
   position: absolute;
-  bottom: 120px;
+  bottom: 110px;
   display: flex;
 }
 
 .shown-tiles-right {
   position: absolute;
-  right: 300px;
+  right: 175px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -652,13 +546,13 @@ export default {
 
 .shown-tiles-top {
   position: absolute;
-  top: 200px;
+  top: 125px;
   display: flex;
 }
 
 .shown-tiles-left {
   position: absolute;
-  left: 300px;
+  left: 175px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -674,7 +568,7 @@ export default {
 .shown-tile {
   width: 22px;
   height: 37px;
-  z-index: 11;
+  z-index: 2;
   transition: transform 0.3s ease; /* 添加过渡效果 */
 }
 
@@ -714,7 +608,7 @@ export default {
   position: absolute;
   top: 4px;
   left: -1px;
-  z-index: 10;
+  z-index: 1;
 }
 
 
@@ -725,7 +619,6 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 50;
 }
 
 .action-buttons button {
@@ -744,7 +637,6 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 5px;
-  z-index: 60;
 }
 
 .notification.bottom {
