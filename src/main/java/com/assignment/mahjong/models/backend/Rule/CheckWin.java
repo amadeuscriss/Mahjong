@@ -46,66 +46,15 @@ public class CheckWin {
     private static boolean isStandardWin(List<TileInterface> handTiles) {
         if (handTiles.size() % 3 != 2) return false;
 
-        Collections.sort(handTiles, Comparator.comparing(TileInterface::getValueAsString));
-        for (int i = 0; i < handTiles.size() - 1; i++) {
-            if (handTiles.get(i).getValueAsString().equals(handTiles.get(i + 1).getValueAsString())) {
-                List<TileInterface> remainingTiles = new ArrayList<>(handTiles);
-                remainingTiles.remove(i);
-                remainingTiles.remove(i);
-
-                if (canFormMelds(remainingTiles)) {
-                    return true;
-                }
-            }
-        }
+        // Add logic from mjlib_java/split for standard win check
         return false;
     }
 
     private static boolean canFormMelds(List<TileInterface> tiles) {
         if (tiles.isEmpty()) return true;
 
-        int[] counts = new int[10]; // 假设牌的值范围是 1-9
-        List<String> honors = new ArrayList<>(); // 用于存储字牌
-
-        for (TileInterface tile : tiles) {
-            int num = extractNumber(tile.getValueAsString());
-            if (num >= 0 && num < counts.length) {
-                counts[num]++;
-            } else {
-                honors.add(tile.getValueAsString());
-            }
-        }
-
-        // 处理字牌，如果有三个相同的字牌，移除它们
-        for (String honor : new HashSet<>(honors)) {
-            if (Collections.frequency(honors, honor) >= 3) {
-                for (int i = 0; i < 3; i++) {
-                    honors.remove(honor);
-                }
-            }
-        }
-
-        return canFormMeldsHelper(counts) && honors.isEmpty();
-    }
-
-    private static boolean canFormMeldsHelper(int[] counts) {
-        for (int i = 0; i < counts.length; i++) {
-            if (counts[i] >= 3) {
-                counts[i] -= 3;
-                if (canFormMeldsHelper(counts)) return true;
-                counts[i] += 3;
-            }
-            if (i <= 6 && counts[i] > 0 && counts[i + 1] > 0 && counts[i + 2] > 0) {
-                counts[i]--;
-                counts[i + 1]--;
-                counts[i + 2]--;
-                if (canFormMeldsHelper(counts)) return true;
-                counts[i]++;
-                counts[i + 1]++;
-                counts[i + 2]++;
-            }
-        }
-        return Arrays.stream(counts).sum() == 0;
+        // Add logic from mjlib_java/split for meld formation check
+        return false;
     }
 
     private static int extractNumber(String str) {
@@ -116,44 +65,9 @@ public class CheckWin {
         return Integer.parseInt(num);
     }
 
-    private static boolean isNumeric(String str) {
-        return str.matches(".*\\d+.*");
-    }
-
-    private static String generateNextValue(String value, int increment) {
-        String[] parts = value.split(" ");
-        if (parts.length < 2) {
-            System.out.println("Error: value '" + value + "' does not contain both type and number.");
-            return value;
-        }
-
-        try {
-            int num = Integer.parseInt(parts[1]) + increment;
-            return parts[0] + " " + num;
-        } catch (NumberFormatException e) {
-            System.out.println("Error generating next tile value for " + value + ": " + e.getMessage());
-            return value;  // 在格式错误时返回原始值
-        }
-    }
-
-
     private static int countMatches(List<TileInterface> tiles, String value) {
         return (int) tiles.stream().filter(t -> t.getValueAsString().equals(value)).count();
     }
-
-    private static List<TileInterface> removeTiles(List<TileInterface> tiles, String value, int count) {
-        List<TileInterface> modifiedList = new ArrayList<>(tiles);
-        Iterator<TileInterface> iterator = modifiedList.iterator();
-        while (iterator.hasNext() && count > 0) {
-            TileInterface tile = iterator.next();
-            if (tile.getValueAsString().equals(value)) {
-                iterator.remove();
-                count--;
-            }
-        }
-        return modifiedList;
-    }
-
 
     private static boolean isSevenPairs(List<TileInterface> handTiles) {
         if (handTiles.size() != 14) return false;
@@ -227,4 +141,3 @@ public class CheckWin {
         }
     }
 }
-

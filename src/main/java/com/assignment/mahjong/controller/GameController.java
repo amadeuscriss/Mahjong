@@ -167,7 +167,10 @@ public class GameController {
                     case "Win":
                         // 执行胡牌操作
                         checkWin(roomCode, playerName);
-                        break;
+                        return ResponseEntity.ok(Map.of(
+                                "type", "gameEnd",
+                                "scoresList", getScoresList(room)
+                        ));
                     case "Kong":
                         // 执行杠牌操作
                         kongTile(roomCode, playerName);
@@ -178,7 +181,7 @@ public class GameController {
                         break;
                     case "Chi":
                         // 执行吃牌操作
-                        chiTile(roomCode, playerName,theindex);
+                        chiTile(roomCode, playerName, theindex);
                         break;
                     case "Skip":
                         room.moveToNextPlayer();
@@ -198,7 +201,6 @@ public class GameController {
                         "type", "Turn change",
                         "currentTurnPlayerName", currentTurnPlayerName
                 );
-
 
                 return ResponseEntity.ok(turnChangeNotification);
             }
@@ -282,9 +284,8 @@ public class GameController {
                     ));
                 } else {
                     return ResponseEntity.ok(Map.of(
-                            "type", "playerActions",
-                            "state", "NoMoreTiles",
-                            "message", "No more tiles to draw."
+                            "type", "gameEnd",
+                            "scoresList", getScoresList(room)
                     ));
                 }
             }
@@ -293,6 +294,11 @@ public class GameController {
         return ResponseEntity.badRequest().body(Map.of("message", "Room not found."));
     }
 
+    private List<Integer> getScoresList(Room room) {
+        return room.getPlayers().stream()
+                .map(player -> player.getPoints().getTotalPoints())
+                .collect(Collectors.toList());
+    }
 
     @PostMapping("/pong/{roomCode}/{playerName}")
     public ResponseEntity<Object> pongTile(@PathVariable String roomCode, @PathVariable String playerName) {
