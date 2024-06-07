@@ -41,7 +41,7 @@
       <!-- 右侧玩家手牌 -->
       <div class="other-players-right">
         <div v-for="(tile, index) in rightPlayerTiles" :key="index" class="other-players-tile-container">
-          <img src="../assets/tiles_back/otherPlayerLeft.png" class="other-players-tiles-back" alt="tile back"/>
+          <img src="@/assets/tiles_back/otherPlayerRight.png" class="other-players-tiles-back" alt="tile back"/>
         </div>
       </div>
 
@@ -251,6 +251,7 @@ export default {
       }
 
 
+
       //如果不是下家，删除吃牌操作
       if (this.getNextPlayerName(this.currentTurnPlayerName, 1) !== this.playerIndex){
         const chiIndex = this.playerActions.indexOf('Chi');
@@ -314,12 +315,6 @@ export default {
 
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 1) % 4){
-        this.rightPlayerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 2) % 4){
-        this.topPlayerTiles = message.playernowtiles
-      }else if (message.performerIndex === (this.playerIndexInList + 3) % 4){
-        this.leftPlayerTiles = message.playernowtiles
       }
 
       this.showTiles[message.performerIndex] = message.showTiles;
@@ -454,6 +449,7 @@ export default {
           break;
         case 'Turn change':
           this.currentTurnPlayerName = message.currentTurnPlayerName;
+          this.playerActions = []
           break;
         case 'gameEnd':
           this.handleGameEnd(message);

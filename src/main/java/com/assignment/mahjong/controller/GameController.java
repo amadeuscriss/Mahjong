@@ -250,6 +250,7 @@ public class GameController {
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
             Player player = room.getPlayerByName(playerName);
+            List<TileInterface> beforeplayerTiles = player.getHand().getTiles();
             if (player != null) {
                 DrawAction drawAction = new DrawAction(room.getTiles());
                 drawAction.execute();
@@ -263,14 +264,14 @@ public class GameController {
                     System.out.println(playerTiles.stream().map(TileInterface::getValueAsString).collect(Collectors.toList()));
                     playerTiles.add(thedrawtiles);
 
-                    // 检测是否可以胡牌或杠牌，并将结果存储在一个列表中
+                    // 检测是否可以赢牌或杠牌，并将结果存储在一个列表中
                     List<String> playerActions = new ArrayList<>();
                     TileInterface drawnTile = drawAction.getDrawnTile();
 
                     if (CheckWin.canWin(playerTiles, drawnTile)) {
                         playerActions.add("Win");
                     }
-                    if (KongAction.canKong(playerTiles, drawnTile)) {
+                    if (KongAction.canKong(beforeplayerTiles, drawnTile)) {
                         playerActions.add("SelfKong");
                     }
 
