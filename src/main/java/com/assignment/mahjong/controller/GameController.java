@@ -115,7 +115,7 @@ public class GameController {
     }
 
     @PostMapping("/availableActions/{roomCode}/{playerName}")
-    public Map<String, Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName, @RequestBody int discardedTileIndex) {
+    public Map<String, Object> availableActions(@PathVariable String roomCode, @PathVariable String playerName) {
         System.out.println(playerName);
         Room room = roomManager.getRoom(roomCode);
         if (room != null) {
