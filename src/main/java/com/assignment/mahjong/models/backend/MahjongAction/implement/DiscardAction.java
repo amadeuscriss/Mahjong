@@ -4,19 +4,20 @@ import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Room.Room;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * DiscardAction uses to perform poker actions
  */
 public class DiscardAction {
-    private final List<TileInterface> handTiles;
+    private List<TileInterface> handTiles;
     // Get the method of obtaining the card played
     @Getter
     private TileInterface discardedTile;
     private boolean isSuccessful; // Indicates whether the operation is successful
 
-    private final List<TileInterface> tableTiles = Room.getAllDiscardedTiles();
+    private List<TileInterface> tableTiles = Room.getAllDiscardedTiles();
 
     /**
      * Constructor that initializes the hand list
