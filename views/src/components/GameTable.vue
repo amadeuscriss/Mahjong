@@ -388,6 +388,7 @@ export default {
         state: 'Playing' ,
         roomId: this.roomId ,
         playIndex: this.players.indexOf(this.playerIndex),
+        currentTurnPlayerName: this.currentTurnPlayerName,
         nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
         tilesToEatIndex : tilesIndex,
         skipType: skipType // 将 SkipType 添加到消息中
@@ -728,6 +729,24 @@ export default {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.action-buttons button:hover {
+  background: linear-gradient(135deg, #8c8eff 0%, #0014ff 100%);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.action-buttons button:active {
+  background: linear-gradient(135deg, #4b52d8 0%, #000a99 100%);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
 }
 
 

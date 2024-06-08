@@ -169,7 +169,7 @@ public class GameController {
                         checkWin(roomCode, playerName);
                         return ResponseEntity.ok(Map.of(
                                 "type", "gameEnd",
-                                "scoresList", getScoresList(room)
+                                "ScoresList", getScoresList(room)
                         ));
                     case "Kong":
                         // 执行杠牌操作
@@ -272,6 +272,7 @@ public class GameController {
                         playerActions.add("Win");
                     }
                     if (KongAction.canKong(beforeplayerTiles, drawnTile)) {
+                        System.out.println(beforeplayerTiles);
                         playerActions.add("SelfKong");
                     }
 

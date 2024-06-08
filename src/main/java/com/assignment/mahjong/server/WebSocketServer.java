@@ -181,7 +181,7 @@ public class WebSocketServer {
                                         }
 
                                         for (Player player : serverRoom.getPlayers()) {
-                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                             sendMessageToUser(messageToSend, player.getName());
                                         }
 
@@ -195,7 +195,7 @@ public class WebSocketServer {
                                         }
 
                                         for (Player player : serverRoom.getPlayers()) {
-                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                             sendMessageToUser(messageToSend, player.getName());
                                         }
                                     }
@@ -207,8 +207,12 @@ public class WebSocketServer {
                                     sendMessageToHu(huName,jsonObject);
                                 } else {
                                     for (Player player : serverRoom.getPlayers()) {
+
                                         Map<String, Object> responds = gameController.availableActions((String) jsonObject.get("roomId"), player.getName());
-                                        responds.put("playerActions", new ArrayList<>( (List<String>) playerActions.get(player.getName())));
+
+                                        if (!jsonObject.get("currentTurnPlayerName").equals(player.getName())) {
+                                            responds.put("playerActions", (List<String>) playerActions.get(player.getName()));
+                                        }
 
                                         String tempMessage = objectMapper.writeValueAsString(responds);
                                         if (!player.getName().equals(jsonObject.get("currentTurnPlayerName"))) {
