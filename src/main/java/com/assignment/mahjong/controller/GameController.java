@@ -181,7 +181,6 @@ public class GameController {
                         chiTile(roomCode, playerName,theindex);
                         break;
                     case "Skip":
-                        room.moveToNextPlayer();
                         break;
                     default:
                         return ResponseEntity.badRequest().body(Map.of("message", "Invalid action."));
@@ -236,6 +235,7 @@ public class GameController {
 
         room.setLastDiscardedTile(tileToDiscard, playerName);
         player.getHand().arrangeHand();
+        room.moveToNextPlayer();
         return ResponseEntity.ok(Map.of(
                 "type", "updateGame",
                 "discardedTile", discardAction.getleasttiles().stream().map(TileInterface::getValueAsString).collect(Collectors.toList())

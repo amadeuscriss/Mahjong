@@ -56,7 +56,6 @@ public class ChiAction extends MahjongAction {
     }
 
     private void performChi1(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
-        System.out.println(1);
         List<TileInterface> chiTiles = new ArrayList<>();
         chiTiles.add(tile1);
         chiTiles.add(tile2);
@@ -72,7 +71,6 @@ public class ChiAction extends MahjongAction {
     }
 
     private void performChi2(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
-        System.out.println(1);
         List<TileInterface> chiTiles = new ArrayList<>();
         chiTiles.add(tile1);
         chiTiles.add(tile2);
@@ -88,7 +86,6 @@ public class ChiAction extends MahjongAction {
     }
 
     private void performChi3(TileInterface tile1, TileInterface tile2, TileInterface tile3) {
-        System.out.println(1);
         List<TileInterface> chiTiles = new ArrayList<>();
         chiTiles.add(tile1);
         chiTiles.add(tile2);
