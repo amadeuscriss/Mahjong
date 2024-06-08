@@ -9,12 +9,12 @@ import java.util.List;
 public class CheckWinTest {
 
     public static void main(String[] args) {
-        Point points = new Point();
-        CheckWin checkWin = new CheckWin(points);
+        Point points = new Point();// Create a Point object to record player scores
+        CheckWin checkWin = new CheckWin(points);// Create an instance of CheckWin for testing
 
-        List<List<TileInterface>> testCases = new ArrayList<>();
+        List<List<TileInterface>> testCases = new ArrayList<>();// List to store test cases
 
-        // 测试用例1: 标准胡牌 (11 22 33 444 555 666 777)
+        // Test Case 1: Standard Win (111 222 333 444 555 666 777)
         List<TileInterface> testCase1 = new ArrayList<>();
         testCase1.add(new ConcreteTile("Character", "1"));
         testCase1.add(new ConcreteTile("Character", "1"));
@@ -32,7 +32,7 @@ public class CheckWinTest {
         testCase1.add(new ConcreteTile("Dot", "7"));
         testCases.add(testCase1);
 
-        // 测试用例2: 七对子 (1122 3344 5566 7788 99)
+        // Test Case 2: Seven Pairs (1122 3344 5566 7788 99)
         List<TileInterface> testCase2 = new ArrayList<>();
         testCase2.add(new ConcreteTile("Character", "1"));
         testCase2.add(new ConcreteTile("Character", "1"));
@@ -50,7 +50,7 @@ public class CheckWinTest {
         testCase2.add(new ConcreteTile("Dot", "8"));
         testCases.add(testCase2);
 
-        // 测试用例3: 清一色 (111 222 333 444 555 66)
+        // Test Case 3: All colors (111 222 333 444 555 66)
         List<TileInterface> testCase3 = new ArrayList<>();
         testCase3.add(new ConcreteTile("Character", "1"));
         testCase3.add(new ConcreteTile("Character", "1"));
@@ -68,7 +68,7 @@ public class CheckWinTest {
         testCase3.add(new ConcreteTile("Character", "5"));
         testCases.add(testCase3);
 
-        // 测试用例4: 龙 (123 456 789 112 33)
+        // Test Case 4: Dragon (123 456 789 112 33)
         List<TileInterface> testCase4 = new ArrayList<>();
         testCase4.add(new ConcreteTile("Character", "1"));
         testCase4.add(new ConcreteTile("Character", "2"));
@@ -85,7 +85,7 @@ public class CheckWinTest {
         testCase4.add(new ConcreteTile("Character", "2"));
         testCases.add(testCase4);
 
-        // 测试用例5: 大四喜 (东东东 东南南 西西西 北北北)
+        // Test case 5: Big four Xi (east east east southeast south west west west North North)
         List<TileInterface> testCase5 = new ArrayList<>();
         testCase5.add(new ConcreteTile("Wind", "East"));
         testCase5.add(new ConcreteTile("Wind", "East"));
@@ -103,7 +103,7 @@ public class CheckWinTest {
         testCase5.add(new ConcreteTile("Character", "1"));
         testCases.add(testCase5);
 
-        // 测试用例6: 大三元 (红红红 绿绿绿 白白白 11 22)
+        // Test Case 6: Big ternary (Red Red Red green green green white white white White 11 22)
         List<TileInterface> testCase6 = new ArrayList<>();
         testCase6.add(new ConcreteTile("Dragon", "Red"));
         testCase6.add(new ConcreteTile("Dragon", "Red"));
@@ -120,7 +120,7 @@ public class CheckWinTest {
         testCase6.add(new ConcreteTile("Character", "2"));
         testCases.add(testCase6);
 
-        // 测试用例7: 九莲宝灯 (1112345678999)
+        // Test Case 7: Jiulian Bao Deng (1112345678999)
         List<TileInterface> testCase7 = new ArrayList<>();
         testCase7.add(new ConcreteTile("Character", "1"));
         testCase7.add(new ConcreteTile("Character", "1"));
@@ -138,7 +138,7 @@ public class CheckWinTest {
         testCase7.add(new ConcreteTile("Character", "1"));
         testCases.add(testCase7);
 
-        // 测试用例8: 十三幺 (19万 19条 19筒 东南西北中发白)
+        // Test Case 8: 13 unitary (190,000 19 pieces 19 tubes, southeast, northwest, middle whitening)
         List<TileInterface> testCase8 = new ArrayList<>();
         testCase8.add(new ConcreteTile("Character", "1"));
         testCase8.add(new ConcreteTile("Character", "9"));
@@ -156,7 +156,7 @@ public class CheckWinTest {
         testCase8.add(new ConcreteTile("Character", "1"));
         testCases.add(testCase8);
 
-        // 测试用例9: 小四喜 (东东东 南南南 西西 西北北北)
+        // Test Case 9: Xiao Si Xi (east East South South south west west northwest North North)
         List<TileInterface> testCase9 = new ArrayList<>();
         testCase9.add(new ConcreteTile("Wind", "East"));
         testCase9.add(new ConcreteTile("Wind", "East"));
@@ -174,7 +174,7 @@ public class CheckWinTest {
         testCase9.add(new ConcreteTile("Character", "1"));
         testCases.add(testCase9);
 
-        // 测试用例10: 全带幺 (123 123 123 123 111)
+        // Test Case 10: All unitary (123 123 123 123 111)
         List<TileInterface> testCase10 = new ArrayList<>();
         testCase10.add(new ConcreteTile("Character", "1"));
         testCase10.add(new ConcreteTile("Character", "2"));
@@ -192,10 +192,12 @@ public class CheckWinTest {
         testCase10.add(new ConcreteTile("Character", "1"));
         testCases.add(testCase10);
 
-        // 运行测试用例
+        // Run test cases
         for (int i = 0; i < testCases.size(); i++) {
+            // Perform the win check for the current test case
             List<TileInterface> testCase = testCases.get(i);
             boolean result = checkWin.checkIfWin(testCase, false, false, false, false);
+            // Print the result of the test case
             System.out.println("Test case " + (i + 1) + ": " + (result ? "Win" : "Not Win"));
         }
     }
