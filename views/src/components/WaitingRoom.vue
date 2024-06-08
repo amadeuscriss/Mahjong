@@ -1,14 +1,14 @@
 <template>
   <div class="waiting-room">
-    <h1>房间号: {{ roomId }}</h1>
-    <h2>玩家列表:</h2>
+    <h1>RoomID: {{ roomId }}</h1>
+    <h2>player-list:</h2>
     <ul class="player-list">
       <li v-for="(player, index) in players" :key="index" class="player-item">
-        玩家{{ index + 1 }}: {{ player }}
-        <span v-if="index === this.players.indexOf(playerIndex)" class="current-player"> (当前玩家)</span>
+        player{{ index + 1 }}: {{ player }}
+        <span v-if="index === this.players.indexOf(playerIndex)" class="current-player"> (you)</span>
       </li>
     </ul>
-    <p>当前玩家name: {{ playerIndex }}</p>
+    <p>your name: {{ playerIndex }}</p>
   </div>
 </template>
 

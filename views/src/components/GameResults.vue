@@ -1,15 +1,18 @@
 <template>
   <div class="game-results">
-    <h1>房间号: {{ roomId }}</h1>
-    <h2>结算结果:</h2>
+    <h1>RoomID: {{ roomId }}</h1>
+    <h2>Game-results:</h2>
     <ul class="results-list">
       <li v-for="(player, index) in players" :key="index" class="result-item">
-        玩家 {{ index + 1 }}: {{ player }} - 分数: {{ ScoresList[index] }}
-        <span v-if="index === playerIndex" class="current-player"> (当前玩家)</span>
+        Player {{ index + 1 }}: {{ player }} - Scores: {{ ScoresList[index] }}
+        <span v-if="index === playerIndex" class="current-player"> (you)</span>
+        <div class="tiles-container">
+          <img v-for="tile in getPlayerTiles(index)" :key="tile" :src="fetchTileImage(tile)" class="tile" />
+        </div>
       </li>
     </ul>
-    <!-- 返回按钮 -->
-    <button @click="goBack" class="return-button">返回</button>
+
+    <button @click="goBack" class="return-button">New Game</button>
   </div>
 </template>
 
@@ -18,14 +21,43 @@ export default {
   name: 'GameResults',
   props: {
     players: Array,
-    playerIndex: Number,
+    playerIndex: null,
     roomId: String,
     ScoresList: Array,
+    playerTiles:Array,
+    rightPlayerTiles:Array,
+    topPlayerTiles:Array,
+    leftPlayerTiles:Array
   },
 
   methods: {
     goBack() {
-      this.$emit('goBack');
+      this.$emit('newGame');
+    },
+    getPlayerTiles(index) {
+      console.log(this.playerTiles)
+      console.log(this.rightPlayerTiles)
+      console.log(this.leftPlayerTiles)
+      console.log(this.topPlayerTiles)
+      switch (index) {
+        case 0:
+          return this.playerTiles;
+        case 1:
+          return this.rightPlayerTiles;
+        case 2:
+          return this.topPlayerTiles;
+        case 3:
+          return this.leftPlayerTiles;
+        default:
+          return [];
+      }
+    },
+    fetchTileImage(tile) {
+      try {
+        return require(`@/assets/tiles_front/${tile}.png`);
+      } catch (e) {
+        return '';
+      }
     },
   },
 
@@ -48,8 +80,8 @@ export default {
 }
 
 .result-item {
-  padding: 10px;
-  margin: 10px 0;
+  padding: 8px;
+  margin: 8px 0;
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -58,7 +90,7 @@ export default {
 
 .current-player {
   font-weight: bold;
-  color: #d9534f; /* 当前玩家的颜色 */
+  color: #d9534f;
 }
 
 h1, h2 {
@@ -72,4 +104,16 @@ h1, h2 {
   cursor: pointer;
 }
 
+.tiles-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.tile {
+  width: 45px;
+  height: 75px;
+  margin: 2px;
+}
 </style>

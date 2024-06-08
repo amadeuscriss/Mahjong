@@ -10,6 +10,7 @@
                ref="inputRoomNumberComponent"
                @errorMessage="setErrorMessage"
                @goBack="handleGoback"
+               @newGame="handleNewGame"
     />
   </div>
 </template>
@@ -20,6 +21,7 @@ import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
 import GameTable from "@/components/GameTable.vue";
+
 
 export default {
   name: 'App',
@@ -43,7 +45,6 @@ export default {
       this.currentComponent = 'InputRoomNumber';
     },
     handleCreateRoom() {
-      // 发送新建房间的请求到后端
       this.$ws.send(JSON.stringify({ type: 'createRoom',state: 'Waiting' }));
     },
     handleRoomEntered(roomId) {
@@ -59,10 +60,13 @@ export default {
     },
     handleGoback(){
       this.currentComponent = WelcomePage
+    },
+    handleNewGame(){
+      window.location.reload();
     }
   },
   created() {
-    // 直接在 created 钩子中访问全局属性 $ws
+    // Access the global property $ws directly from the created hook
     if (this.$ws) {
       this.$ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -84,12 +88,15 @@ export default {
             this.roomId = data.roomId;
             this.currentComponent = 'WaitingRoom';
           } else {
-            // 显示错误信息，房间不存在
             this.setErrorMessage('房间不存在');
           }
         } else if (data.type === 'gameStart'){
           //开始游戏
           this.currentComponent = 'GameTable';
+        } else if (data.type === 'gameEnd'){
+          //游戏结束
+          this.ScoresList = data.ScoresList;
+          this.currentComponent = 'GameResults';
         }
       };
 
@@ -108,13 +115,10 @@ export default {
 
 <style>
 body {
-  /* 使用 url() 函数设置背景图片 */
   background-image: url('./assets/desk.png');
-  /* 设置其他背景属性 */
-  background-size: cover; /* 覆盖整个屏幕 */
-  background-attachment: fixed; /* 滚动时固定背景 */
-  background-position: center; /* 将背景图片居中 */
-  /* 根据需要添加其他样式 */
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
 }
 
 #app {
