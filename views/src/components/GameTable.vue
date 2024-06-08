@@ -1,14 +1,14 @@
 <template>
   <div class="game-table">
-    <!-- 显示房间号 -->
+    <!-- room id -->
     <div class="room-id">
-      房间号: {{ roomId }}
-      玩家name{{playerIndex}}
-      当前回合玩家name{{currentTurnPlayerName}}
-      下家name{{getNextPlayerName(currentTurnPlayerName, 1)}}
+      RoomID: {{ roomId }}
+      your name: {{playerIndex}}
+      current Turn Player Name: {{currentTurnPlayerName}}
+      nest player name: {{getNextPlayerName(currentTurnPlayerName, 1)}}
     </div>
 
-    <!-- 玩家手牌展示区 -->
+    <!-- player tiles -->
     <div class="tiles">
       <div
           v-for="(tile, index) in playerTiles"
@@ -35,24 +35,24 @@
       </div>
     </div>
 
-    <!-- 展示其他玩家手牌区 -->
+    <!-- other players tiles -->
     <div class="other-players-tiles">
 
-      <!-- 右侧玩家手牌 -->
+      <!-- right player tiles -->
       <div class="other-players-right">
         <div v-for="(tile, index) in rightPlayerTiles" :key="index" class="other-players-tile-container">
           <img src="@/assets/tiles_back/otherPlayerRight.png" class="other-players-tiles-back" alt="tile back"/>
         </div>
       </div>
 
-      <!-- 上方玩家手牌 -->
+      <!-- top player tiles -->
       <div class="other-players-top">
         <div v-for="(tile, index) in topPlayerTiles" :key="index" class="other-players-tile-container">
           <img src="@/assets/tiles_back/otherPlayerTop.png" class="other-players-tiles-back" alt="tile back"/>
         </div>
       </div>
 
-      <!-- 左侧玩家手牌 -->
+      <!-- left player tiles -->
       <div class="other-players-left">
         <div v-for="(tile, index) in leftPlayerTiles" :key="index" class="other-players-tile-container">
           <img src="@/assets/tiles_back/otherPlayerLeft.png" class="other-players-tiles-back" alt="tile back"/>
@@ -62,9 +62,9 @@
     </div>
 
 
-    <!-- 展示明牌区 -->
+    <!-- shown tiles -->
     <div class="shown-tiles">
-      <!-- 下方玩家 -->
+      <!-- bottom player -->
       <div class="shown-tiles-bottom">
         <div v-for="(tile, index) in showTiles[playerIndexInList]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <!-- 右侧玩家 -->
+      <!-- right player -->
       <div class="shown-tiles-right">
         <div v-for="(tile, index) in showTiles[(playerIndexInList + 1) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
@@ -80,7 +80,7 @@
         </div>
       </div>
 
-      <!-- 上方玩家 -->
+      <!-- top player -->
       <div class="shown-tiles-top">
         <div v-for="(tile, index) in showTiles[(playerIndexInList + 2) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <!-- 左侧玩家 -->
+      <!-- left player -->
       <div class="shown-tiles-left">
         <div v-for="(tile, index) in showTiles[(playerIndexInList + 3) % 4]" :key="index" class="shown-tile-container">
           <img :src="getTileImage(tile)" class="shown-tile" alt="tile"/>
@@ -98,7 +98,7 @@
 
     </div>
 
-    <!-- 桌面上打出去的牌展示区 -->
+    <!-- table tiles -->
     <div class="table-tiles">
       <div v-for="(tile, index) in tableTiles" :key="index" class="table-tile-container">
         <img :src="getTileImage(tile)" class="table-tile" alt="tile"/>
@@ -118,19 +118,23 @@
       </button>
     </div>
 
-    <!-- 玩家行为展示区 -->
+    <!-- popup notification -->
     <div v-if="notification.show" class="notification" :class="notification.position">
       {{ notification.action }}
     </div>
 
-    <!-- 结算结果窗口 -->
+    <!-- results overlay -->
     <div v-if="showGameResults" class="results-overlay">
       <GameResults
           :players="players"
           :playerIndex="playerIndex"
           :roomId="roomId"
           :ScoresList="ScoresList"
-          @goBack="hideGameResults"
+          :playerTiles="playerTiles"
+          :rightPlayerTiles="rightPlayerTiles"
+          :topPlayerTiles="topPlayerTiles"
+          :leftPlayerTiles="leftPlayerTiles"
+          @newGame="hideGameResults"
       />
     </div>
 
@@ -148,29 +152,27 @@ export default {
   props: {
     roomId: String,
     players: Array,
-    playerIndex: null, // 玩家索引
+    playerIndex: null,
   },
   data() {
     return {
       showGameResults: false,
       ScoresList: [],
 
-      playerActions: [ ], // 玩家操作
+      playerActions: [ ],
       currentTurnPlayerName: null,
 
       tableTiles: [],
-      playerTiles: [], // 玩家手牌
+      playerTiles: [],
 
       rightPlayerTiles: [],
       topPlayerTiles: [],
       leftPlayerTiles: [],
 
 
-      drawnTile: null,
-
       tilesToEat: [],
-      highlightedTiles: [], // 高亮的牌索引
-      showTiles: [[], [], [], []], // 玩家的明牌
+      highlightedTiles: [],
+      showTiles: [[], [], [], []],
 
       notification: {
         show: false,
@@ -178,7 +180,7 @@ export default {
         position: '',
       },
 
-      skipTimeout: null, // 跟踪自动跳过的超时
+      skipTimeout: null,
     };
   },
   computed: {
@@ -186,7 +188,6 @@ export default {
       return this.players.indexOf(this.playerIndex);
     },
 
-    //剔除'Chi'
     filteredActions() {
       const actions = [];
       if (Array.isArray(this.playerActions)) {
@@ -210,7 +211,7 @@ export default {
 
 
   methods: {
-    // 根据当前玩家ID获取下一个玩家ID
+    // Get next player ID based on current player ID
     getNextPlayerName(currentTurnPlayerName, offset) {
       const currentIdx = this.players.indexOf(currentTurnPlayerName);
       const nextIdx = (currentIdx + offset) % 4;
@@ -218,41 +219,44 @@ export default {
     },
 
     gameInitialization(message){
-      console.log("gameInitialization" + this.playerActions);
+
+      //update player tiles
       this.playerTiles = message.playerTiles[this.playerIndex];
 
+      //update other players' tiles
       this.rightPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 1) % 4]];
       this.topPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 2) % 4]];
       this.leftPlayerTiles = message.playerTiles[this.players[(this.playerIndexInList + 3) % 4]];
 
-      console.log("rightPlayerTiles " + this.rightPlayerTiles)
-      console.log("topPlayerTiles " + this.topPlayerTiles)
-      console.log("leftPlayerTiles " + this.leftPlayerTiles)
+
       this.currentTurnPlayerName = message.currentTurnPlayerName;
       if(this.currentTurnPlayerName === this.playerIndex){
         this.$ws.send(JSON.stringify({ type: 'startGame',state: this.currentTurnPlayerName , roomId: this.roomId}));
       }
 
     },
-    //更新手牌
+
+    //update player tiles after discarding a tile
     updateGame(message) {
       this.playerTiles = message.discardedTile;
     },
 
-    //获取玩家行为
+    //get player actions
     handlePlayerActions(message) {
       this.playerActions = message.playerActions;
       this.tilesToEat = message.tilesToEat;
 
+      //if the player is the current turn player, update the player tiles
       if (message.state === "Draw"){
         this.playerTiles = message.playerTiles;
       } else if (message.state === "NoMoreTiles"){
+        //if no more tiles, end the game
         this.$ws.send(JSON.stringify({ type: 'gameEnd', roomId: this.roomId }));
       }
 
 
 
-      //如果不是下家，删除吃牌操作
+      //if the player is not the next turn player, remove the 'Chi' action
       if (this.getNextPlayerName(this.currentTurnPlayerName, 1) !== this.playerIndex){
         const chiIndex = this.playerActions.indexOf('Chi');
         if (chiIndex !== -1) {
@@ -261,11 +265,11 @@ export default {
         this.tilesToEat = [];
       }
 
-      // 如果该玩家不在回合内，且有抢占行为,增加跳过按钮
+      // Add a skip button if the player is not in turn and there is preemption
       if (this.playerActions.length > 0 && this.currentTurnPlayerName !== this.playerIndex) {
-        //10秒内没有点击则自动点击 Skip
+        // If not clicked within 10 seconds, click Skip
 
-        this.playerActions.push('Skip'); // 添加“跳过”按钮
+        this.playerActions.push('Skip'); // Add a "Skip" button
 
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
@@ -277,7 +281,7 @@ export default {
 
       }
 
-      //如果不能进行任何抢占操作,且当前玩家是下家，则15秒后自动点击 Skip
+      // If no preemption can be done and the current player is next, click Skip after 13 seconds
       if(this.getNextPlayerName(this.currentTurnPlayerName, 1) === this.playerIndex && this.filteredActions.length === 0){
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
@@ -285,16 +289,12 @@ export default {
 
         this.skipTimeout = setTimeout(() => {
           this.handleAction('Skip');
-        }, 15000);
+        }, 13000);
       }
     },
 
-    //在执行操作后更新手牌
-    updateAfterActing(message){
-      this.playerTiles = message.playerTiles[this.playerIndex];
-    },
 
-    // 显示玩家行为通知
+    // Show player action notifications
     showNotification(action, performerIndex) {
       const positions = ['bottom', 'right', 'top', 'left'];
       const position = positions[(performerIndex - this.playerIndexInList + 4) % 4];
@@ -309,23 +309,30 @@ export default {
         this.notification.show = false;
       }, 5000);
     },
-    //接收通知，更新明牌库
+
+    // Receive notification to update the card library
     updateShownTiles(message){
       this.tableTiles = message.tableTiles;
 
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 1) % 4){
+        this.rightPlayerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 2) % 4){
+        this.topPlayerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 3) % 4){
+        this.leftPlayerTiles = message.playernowtiles
       }
 
       this.showTiles[message.performerIndex] = message.showTiles;
 
-      //接受通知，清空行为列表。避免有玩家吃牌后，还能杠
       this.playerActions = [];
       console.log("performerIndex " +  message.performerIndex);
       console.log(message.showTiles);
       this.showNotification(message.action, message.performerIndex);
     },
-    // 动态获取图片路径
+
+    // Get image path dynamically
     getTileImage(tile) {
       try {
         return require(`@/assets/tiles_front/${tile}.png`);
@@ -334,11 +341,10 @@ export default {
       }
     },
 
-    // 处理牌面的点击事件
+    // Handle the click event on the card
     handleTileClick(tile) {
-      // 如果当前玩家是当前回合的玩家
       if (this.currentTurnPlayerName === this.playerIndex) {
-        // 如果没有在冷却中
+        // if not cooling
         if (!this.clickCooldown) {
           const tileIndex = this.playerTiles.indexOf(tile);
           const message = JSON.stringify({
@@ -352,34 +358,32 @@ export default {
             players: this.players,
           });
 
-          // 发送消息
           this.$ws.send(message);
 
-          // 设置冷却时间
+          // the cooldown
           this.clickCooldown = true;
           setTimeout(() => {
-            // 清除冷却状态
+            //reset the cooldown
             this.clickCooldown = false;
-          }, 15000); // 15秒冷却时间
+          }, 13000); // 13 seconds
 
-          // 重置其他状态
           this.playerActions = [];
           this.drawnTile = null;
         } else {
-          console.log('点击冷却中，无法再次点击。');
+          console.log('Click cooling, can not click again');
         }
       } else {
-        console.log('当前玩家不是回合玩家，无法执行操作。');
+        console.log('The current player is not a turn player and cannot perform an action.');
       }
     },
 
-    // 处理操作按钮的点击事件
+    // Handle the action button click event
     handleAction(action, tilesIndex = -1) {
-      console.log('Action clicked:', action); // 调试信息
+      console.log('Action clicked:', action);
 
       let skipType = null;
       if (this.playerActions.includes("Win") && action === "Skip") {
-        // 添加 SkipType
+        // add SkipType
         skipType = "Hu";
       }
 
@@ -391,7 +395,7 @@ export default {
         currentTurnPlayerName: this.currentTurnPlayerName,
         nextPlayerName: this.getNextPlayerName(this.currentTurnPlayerName, 1),
         tilesToEatIndex : tilesIndex,
-        skipType: skipType // 将 SkipType 添加到消息中
+        skipType: skipType
       });
 
       if (!(action === "SelfKong" && this.currentTurnPlayerName !== this.playerIndex)){
@@ -401,7 +405,7 @@ export default {
         this.playerActions = [];
         this.tilesToEat = [];
 
-        // 点击按钮后清除自动跳过的超时
+        // Clear auto-skipped timeouts after clicking the button
         if (this.skipTimeout) {
           clearTimeout(this.skipTimeout);
           this.skipTimeout = null;
@@ -409,7 +413,6 @@ export default {
       }
     },
 
-    // 在事件处理程序中调用 handleAction
     handleEatAction(index) {
       this.handleAction('Chi', index);
     },
@@ -425,6 +428,7 @@ export default {
 
     hideGameResults() {
       this.showGameResults = false;
+      this.$emit('newGame');
     },
     handleGameEnd(message) {
       this.ScoresList = message.ScoresList;
@@ -475,7 +479,7 @@ export default {
 <style scoped>
 .game-table {
   display: flex;
-  flex-direction: column; /* 将子元素垂直排列 */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 80vh;
@@ -483,12 +487,12 @@ export default {
 
 .room-id {
   position: fixed;
-  top: 10px; /* 距离顶部 10px */
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 20px; /* 根据需要调整大小 */
-  font-weight: bold; /* 字体加粗 */
-  color: white; /* 白色字体 */
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
   z-index: 10;
 }
 
@@ -504,16 +508,16 @@ export default {
 .tile-container {
   position: relative;
   margin: 0 33px;
-  transition: transform 0.3s ease; /* 添加过渡效果 */
+  transition: transform 0.3s ease;
 }
 
 .tile-container:hover {
-  transform: translateY(-30px); /* 悬停时上移20px，根据需要调整 */
+  transform: translateY(-30px);
 }
 
 .tile-front {
-  width: 45px; /* 根据需要调整大小 */
-  height: 75px; /* 根据需要调整大小 */
+  width: 45px;
+  height: 75px;
   position: absolute;
   top: 8px;
   left: 2px;
@@ -527,12 +531,12 @@ export default {
 }
 
 .highlighted-tile {
-  transform: translateY(-10px); /* 或者根据需要调整上移的距离 */
+  transform: translateY(-10px);
 }
 
 .player-tiles-back{
-  width: 70px; /* 根据需要调整大小 */
-  height: 100px; /* 根据需要调整大小 */
+  width: 70px;
+  height: 100px;
 
   position: absolute;
   top: -15px;
@@ -561,8 +565,8 @@ export default {
 }
 
 .table-tile {
-  width: 25px; /* 根据需要调整大小 */
-  height: 40px; /* 根据需要调整大小 */
+  width: 25px;
+  height: 40px;
   z-index: 31;
 }
 
@@ -587,8 +591,8 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  justify-content: flex-start; /* 将牌靠左对齐 */
-  align-items: flex-start; /* 将牌靠上对齐 */
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .other-players-left {
@@ -600,24 +604,24 @@ export default {
 
 .other-players-tile-container {
   display: flex;
-  margin: -3px; /* 根据需要调整间距 */
+  margin: -3px;
   flex-wrap: wrap;
 }
 
 .other-players-tiles-back {
-  width: 40px; /* 根据需要调整牌背的宽度 */
-  height: 60px; /* 根据需要调整牌背的高度 */
-  margin: 2px; /* 根据需要调整牌背之间的间距 */
+  width: 40px;
+  height: 60px;
+  margin: 2px;
 }
 
-/* 右侧玩家的牌背样式 */
+
 .other-players-right .other-players-tile-container .other-players-tiles-back {
-  margin-bottom: -30px; /* 调整右侧玩家牌之间的垂直间距 */
+  margin-bottom: -30px;
 }
 
-/* 左侧玩家的牌背样式 */
+
 .other-players-left .other-players-tile-container .other-players-tiles-back {
-  margin-bottom: -30px; /* 调整左侧玩家牌之间的垂直间距 */
+  margin-bottom: -30px;
 }
 
 
@@ -628,7 +632,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none; /* 禁用指针事件 */
+  pointer-events: none;
   z-index: 10;
 }
 
@@ -649,7 +653,7 @@ export default {
 
 .shown-tiles-top {
   position: absolute;
-  top: 200px;
+  top: 245px;
   display: flex;
 }
 
@@ -664,7 +668,7 @@ export default {
 
 .shown-tile-container {
   position: relative;
-  margin: 0; /* 根据需要调整间距 */
+  margin: 0;
   display: flex;
 }
 
@@ -672,41 +676,41 @@ export default {
   width: 22px;
   height: 37px;
   z-index: 11;
-  transition: transform 0.3s ease; /* 添加过渡效果 */
+  transition: transform 0.3s ease;
 }
 
-/* 右边展示手牌逆时针旋转90度 */
+
 .shown-tiles-right .shown-tile {
   transform: rotate(-90deg);
-  transform-origin: center; /* 绕中心旋转 */
-  margin: -8px; /* 调整每张牌之间的间距 */
+  transform-origin: center;
+  margin: -8px;
 }
 
 .shown-tiles-right .shown-tiles-back {
   transform: rotate(-90deg);
-  transform-origin: center; /* 绕中心旋转 */
-  margin: -8px; /* 调整每张牌之间的间距 */
-  top: 0px; /* 调整牌背的垂直位置 */
+  transform-origin: center;
+  margin: -8px;
+  top: 0px;
 }
 
-/* 左边展示手牌顺时针旋转90度 */
+
 .shown-tiles-left .shown-tile {
   transform: rotate(90deg);
-  transform-origin: center; /* 绕中心旋转 */
-  margin: -8px; /* 调整每张牌之间的间距 */
+  transform-origin: center;
+  margin: -8px;
 }
 
 .shown-tiles-left .shown-tiles-back {
   transform: rotate(90deg);
-  transform-origin: center; /* 绕中心旋转 */
-  margin: -8px; /* 调整每张牌之间的间距 */
-  top: 0px; /* 调整牌背的垂直位置 */
+  transform-origin: center;
+  margin: -8px;
+  top: 0px;
 }
 
 
 .shown-tiles-back{
-  width: 25px; /* 根据需要调整大小 */
-  height: 45px; /* 根据需要调整大小 */
+  width: 25px;
+  height: 45px;
 
   position: absolute;
   top: 4px;
@@ -748,6 +752,7 @@ export default {
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
   transform: translateY(0);
 }
+
 
 
 /* 玩家行为展示区样式 */

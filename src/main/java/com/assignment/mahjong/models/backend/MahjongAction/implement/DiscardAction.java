@@ -2,6 +2,7 @@ package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
 import com.assignment.mahjong.models.backend.Room.Room;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
  */
 public class DiscardAction {
     private List<TileInterface> handTiles;
+    // Get the method of obtaining the card played
+    @Getter
     private TileInterface discardedTile;
     private boolean isSuccessful; // Indicates whether the operation is successful
 
@@ -45,11 +48,6 @@ public class DiscardAction {
             System.out.println("Failed to discard a tile. Invalid index.");
             isSuccessful = false;
         }
-    }
-
-    // Get the method of obtaining the card played
-    public TileInterface getDiscardedTile() {
-        return discardedTile;
     }
 
     /**

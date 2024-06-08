@@ -16,15 +16,15 @@ export default {
 <style scoped>
 .welcome {
   display: flex;
-  font-size: 40px; /* 增大标题字号 */
-  flex-direction: column; /* 将子元素垂直排列 */
+  font-size: 40px;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 80vh;
 }
 
 .button-container {
-  margin-top: 20px; /* 设置顶部边距 */
+  margin-top: 20px;
 }
 
 button {
@@ -35,7 +35,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 24px; /* 调整按钮字体大小 */
+  font-size: 24px;
 }
 
 button:hover {

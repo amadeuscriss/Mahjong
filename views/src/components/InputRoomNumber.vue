@@ -1,21 +1,21 @@
 <template>
   <div class="room-number-page">
-    <!-- 欢迎标题 -->
+    <!-- Welcome title -->
     <h1 class="welcome-title">Welcome to mahjong</h1>
-    <!-- 输入房间号提示 -->
+    <!-- Enter room number -->
     <h2 class="input-room-number-prompt">Please enter the room number</h2>
-    <!-- 房间号输入框 -->
+    <!-- Room number input field -->
     <input type="text" v-model="roomNumber" @input="handleInput" class="room-number-input" maxlength="6" />
-    <!-- 矩形框 -->
+
     <div class="digit-container">
       <div v-for="(digit, index) in digits" :key="index" class="digit">
         {{ digit }}
       </div>
-      <!-- 确定按钮 -->
+      <!-- join button -->
       <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">join</div>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-    <!-- 返回按钮 -->
+    <!-- go back button -->
     <button @click="goBack" class="return-button">Go Back</button>
   </div>
 </template>
@@ -26,22 +26,22 @@ export default {
   name: 'InputRoomNumber',
   data() {
     return {
-      roomNumber: '', // 记录用户输入的房间号
-      digits: ['', '', '', '', '', ''], // 存储每个矩形框中的数字
-      showConfirmButton: false, // 控制确定按钮显示与隐藏
+      roomNumber: '', // input room number
+      digits: ['', '', '', '', '', ''], // store room number
+      showConfirmButton: false, // display confirm button
       errorMessage: ''
     };
   },
 
   methods: {
     handleInput() {
-      // 允许输入字母和数字，并截取前6个字符
+      // Allow letters and numbers, and truncate the first 6 characters
       this.roomNumber = this.roomNumber.slice(0, 6);
-      // 更新矩形框中的数字
+      // Update the numbers in the box
       this.digits = this.roomNumber.split('').concat(Array(6).fill('')).slice(0, 6);
-      // 根据输入数字个数决定是否显示确定按钮
+      // Show the OK button based on the number of digits entered
       this.showConfirmButton = this.roomNumber.length === 6;
-      // 清除错误信息
+      // Clear the error message
       this.errorMessage = '';
     },
     handleConfirm() {
@@ -63,12 +63,12 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* 设置容器高度，使其充满整个视口 */
+  height: 100vh;
 }
 
 .welcome-title {
-  font-size: 60px; /* 增大标题字号 */
-  margin-top: -100px; /* 上移标题 */
+  font-size: 60px;
+  margin-top: -100px;
 }
 
 .input-room-number-prompt {
@@ -108,18 +108,18 @@ export default {
 }
 
 .return-button {
-  margin-top: 20px; /* 设置顶部边距 */
-  padding: 15px 30px; /* 增大按钮尺寸 */
-  font-size: 28px; /* 增大字体 */
-  background-color: #28a745; /* 设置按钮背景颜色 */
-  color: white; /* 设置按钮文字颜色 */
-  border: none; /* 移除按钮边框 */
-  border-radius: 8px; /* 设置按钮圆角 */
-  cursor: pointer; /* 鼠标指针 */
+  margin-top: 20px;
+  padding: 15px 30px;
+  font-size: 28px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .return-button:hover {
-  background-color: #218838; /* 悬停时的背景颜色 */
+  background-color: #218838;
 }
 
 </style>

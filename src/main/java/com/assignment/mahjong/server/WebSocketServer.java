@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,7 @@ public class WebSocketServer {
                                 sendMessageToUser(tempMessage, player.getName());
 
                                 if (!player.getName().equals(session.getId())) {
-                                    playerActions.put(player.getName(), gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")).get("playerActions"));
+                                    playerActions.put(player.getName(), gameController.availableActions((String) jsonObject.get("roomId"), player.getName()).get("playerActions"));
                                 }
                             }
 
@@ -152,7 +153,7 @@ public class WebSocketServer {
                                 for (Player player : serverRoom.getPlayers()) {
                                     if (!player.getName().equals(session.getId())) {
                                         String tempMessage;
-                                        tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data")));
+                                        tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), player.getName()));
                                         sendMessageToUser(tempMessage, player.getName());
                                     }
                                 }
@@ -180,7 +181,7 @@ public class WebSocketServer {
                                         }
 
                                         for (Player player : serverRoom.getPlayers()) {
-                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                             sendMessageToUser(messageToSend, player.getName());
                                         }
 
@@ -194,7 +195,7 @@ public class WebSocketServer {
                                         }
 
                                         for (Player player : serverRoom.getPlayers()) {
-                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, session.getId(), (Integer) jsonObject.get("playIndex")).getBody());
+                                            messageToSend = objectMapper.writeValueAsString(gameController.broadcastAction(serverRoom, (String) jsonObject.get("behavior"), (Integer) jsonObject.get("playIndex")).getBody());
                                             sendMessageToUser(messageToSend, player.getName());
                                         }
                                     }
@@ -206,8 +207,12 @@ public class WebSocketServer {
                                     sendMessageToHu(huName,jsonObject);
                                 } else {
                                     for (Player player : serverRoom.getPlayers()) {
-                                        Map<String, Object> responds = gameController.availableActions((String) jsonObject.get("roomId"), player.getName(), (int) jsonObject.get("data"));
-                                        responds.put("playerActions", (List<String>) playerActions.get(player.getName()));
+
+                                        Map<String, Object> responds = gameController.availableActions((String) jsonObject.get("roomId"), player.getName());
+
+                                        if (!jsonObject.get("currentTurnPlayerName").equals(player.getName())) {
+                                            responds.put("playerActions", (List<String>) playerActions.get(player.getName()));
+                                        }
 
                                         String tempMessage = objectMapper.writeValueAsString(responds);
                                         if (!player.getName().equals(jsonObject.get("currentTurnPlayerName"))) {
@@ -294,7 +299,7 @@ public class WebSocketServer {
                 String tempMessage;
 
                 if (huName.equals(key)) {
-                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), huName, (int) jsonObject.get("data")));
+                    tempMessage = objectMapper.writeValueAsString(gameController.availableActions((String) jsonObject.get("roomId"), huName));
                     ((List<String>) playerActions.get(huName)).remove("Win");
                     sendMessageToUser(tempMessage, huName);
                     break;
