@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PongAction extends MahjongAction {
-    private TileInterface tileToPong;
-    private Player player;
+    private final TileInterface tileToPong;
+    private final Player player;
 
     public PongAction(TileInterface tileToPong, List<TileInterface> playerHand, Player player) {
         super(tileToPong, playerHand);
@@ -58,7 +58,7 @@ public class PongAction extends MahjongAction {
         List<TileInterface> toRemove = playerHand.stream()
                 .filter(tile -> tile.equals(tileToPong))
                 .limit(2)
-                .collect(Collectors.toList());
+                .toList();
 
         playerHand.removeAll(toRemove);
     }

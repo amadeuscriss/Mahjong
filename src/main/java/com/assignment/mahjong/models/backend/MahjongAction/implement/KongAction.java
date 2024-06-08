@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 public class KongAction extends MahjongAction {
-    private boolean isSelfKong;  // Mark whether it is a self-touching Kong
-    private Point points;
-    private Player player;
+    private final boolean isSelfKong;  // Mark whether it is a self-touching Kong
+    private final Point points;
+    private final Player player;
 
     /**
      * Represents an action of declaring a Kong (four-of-a-kind) in a Mahjong game.

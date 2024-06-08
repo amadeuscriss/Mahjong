@@ -1,6 +1,7 @@
 package com.assignment.mahjong.models.backend.MahjongAction.implement;
 
 import com.assignment.mahjong.models.backend.Tile.TileInterface;
+import lombok.Getter;
 
 import java.util.List;
 
@@ -9,6 +10,8 @@ import java.util.List;
  */
 public class DrawAction {
     private List<TileInterface> tiles;
+    // A public method of obtaining a touched card
+    @Getter
     private TileInterface drawnTile;
     private boolean isSuccessful;  // Indicates whether the operation was successful
 
@@ -41,11 +44,6 @@ public class DrawAction {
             return tiles.remove(tiles.size() - 1);
         }
         return null;
-    }
-
-    // A public method of obtaining a touched card
-    public TileInterface getDrawnTile() {
-        return drawnTile;
     }
 
     /**
