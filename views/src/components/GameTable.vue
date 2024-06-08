@@ -316,11 +316,16 @@ export default {
 
       if (this.playerIndex === this.players[message.performerIndex]){
         this.playerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 1) % 4){
+        this.rightPlayerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 2) % 4){
+        this.topPlayerTiles = message.playernowtiles
+      }else if (message.performerIndex === (this.playerIndexInList + 3) % 4){
+        this.leftPlayerTiles = message.playernowtiles
       }
 
       this.showTiles[message.performerIndex] = message.showTiles;
 
-      // Accept the notification and clear the list of actions. Avoid players eat cards, but also bar
       this.playerActions = [];
       console.log("performerIndex " +  message.performerIndex);
       console.log(message.showTiles);
