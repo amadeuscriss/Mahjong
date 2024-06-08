@@ -20,6 +20,8 @@ import InputRoomNumber from './components/InputRoomNumber.vue'
 import WaitingRoom from './components/WaitingRoom.vue'
 import WelcomePage from "@/components/WelcomePage.vue";
 import GameTable from "@/components/GameTableTest.vue";
+import GameResultsTest from "@/components/GameResultsTest.vue";
+import GameTableTest from "@/components/GameTableTest.vue";
 
 
 export default {
@@ -28,11 +30,13 @@ export default {
     WelcomePage,
     InputRoomNumber,
     WaitingRoom,
-    GameTable
+    GameTable,
+    GameResultsTest,
+    GameTableTest
   },
   data() {
     return {
-      currentComponent: 'GameTable',
+      currentComponent: 'GameResultsTest',
       players: [],
       playerIndex: null,
       roomId: null,

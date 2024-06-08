@@ -1,9 +1,9 @@
 <template>
   <div class="welcome">
-    <h1>欢迎来到麻将游戏</h1>
+    <h1>Welcome to mahjong</h1>
     <div class="button-container">
-      <button @click="$emit('joinRoom')">加入房间</button>
-      <button @click="$emit('createRoom')">新建房间</button>
+      <button @click="$emit('joinRoom')">Join Room</button>
+      <button @click="$emit('createRoom')">Create Room</button>
     </div>
   </div>
 </template>
@@ -16,6 +16,7 @@ export default {
 <style scoped>
 .welcome {
   display: flex;
+  font-size: 40px; /* 增大标题字号 */
   flex-direction: column; /* 将子元素垂直排列 */
   justify-content: center;
   align-items: center;
@@ -27,13 +28,14 @@ export default {
 }
 
 button {
-  margin: 0 10px;
-  padding: 10px 20px;
+  margin: 0 40px;
+  padding: 20px 40px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 24px; /* 调整按钮字体大小 */
 }
 
 button:hover {

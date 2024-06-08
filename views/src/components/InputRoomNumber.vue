@@ -1,9 +1,9 @@
 <template>
   <div class="room-number-page">
     <!-- 欢迎标题 -->
-    <h1 class="welcome-title">欢迎来到麻将游戏</h1>
+    <h1 class="welcome-title">Welcome to mahjong</h1>
     <!-- 输入房间号提示 -->
-    <h2 class="input-room-number-prompt">请输入房间号</h2>
+    <h2 class="input-room-number-prompt">Please enter the room number</h2>
     <!-- 房间号输入框 -->
     <input type="text" v-model="roomNumber" @input="handleInput" class="room-number-input" maxlength="6" />
     <!-- 矩形框 -->
@@ -12,11 +12,11 @@
         {{ digit }}
       </div>
       <!-- 确定按钮 -->
-      <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">确定</div>
+      <div v-if="showConfirmButton" class="digit confirm-button" @click="handleConfirm">join</div>
     </div>
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     <!-- 返回按钮 -->
-    <button @click="goBack" class="return-button">返回</button>
+    <button @click="goBack" class="return-button">Go Back</button>
   </div>
 </template>
 
@@ -108,10 +108,18 @@ export default {
 }
 
 .return-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+  margin-top: 20px; /* 设置顶部边距 */
+  padding: 15px 30px; /* 增大按钮尺寸 */
+  font-size: 28px; /* 增大字体 */
+  background-color: #28a745; /* 设置按钮背景颜色 */
+  color: white; /* 设置按钮文字颜色 */
+  border: none; /* 移除按钮边框 */
+  border-radius: 8px; /* 设置按钮圆角 */
+  cursor: pointer; /* 鼠标指针 */
+}
+
+.return-button:hover {
+  background-color: #218838; /* 悬停时的背景颜色 */
 }
 
 </style>
